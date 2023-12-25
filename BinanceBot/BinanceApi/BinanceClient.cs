@@ -13,13 +13,13 @@ namespace BinanceBot.BinanceApi
         private readonly HttpClient _client = new HttpClient();
         private readonly bool _testApi;
         private static readonly string _baseEndpoint = "https://api.binance.com";
-        private string _apiKey = "";
-        private string _apiSecret = "";
+        private string _apiKey = string.Empty;
+        private string _apiSecret = string.Empty;
 
         public BinanceClient(IConfiguration config, bool testApi)
         {
-            _apiKey = config["AppSettings:Binance:ApiKey"];
-            _apiSecret = config["AppSettings:Binance:ApiSecret"];
+            _apiKey = config["AppSettings:Binance:ApiKey"] ?? string.Empty;
+            _apiSecret = config["AppSettings:Binance:ApiSecret"] ?? string.Empty;
 
             _client.DefaultRequestHeaders.Add("X-MBX-APIKEY", _apiKey);
 
@@ -31,7 +31,6 @@ namespace BinanceBot.BinanceApi
             _client.Dispose();
         }
 
-        // creer moi les tests de la fonction GetKLinesBySymbolAsync
         public async Task<List<List<object>>> GetKLinesBySymbolAsync(string symbol, string interval, string limit)
         {
             var klinesEndpoint = $"{_baseEndpoint}/api/v3/klines?symbol={symbol}&interval={interval}&limit={limit}";
@@ -41,7 +40,6 @@ namespace BinanceBot.BinanceApi
             return klines;
         }
 
-        // creer moi les tests de la fonction GetPriceBySymbolAsync ici
         public async Task<Currency> GetPriceBySymbolAsync(string symbol)
         {
             var priceEndpoint = $"{_baseEndpoint}/api/v3/ticker/price?symbol={symbol}";

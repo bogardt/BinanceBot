@@ -266,7 +266,7 @@ namespace BinanceBot.Core
 
             while (true)
             {
-                if (orders.Any((it) => it.symbol == _symbol && it.side == "BUY"))
+                if (orders.Any((it) => it.Symbol == _symbol && it.Side == "BUY"))
                 {
                     Console.WriteLine("En attente de la fin de l'achat");
                     orders = await _binanceClient.GetOpenOrdersAsync(_symbol);
@@ -286,7 +286,7 @@ namespace BinanceBot.Core
 
             while (true)
             {
-                if (orders.Any((it) => it.symbol == _symbol && it.side == "SELL"))
+                if (orders.Any((it) => it.Symbol == _symbol && it.Side == "SELL"))
                 {
                     Console.WriteLine("En attente de la fin de la vente");
                     orders = await _binanceClient.GetOpenOrdersAsync(_symbol);
