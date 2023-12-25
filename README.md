@@ -21,7 +21,7 @@
 * [.Net Core 3.1](https://www.microsoft.com/net/download/dotnet-core/3.1) - The framework
 
 ## Configuration settings
-* Create a file appsettings.json in the project Bot.Crypto.Binance
+* Create a file appsettings.json in the project root solution folder with your binance api key and secret
 ```json
 {
   "AppSettings": {
