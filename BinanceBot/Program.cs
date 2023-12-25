@@ -48,7 +48,7 @@ internal class Program
         Console.ReadLine();
     }
 
-    private static string GetSolutionPath()
+    public static string GetSolutionPath()
     {
         var currentDirectory = Directory.GetCurrentDirectory();
 

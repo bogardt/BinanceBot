@@ -31,6 +31,7 @@ namespace BinanceBot.BinanceApi
             _client.Dispose();
         }
 
+        // creer moi les tests de la fonction GetKLinesBySymbolAsync
         public async Task<List<List<object>>> GetKLinesBySymbolAsync(string symbol, string interval, string limit)
         {
             var klinesEndpoint = $"{_baseEndpoint}/api/v3/klines?symbol={symbol}&interval={interval}&limit={limit}";
@@ -40,6 +41,7 @@ namespace BinanceBot.BinanceApi
             return klines;
         }
 
+        // creer moi les tests de la fonction GetPriceBySymbolAsync ici
         public async Task<Currency> GetPriceBySymbolAsync(string symbol)
         {
             var priceEndpoint = $"{_baseEndpoint}/api/v3/ticker/price?symbol={symbol}";
@@ -65,7 +67,7 @@ namespace BinanceBot.BinanceApi
             var response = await _client.SendAsync(request);
             response.EnsureSuccessStatusCode();
 
-            string responseContent = await response.Content.ReadAsStringAsync();
+            var responseContent = await response.Content.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<List<Order>>(responseContent);
         }
 
