@@ -1,5 +1,7 @@
 using BinanceBot;
-using BinanceBot.BinanceApi;
+using BinanceBot.Abstraction;
+using BinanceBot.Core;
+using BinanceBot.Model;
 using Microsoft.Extensions.Configuration;
 using Moq;
 
@@ -30,8 +32,7 @@ namespace BinanceBot.Tests
         [TestMethod]
         public async Task GetKLinesBySymbolTest()
         {
-            var mockClient = new Mock<IBinanceClient>();
-            mockClient.Setup(client => client.GetKLinesBySymbolAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(new List<List<object>>
+            _mockClient.Setup(client => client.GetKLinesBySymbolAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(new List<List<object>>
             {
                 new List<object>
                 {
@@ -50,7 +51,7 @@ namespace BinanceBot.Tests
                 },
             });
 
-            var klines = await mockClient.Object.GetKLinesBySymbolAsync("BTCUSDT", "1m", "1");
+            var klines = await _mockClient.Object.GetKLinesBySymbolAsync("BTCUSDT", "1m", "1");
             Assert.IsTrue(klines.Count == 1);
             Assert.IsTrue(klines[0].Count == 12);
         }
@@ -66,7 +67,12 @@ namespace BinanceBot.Tests
         [TestMethod]
         public async Task GetPriceBySymbolTest()
         {
-            var currency = await _client.GetPriceBySymbolAsync("BTCUSDT");
+            _mockClient.Setup(client => client.GetPriceBySymbolAsync(It.IsAny<string>())).ReturnsAsync(new Currency
+            {
+                Symbol = "BTCUSDT",
+                Price = 50000,
+            });
+            var currency = await _mockClient.Object.GetPriceBySymbolAsync("BTCUSDT");
             Assert.IsTrue(!string.IsNullOrEmpty(currency.Symbol));
             Assert.IsTrue(currency.Price > 0);
         }

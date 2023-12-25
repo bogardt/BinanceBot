@@ -1,9 +1,9 @@
-﻿using BinanceBot.BinanceApi;
-using Microsoft.Extensions.Hosting;
+﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using BinanceBot.Core;
-using BinanceBot.Logger;
+using BinanceBot.Utils;
 using Microsoft.Extensions.Configuration;
+using BinanceBot.Abstraction;
 
 internal class Program
 {
@@ -21,17 +21,18 @@ internal class Program
             await binanceBot.TradeLimit();
         }
 
-        string solutionPath = GetSolutionPath();
+        var solutionPath = Helper.GetSolutionPath();
 
-        IConfiguration config = new ConfigurationBuilder()
+        var config = new ConfigurationBuilder()
             .SetBasePath(solutionPath)
             .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
             .Build();
 
-        IHostBuilder builder = Host.CreateDefaultBuilder(args)
+        var builder = Host.CreateDefaultBuilder(args)
             .ConfigureServices((context, services) =>
             {
-                services.AddSingleton<IBinanceClient, BinanceClient>((s) => new BinanceClient(config, true));
+                // todo : change testApi to false if you want to trade with real money
+                services.AddSingleton<IBinanceClient, BinanceClient>((s) => new BinanceClient(config, testApi: true));
                 services.AddSingleton<IMarketTradeHandler, MarketTradeHandler>();
                 services.AddSingleton<ILogger, Logger>();
                 services.AddSingleton<IConfiguration>(config);
@@ -47,21 +48,4 @@ internal class Program
 
         Console.ReadLine();
     }
-
-    public static string GetSolutionPath()
-    {
-        var currentDirectory = Directory.GetCurrentDirectory();
-
-        var directoryInfo = new DirectoryInfo(currentDirectory);
-
-        while (directoryInfo != null && !directoryInfo.GetFiles("*.sln").Any())
-        {
-            directoryInfo = directoryInfo.Parent;
-        }
-
-        var solutionPath = directoryInfo?.FullName;
-
-        return solutionPath;
-    }
-
 }

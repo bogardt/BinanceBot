@@ -1,4 +1,6 @@
-﻿namespace BinanceBot.Logger
+﻿using BinanceBot.Abstraction;
+
+namespace BinanceBot.Utils
 {
     public class Logger : ILogger
     {

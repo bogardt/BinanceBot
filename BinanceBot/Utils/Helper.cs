@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BinanceBot.Tests
+namespace BinanceBot.Utils
 {
     public static class Helper
     {
@@ -15,9 +15,7 @@ namespace BinanceBot.Tests
             var directoryInfo = new DirectoryInfo(currentDirectory);
 
             while (directoryInfo != null && !directoryInfo.GetFiles("*.sln").Any())
-            {
                 directoryInfo = directoryInfo.Parent;
-            }
 
             var solutionPath = directoryInfo?.FullName;
 

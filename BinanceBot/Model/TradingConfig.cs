@@ -18,7 +18,7 @@
         public decimal FloorStopLossPercentage { get; set; }
         public decimal CeilingStopLossPercentage { get; set; }
 
-        public TradingConfig(Dictionary<string, CurrencyConfiguration> dict, string symbol)
+        public TradingConfig(Dictionary<string, StrategyCurrencyConfiguration> dict, string symbol)
         {
             FeePercentage = 0.001m;
             TargetProfit = dict[symbol].ProfitCible;

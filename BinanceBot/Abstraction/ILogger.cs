@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BinanceBot.Logger
+namespace BinanceBot.Abstraction
 {
     public interface ILogger
     {

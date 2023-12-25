@@ -1,4 +1,4 @@
-﻿namespace BinanceBot.Core
+﻿namespace BinanceBot.Abstraction
 {
     internal interface IMarketTradeHandler
     {

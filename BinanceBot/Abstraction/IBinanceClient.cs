@@ -1,6 +1,6 @@
 ﻿using BinanceBot.Model;
 
-namespace BinanceBot.BinanceApi
+namespace BinanceBot.Abstraction
 {
     public interface IBinanceClient
     {

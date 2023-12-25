@@ -1,8 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System.Globalization;
-using BinanceBot.BinanceApi;
-using BinanceBot.Logger;
 using BinanceBot.Model;
+using BinanceBot.Abstraction;
 
 namespace BinanceBot.Core
 {
@@ -13,11 +12,11 @@ namespace BinanceBot.Core
 
         private static readonly string _symbol = "SOLUSDT";
 
-        private static readonly Dictionary<string, CurrencyConfiguration> _dict = new Dictionary<string, CurrencyConfiguration>
+        private static readonly Dictionary<string, StrategyCurrencyConfiguration> _dict = new Dictionary<string, StrategyCurrencyConfiguration>
         {
-            { "SOLUSDT", new CurrencyConfiguration { ProfitCible = 50m, QuantiteFixeCryptoAcheter = 100m, Interval = "1s", Periode = 900 } },
-            { "ETHUSDT", new CurrencyConfiguration { ProfitCible = 10m, QuantiteFixeCryptoAcheter = 5m, Interval = "1s", Periode = 900 } },
-            { "ADAUSDT", new CurrencyConfiguration { ProfitCible = 1m, QuantiteFixeCryptoAcheter = 2000m, Interval = "1s", Periode = 60 } }
+            { "SOLUSDT", new StrategyCurrencyConfiguration { ProfitCible = 50m, QuantiteFixeCryptoAcheter = 100m, Interval = "1s", Periode = 900 } },
+            { "ETHUSDT", new StrategyCurrencyConfiguration { ProfitCible = 10m, QuantiteFixeCryptoAcheter = 5m, Interval = "1s", Periode = 900 } },
+            { "ADAUSDT", new StrategyCurrencyConfiguration { ProfitCible = 1m, QuantiteFixeCryptoAcheter = 2000m, Interval = "1s", Periode = 60 } }
         };
 
         private readonly TradingConfig _tradingConfig = new TradingConfig(_dict, _symbol);

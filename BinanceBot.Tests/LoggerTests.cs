@@ -1,9 +1,11 @@
+using BinanceBot.Utils;
+
 namespace BinanceBot.Tests
 {
     [TestClass]
     public class LoggerTests
     {
-        private readonly Logger.Logger _logger = new();
+        private readonly Utils.Logger _logger = new();
 
         [TestMethod]
         public async Task WriteLogTests()

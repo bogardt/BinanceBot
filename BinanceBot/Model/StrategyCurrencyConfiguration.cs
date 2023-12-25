@@ -1,6 +1,6 @@
 ﻿namespace BinanceBot.Model
 {
-    public class CurrencyConfiguration
+    public class StrategyCurrencyConfiguration
     {
         public decimal ProfitCible { get; set; }
         public decimal QuantiteFixeCryptoAcheter { get; set; }

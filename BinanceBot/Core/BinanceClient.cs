@@ -5,8 +5,9 @@ using System.Text;
 using Newtonsoft.Json.Linq;
 using Microsoft.Extensions.Configuration;
 using BinanceBot.Model;
+using BinanceBot.Abstraction;
 
-namespace BinanceBot.BinanceApi
+namespace BinanceBot.Core
 {
     public class BinanceClient : IBinanceClient
     {
