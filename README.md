@@ -1,0 +1,41 @@
+# Bot Crypto Binance
+
+## Getting Started
+
+### Prerequisites
+* Visual Studio 2022
+* .Net Core 3.1
+
+### Installing
+* Clone the project
+* Open the solution with Visual Studio
+* Build the solution
+* Run the project
+
+## Running the tests
+* Open Test Explorer
+* Run all tests
+
+## Built With
+* [Visual Studio 2022](https://visualstudio.microsoft.com/fr/downloads/) - The development IDE
+* [.Net Core 3.1](https://www.microsoft.com/net/download/dotnet-core/3.1) - The framework
+
+## Configuration settings
+* Create a file appsettings.json in the project Bot.Crypto.Binance
+```json
+{
+  "AppSettings": {
+    "Binance": {
+      "ApiKey": "***",
+      "ApiSecret": "***"
+    }
+    },
+  "ConnectionStrings": {
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information"
+    }
+  }
+}
+```
