@@ -25,7 +25,7 @@ namespace BinanceBot.Tests
                                      .AddInMemoryCollection(_inMemorySettings)
                                      .Build();
 
-            _client = new BinanceClient(_configuration, true);
+            _client = new BinanceClient(_configuration, testApi: true);
             _mockClient = new Mock<IBinanceClient>();
         }
 

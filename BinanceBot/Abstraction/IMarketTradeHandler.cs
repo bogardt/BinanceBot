@@ -2,9 +2,8 @@
 {
     internal interface IMarketTradeHandler
     {
-        Task TradeLimit();
+        Task TradeOnLimit();
         Task WaitBuy();
         Task WaitSell();
-
     }
 }

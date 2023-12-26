@@ -67,6 +67,7 @@ namespace BinanceBot.Core
             response.EnsureSuccessStatusCode();
 
             var responseContent = await response.Content.ReadAsStringAsync();
+            //return JsonSerializer.Deserialize<List<Order>>(responseContent);
             return JsonConvert.DeserializeObject<List<Order>>(responseContent);
         }
 

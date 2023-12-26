@@ -4,7 +4,7 @@
     {
         public decimal FeePercentage { get; set; }
         public decimal TargetProfit { get; set; }
-        public decimal FixedQuantityCryptoToBuy { get; set; }
+        public decimal Quantity { get; set; }
         public decimal TotalBenefit { get; set; } = 0;
         public decimal MaxRSI { get; set; } = 70;
         public decimal TotalPurchaseCost { get; set; } = 0;
@@ -22,7 +22,7 @@
         {
             FeePercentage = 0.001m;
             TargetProfit = dict[symbol].ProfitCible;
-            FixedQuantityCryptoToBuy = dict[symbol].QuantiteFixeCryptoAcheter;
+            Quantity = dict[symbol].QuantiteFixeCryptoAcheter;
             Period = dict[symbol].Periode;
             Interval = dict[symbol].Interval;
             StopLossPercentage = 0.05m;

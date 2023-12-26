@@ -12,14 +12,14 @@ namespace BinanceBot.Core
 
         private static readonly string _symbol = "SOLUSDT";
 
-        private static readonly Dictionary<string, StrategyCurrencyConfiguration> _dict = new Dictionary<string, StrategyCurrencyConfiguration>
+        private static readonly Dictionary<string, StrategyCurrencyConfiguration> _dict = new()
         {
-            { "SOLUSDT", new StrategyCurrencyConfiguration { ProfitCible = 50m, QuantiteFixeCryptoAcheter = 100m, Interval = "1s", Periode = 900 } },
+            { "SOLUSDT", new StrategyCurrencyConfiguration { ProfitCible = 200m, QuantiteFixeCryptoAcheter = 100m, Interval = "1m", Periode = 20 } },
             { "ETHUSDT", new StrategyCurrencyConfiguration { ProfitCible = 10m, QuantiteFixeCryptoAcheter = 5m, Interval = "1s", Periode = 900 } },
             { "ADAUSDT", new StrategyCurrencyConfiguration { ProfitCible = 1m, QuantiteFixeCryptoAcheter = 2000m, Interval = "1s", Periode = 60 } }
         };
 
-        private readonly TradingConfig _tradingConfig = new TradingConfig(_dict, _symbol);
+        private readonly TradingConfig _tradingConfig = new(_dict, _symbol);
 
         public MarketTradeHandler(IBinanceClient binanceClient,
             ILogger logger)
@@ -28,7 +28,7 @@ namespace BinanceBot.Core
             _logger = logger;
         }
 
-        public async Task TradeLimit()
+        public async Task TradeOnLimit()
         {
             while (true)
             {
@@ -45,52 +45,46 @@ namespace BinanceBot.Core
                     var klines = await getKlinesTask;
 
                     decimal currentCurrencyPrice = currency.Price;
-                    decimal moyenneMobile, rsi;
 
-                    var moyenneMobileTask = MobileAverageCalculation(klines, periode: _tradingConfig.Period);
-                    var rsiTask = RSICalculation(_symbol, _tradingConfig.Interval, periode: _tradingConfig.Period);
+                    decimal mobileAverage = MobileAverageCalculation(klines, periode: _tradingConfig.Period);
+                    decimal rsi = await RSICalculation(_symbol, _tradingConfig.Interval, periode: _tradingConfig.Period);
                     decimal volatility = VolatilityCalculation(klines);
 
-                    await Task.WhenAll(moyenneMobileTask, rsiTask);
+                    decimal targetPriceFeesNotIncluded = ((currentCurrencyPrice * _tradingConfig.Quantity) + _tradingConfig.TargetProfit) / _tradingConfig.Quantity;
+                    decimal targetPriceFeesIncluded = targetPriceFeesNotIncluded * (1 + _tradingConfig.FeePercentage);
 
-                    moyenneMobile = await moyenneMobileTask;
-                    rsi = await rsiTask;
-
-                    decimal prixVenteCibleParCrypto = ((currentCurrencyPrice * _tradingConfig.FixedQuantityCryptoToBuy) + _tradingConfig.TargetProfit) / _tradingConfig.FixedQuantityCryptoToBuy;
-                    decimal prixVenteCibleParCryptoAvecFrais = prixVenteCibleParCrypto * (1 + _tradingConfig.FeePercentage);
-
-                    if (!_tradingConfig.OpenPosition && rsi <= _tradingConfig.MaxRSI && prixVenteCibleParCrypto < moyenneMobile)
+                    if (!_tradingConfig.OpenPosition && rsi <= _tradingConfig.MaxRSI && currentCurrencyPrice < mobileAverage)
                     {
                         await Buy(currentCurrencyPrice, volatility);
                     }
 
                     if (_tradingConfig.OpenPosition)
                     {
-                        decimal prixVenteCible = await Sell(currentCurrencyPrice, volatility);
+                        decimal targetPrice = await Sell(currentCurrencyPrice, volatility);
 
-                        decimal beneficePossible = (_tradingConfig.TotalPurchaseCost + _tradingConfig.TargetProfit) - _tradingConfig.TotalPurchaseCost;
+                        decimal targetBenefit = (_tradingConfig.TotalPurchaseCost + _tradingConfig.TargetProfit) - _tradingConfig.TotalPurchaseCost;
 
                         _logger.WriteLog($"timeElapsed {DateTime.UtcNow - startLoop} | " +
-                            $"diffMarge : {(prixVenteCible - _tradingConfig.CryptoPurchasePrice):F2} | " +
-                            $"{_symbol} : {currentCurrencyPrice:F2} | " +
-                            $"prixVenteCible : {prixVenteCible:F2} | " +
-                            $"moyenne mobile : {moyenneMobile:F2} | " +
-                            $"rsi : {rsi:F2} | " +
-                            $"beneficePossible: {beneficePossible:F2} | " +
-                            $"Bénéfice total: {_tradingConfig.TotalBenefit:F2} | " +
-                            $"Quantity: {_tradingConfig.FixedQuantityCryptoToBuy} | " +
-                            $"Vol : {volatility:F2}");
+                            $"diffMarge: {(targetPrice - _tradingConfig.CryptoPurchasePrice):F2} | " +
+                            $"{_symbol}: {currentCurrencyPrice:F2} | " +
+                            $"targetPrice: {targetPrice:F2} | " +
+                            $"mobileAverage: {mobileAverage:F2} | " +
+                            $"rsi: {rsi:F2} | " +
+                            $"targetBenefit: {targetBenefit:F2} | " +
+                            $"totalBenefit: {_tradingConfig.TotalBenefit:F2} | " +
+                            $"quantity: {_tradingConfig.Quantity} | " +
+                            $"volatility: {volatility:F2}");
                     }
                     else
                     {
-                        _logger.WriteLog($"timeElapsed : {DateTime.UtcNow - startLoop} | " +
-                            $"{_symbol} : {currentCurrencyPrice:F2} | " +
-                            $"WithoutFee : {prixVenteCibleParCrypto:F2} | " +
-                            $"WithFee : {prixVenteCibleParCryptoAvecFrais:F2} | " +
-                            $"moyenne mobile : {moyenneMobile:F2} | rsi : {rsi:F2} | " +
-                            $"Bénéfice total: {_tradingConfig.TotalBenefit:F2} | " +
-                            $"Quantity :  {_tradingConfig.FixedQuantityCryptoToBuy} | " +
-                            $"Vol : {volatility:F2}");
+                        _logger.WriteLog($"timeElapsed: {DateTime.UtcNow - startLoop} | " +
+                            $"{_symbol}: {currentCurrencyPrice:F2} | " +
+                            $"targetPriceFeesNotIncluded: {targetPriceFeesNotIncluded:F2} | " +
+                            $"targetPriceFeesIncluded: {targetPriceFeesIncluded:F2} | " +
+                            $"mobileAverage: {mobileAverage:F2} | rsi : {rsi:F2} | " +
+                            $"totalBenefit: {_tradingConfig.TotalBenefit:F2} | " +
+                            $"quantity:  {_tradingConfig.Quantity} | " +
+                            $"volatility: {volatility:F2}");
                     }
 
                 }
@@ -104,17 +98,17 @@ namespace BinanceBot.Core
         private async Task Buy(decimal currentCurrencyPrice, decimal volatility)
         {
             _tradingConfig.CryptoPurchasePrice = currentCurrencyPrice;
-            _tradingConfig.TotalPurchaseCost = _tradingConfig.FixedQuantityCryptoToBuy * _tradingConfig.CryptoPurchasePrice;
+            _tradingConfig.TotalPurchaseCost = _tradingConfig.Quantity * _tradingConfig.CryptoPurchasePrice;
 
             decimal feesAmount = _tradingConfig.TotalPurchaseCost * _tradingConfig.FeePercentage;
             _tradingConfig.TotalPurchaseCost *= (1 + _tradingConfig.FeePercentage);
 
-            _logger.WriteLog($"===> [ACHAT] {_tradingConfig.FixedQuantityCryptoToBuy} | " +
-                $"feesAmount : {feesAmount} | " +
-                $"prixAchatCrypto: {_tradingConfig.CryptoPurchasePrice:F2} | " +
-                $"coutTotalAchat : {_tradingConfig.TotalPurchaseCost:F2}");
+            _logger.WriteLog($"===> [ACHAT] {_tradingConfig.Quantity} | " +
+                $"feesAmount: {feesAmount} | " +
+                $"cryptoPurchasePrice: {_tradingConfig.CryptoPurchasePrice:F2} | " +
+                $"totalPurchaseCost: {_tradingConfig.TotalPurchaseCost:F2}");
 
-            string responseAchat = await _binanceClient.PlaceOrder(_symbol, _tradingConfig.FixedQuantityCryptoToBuy, currentCurrencyPrice, "BUY");
+            string responseAchat = await _binanceClient.PlaceOrder(_symbol, _tradingConfig.Quantity, currentCurrencyPrice, "BUY");
             _logger.WriteLog($"{responseAchat}");
 
             await WaitBuy();
@@ -124,11 +118,11 @@ namespace BinanceBot.Core
 
         private async Task<decimal> Sell(decimal currentCurrencyPrice, decimal volatility)
         {
-            decimal prixVenteCible = (_tradingConfig.TotalPurchaseCost + _tradingConfig.TargetProfit) / _tradingConfig.FixedQuantityCryptoToBuy / (1 - _tradingConfig.FeePercentage);
+            decimal prixVenteCible = (_tradingConfig.TotalPurchaseCost + _tradingConfig.TargetProfit) / _tradingConfig.Quantity / (1 - _tradingConfig.FeePercentage);
 
-            decimal montantVenteBrut = currentCurrencyPrice * _tradingConfig.FixedQuantityCryptoToBuy;
+            decimal montantVenteBrut = currentCurrencyPrice * _tradingConfig.Quantity;
             decimal fraisVente = montantVenteBrut * _tradingConfig.FeePercentage;
-            decimal montantVenteNet = (currentCurrencyPrice * _tradingConfig.FixedQuantityCryptoToBuy) * (1 - _tradingConfig.FeePercentage);
+            decimal montantVenteNet = (currentCurrencyPrice * _tradingConfig.Quantity) * (1 - _tradingConfig.FeePercentage);
 
             decimal beneficeBrut = montantVenteBrut - _tradingConfig.TotalPurchaseCost;
             decimal beneficeNet = montantVenteNet - _tradingConfig.TotalPurchaseCost;
@@ -142,13 +136,12 @@ namespace BinanceBot.Core
                     _logger.WriteLog("STOPP LOSS");
                 }
 
-                // Mise à jour du bénéfice total
                 _tradingConfig.TotalBenefit += beneficeNet;
-                _logger.WriteLog($"===> [VENTE] {_tradingConfig.FixedQuantityCryptoToBuy:F2} | " +
-                    $"prixActuel {currentCurrencyPrice:F2} | " +
-                    $"Bénéfice total: {_tradingConfig.TotalBenefit:F2}");
+                _logger.WriteLog($"===> [VENTE] {_tradingConfig.Quantity:F2} | " +
+                    $"currentCurrencyPrice: {currentCurrencyPrice:F2} | " +
+                    $"totalBenefit: {_tradingConfig.TotalBenefit:F2}");
 
-                string responseVente = await _binanceClient.PlaceOrder(_symbol, _tradingConfig.FixedQuantityCryptoToBuy, currentCurrencyPrice, "SELL");
+                string responseVente = await _binanceClient.PlaceOrder(_symbol, _tradingConfig.Quantity, currentCurrencyPrice, "SELL");
                 _logger.WriteLog($"{responseVente}");
 
                 await WaitSell();
@@ -174,7 +167,7 @@ namespace BinanceBot.Core
             return prixStopLoss;
         }
 
-        private async Task<decimal> MobileAverageCalculation(List<List<object>> klines, int periode)
+        private static decimal MobileAverageCalculation(List<List<object>> klines, int periode)
         {
             var prixHistoriques = klines.Select((it) =>
             {
@@ -298,6 +291,5 @@ namespace BinanceBot.Core
                 await Task.Delay(300);
             }
         }
-
     }
 }
