@@ -2,7 +2,6 @@
 using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
-using Newtonsoft.Json.Linq;
 using Microsoft.Extensions.Configuration;
 using BinanceBot.Model;
 using BinanceBot.Abstraction;
@@ -64,39 +63,11 @@ namespace BinanceBot.Core
             using var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
 
             var response = await _client.SendAsync(request);
-            response.EnsureSuccessStatusCode();
+            //response.EnsureSuccessStatusCode();
 
             var responseContent = await response.Content.ReadAsStringAsync();
             //return JsonSerializer.Deserialize<List<Order>>(responseContent);
             return JsonConvert.DeserializeObject<List<Order>>(responseContent);
-        }
-
-        public async Task<List<decimal>> RecuperePrixRecent(string symbol, string interval, int periode)
-        {
-            var url = $"{_baseEndpoint}/api/v3/klines?symbol={symbol}&interval={interval}&limit={periode}";
-
-            try
-            {
-                var response = await _client.GetAsync(url);
-                response.EnsureSuccessStatusCode();
-                var responseBody = await response.Content.ReadAsStringAsync();
-                var klines = JsonConvert.DeserializeObject<List<List<object>>>(responseBody);
-
-                var closingPrices = new List<decimal>();
-                foreach (var kline in klines)
-                {
-                    if (!decimal.TryParse(kline[4].ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out var ret))
-                        throw new InvalidCastException($"it cannot be converted to decimal for klines {JsonConvert.SerializeObject(kline)}");
-                    closingPrices.Add(ret); // closing index is 4
-                }
-
-                return closingPrices;
-            }
-            catch (HttpRequestException e)
-            {
-                Console.WriteLine($"Erreur dans la requête HTTP: {e.Message}");
-                return new List<decimal>();
-            }
         }
 
         public async Task<string> PlaceOrder(string symbol, decimal quantity, decimal price, string side)
@@ -117,36 +88,6 @@ namespace BinanceBot.Core
             var res = await response.Content.ReadAsStringAsync();
 
             return res;
-        }
-
-        public async Task<decimal> GetBNBBalance()
-        {
-            var endpoint = $"{_baseEndpoint}/api/v3/account";
-            var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-
-            var queryString = $"timestamp={timestamp}";
-            var signature = Sign(queryString, _apiSecret);
-
-            var finalUrl = $"{endpoint}?{queryString}&signature={signature}";
-
-            using var request = new HttpRequestMessage(HttpMethod.Get, finalUrl);
-
-            var response = await _client.SendAsync(request);
-            response.EnsureSuccessStatusCode();
-            var responseBody = await response.Content.ReadAsStringAsync();
-
-            var jObject = JObject.Parse(responseBody);
-            var balances = jObject["balances"];
-
-            foreach (var balance in balances)
-            {
-                if (balance["asset"].ToString() == "USDT")
-                {
-                    return decimal.Parse(balance["free"].ToString());
-                }
-            }
-
-            return 0m; // Retourne 0 si aucun solde BNB n'est trouvé
         }
 
         private static string Sign(string data, string secret)

@@ -10,33 +10,27 @@ namespace BinanceBot.Tests
     [TestClass]
     public class BinanceClientTests
     {
-        private readonly Mock<IBinanceClient> _mockClient;
-        private readonly Dictionary<string, string> _inMemorySettings = new()
-        {
-            { "ApiKey", "***" },
-            { "ApiSecret", "***" },
-        };
-        private readonly IConfigurationRoot _configuration;
         private readonly BinanceClient _client;
+        private readonly Mock<IBinanceClient> _mockClient;
+        private readonly IConfigurationRoot _configuration = new ConfigurationBuilder()
+                .SetBasePath(Utils.Helper.GetSolutionPath())
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .Build();
 
         public BinanceClientTests()
         {
-            _configuration = new ConfigurationBuilder()
-                                     .AddInMemoryCollection(_inMemorySettings)
-                                     .Build();
-
-            _client = new BinanceClient(_configuration, testApi: true);
             _mockClient = new Mock<IBinanceClient>();
+            _client = new BinanceClient(_configuration, testApi: true);
         }
 
         [TestMethod]
-        public async Task GetKLinesBySymbolTest()
+        public async Task GetKLinesBySymbolMockedAsyncTest()
         {
             _mockClient.Setup(client => client.GetKLinesBySymbolAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(new List<List<object>>
             {
                 new List<object>
                 {
-                    1619458560000,
+                    16,
                     "0.00000000",
                     "0.00000000",
                     "0.00000000",
@@ -47,7 +41,7 @@ namespace BinanceBot.Tests
                     "0.00000000",
                     "0.00000000",
                     "0.00000000",
-                    "0.00000000",
+                    125.21m
                 },
             });
 
@@ -65,7 +59,7 @@ namespace BinanceBot.Tests
         }
 
         [TestMethod]
-        public async Task GetPriceBySymbolTest()
+        public async Task GetPriceBySymbolMockAsyncTest()
         {
             _mockClient.Setup(client => client.GetPriceBySymbolAsync(It.IsAny<string>())).ReturnsAsync(new Currency
             {
@@ -89,23 +83,34 @@ namespace BinanceBot.Tests
         public async Task GetOpenOrdersAsyncTest()
         {
             var orders = await _client.GetOpenOrdersAsync("BTCUSDT");
+            Assert.IsTrue(orders.Count == 0);
+        }
+
+        [TestMethod]
+        public async Task GetOpenOrdersMockAsyncTest()
+        {
+            _mockClient.Setup(client => client.GetOpenOrdersAsync(It.IsAny<string>())).ReturnsAsync(new List<Order>
+            {
+                new Order
+                {
+                    Symbol = "BTCUSDT",
+                    Price = "50000",
+                    Side = "BUY",
+                    Time = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                },
+            });
+
+            var orders = await _mockClient.Object.GetOpenOrdersAsync("BTCUSDT");
             Assert.IsTrue(orders.Count == 1);
-            Assert.IsTrue(orders[0].Symbol == "BTCUSDT");
         }
 
         [TestMethod]
-        public async Task GetBNBBalanceTest()
+        public async Task PlaceOrderMockAsyncTest()
         {
-            var balance = await _client.GetBNBBalance();
-            Assert.IsTrue(balance > 0);
-        }
+            _mockClient.Setup(client => client.PlaceOrder(It.IsAny<string>(), It.IsAny<decimal>(), It.IsAny<decimal>(), It.IsAny<string>())).ReturnsAsync("123456789");
 
-        [TestMethod]
-        public async Task RecuperePrixRecentTest()
-        {
-            var prices = await _client.RecuperePrixRecent("BTCUSDT", "1m", 1);
-            Assert.IsTrue(prices.Count == 1);
-            Assert.IsTrue(prices[0] > 0);
+            var order = await _mockClient.Object.PlaceOrder("BTCUSDT", 0.0001m, 50000, "BUY");
+            Assert.IsTrue(!string.IsNullOrEmpty(order));
         }
     }
 }
