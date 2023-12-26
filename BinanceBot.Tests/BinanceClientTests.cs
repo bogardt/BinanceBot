@@ -107,9 +107,9 @@ namespace BinanceBot.Tests
         [TestMethod]
         public async Task PlaceOrderMockAsyncTest()
         {
-            _mockClient.Setup(client => client.PlaceOrder(It.IsAny<string>(), It.IsAny<decimal>(), It.IsAny<decimal>(), It.IsAny<string>())).ReturnsAsync("123456789");
+            _mockClient.Setup(client => client.PlaceOrderAsync(It.IsAny<string>(), It.IsAny<decimal>(), It.IsAny<decimal>(), It.IsAny<string>())).ReturnsAsync("123456789");
 
-            var order = await _mockClient.Object.PlaceOrder("BTCUSDT", 0.0001m, 50000, "BUY");
+            var order = await _mockClient.Object.PlaceOrderAsync("BTCUSDT", 0.0001m, 50000, "BUY");
             Assert.IsTrue(!string.IsNullOrEmpty(order));
         }
     }

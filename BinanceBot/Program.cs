@@ -18,7 +18,7 @@ internal class Program
 
             var binanceBot = provider.GetRequiredService<IMarketTradeHandler>();
 
-            await binanceBot.TradeOnLimit();
+            await binanceBot.TradeOnLimitAsync();
         }
 
         var solutionPath = Helper.GetSolutionPath();

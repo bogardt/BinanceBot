@@ -70,7 +70,7 @@ namespace BinanceBot.Core
             return JsonConvert.DeserializeObject<List<Order>>(responseContent);
         }
 
-        public async Task<string> PlaceOrder(string symbol, decimal quantity, decimal price, string side)
+        public async Task<string> PlaceOrderAsync(string symbol, decimal quantity, decimal price, string side)
         {
             var endpoint = $"{_baseEndpoint}/api/v3/order{(_testApi ? "/test" : "")}";
             var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();

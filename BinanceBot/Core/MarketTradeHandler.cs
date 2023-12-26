@@ -28,7 +28,7 @@ namespace BinanceBot.Core
             _logger = logger;
         }
 
-        public async Task TradeOnLimit()
+        public async Task TradeOnLimitAsync()
         {
             while (true)
             {
@@ -108,10 +108,10 @@ namespace BinanceBot.Core
                 $"cryptoPurchasePrice: {_tradingConfig.CryptoPurchasePrice:F2} | " +
                 $"totalPurchaseCost: {_tradingConfig.TotalPurchaseCost:F2}");
 
-            string responseAchat = await _binanceClient.PlaceOrder(_symbol, _tradingConfig.Quantity, currentCurrencyPrice, "BUY");
+            string responseAchat = await _binanceClient.PlaceOrderAsync(_symbol, _tradingConfig.Quantity, currentCurrencyPrice, "BUY");
             _logger.WriteLog($"{responseAchat}");
 
-            await WaitBuy();
+            await WaitBuyAsync();
 
             _tradingConfig.OpenPosition = true;
         }
@@ -141,10 +141,10 @@ namespace BinanceBot.Core
                     $"currentCurrencyPrice: {currentCurrencyPrice:F2} | " +
                     $"totalBenefit: {_tradingConfig.TotalBenefit:F2}");
 
-                string responseVente = await _binanceClient.PlaceOrder(_symbol, _tradingConfig.Quantity, currentCurrencyPrice, "SELL");
+                string responseVente = await _binanceClient.PlaceOrderAsync(_symbol, _tradingConfig.Quantity, currentCurrencyPrice, "SELL");
                 _logger.WriteLog($"{responseVente}");
 
-                await WaitSell();
+                await WaitSellAsync();
 
                 if (_tradingConfig.TotalBenefit >= _tradingConfig.LimitBenefit)
                 {
@@ -252,7 +252,7 @@ namespace BinanceBot.Core
             }
         }
 
-        public async Task WaitBuy()
+        public async Task WaitBuyAsync()
         {
             var orders = await _binanceClient.GetOpenOrdersAsync(_symbol);
 
@@ -272,7 +272,7 @@ namespace BinanceBot.Core
             }
         }
 
-        public async Task WaitSell()
+        public async Task WaitSellAsync()
         {
             var orders = await _binanceClient.GetOpenOrdersAsync(_symbol);
 
