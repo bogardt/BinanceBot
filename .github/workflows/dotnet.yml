@@ -16,13 +16,20 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: '7.0'
+        dotnet-version: '7.0.x' # Remplacer par la version spécifique de .NET 7.0 que vous utilisez
+
     - name: Restore dependencies
       run: dotnet restore
+
     - name: Run tests
       run: dotnet test --collect:"XPlat Code Coverage"
+
+    - name: Install ReportGenerator
+      run: dotnet tool install -g dotnet-reportgenerator-globaltool
+
     - name: Generate coverage report
-      run: reportgenerator -reports:**/coverage.cobertura.xml -targetdir:coverage -reporttypes:Html
+      run: reportgenerator -reports:**/TestResults/**/*.cobertura.xml -targetdir:coverage -reporttypes:Html
+
     - name: Upload coverage to GitHub Artifacts
       uses: actions/upload-artifact@v2
       with:
