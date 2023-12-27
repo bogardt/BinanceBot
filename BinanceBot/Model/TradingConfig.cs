@@ -9,7 +9,7 @@
         public decimal MaxRSI { get; set; } = 70;
         public decimal TotalPurchaseCost { get; set; } = 0;
         public decimal CryptoPurchasePrice { get; set; } = 0;
-        public int LimitBenefit { get; set; } = 500;
+        public int LimitBenefit { get; set; } = 2000;
         public int Period { get; set; }
         public string Interval { get; set; }
         public bool OpenPosition { get; set; } = false;
@@ -21,9 +21,9 @@
         public TradingConfig(Dictionary<string, StrategyCurrencyConfiguration> dict, string symbol)
         {
             FeePercentage = 0.001m;
-            TargetProfit = dict[symbol].ProfitCible;
-            Quantity = dict[symbol].QuantiteFixeCryptoAcheter;
-            Period = dict[symbol].Periode;
+            TargetProfit = dict[symbol].TargetProfit;
+            Quantity = dict[symbol].Quantity;
+            Period = dict[symbol].Period;
             Interval = dict[symbol].Interval;
             StopLossPercentage = 0.05m;
             VolatilityMultiplier = 2;

@@ -5,7 +5,7 @@ namespace BinanceBot.Tests
     [TestClass]
     public class LoggerTests
     {
-        private readonly Utils.Logger _logger = new();
+        private readonly Logger _logger = new();
 
         [TestMethod]
         public async Task WriteLogTests()

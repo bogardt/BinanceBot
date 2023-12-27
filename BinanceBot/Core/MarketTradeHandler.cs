@@ -14,28 +14,33 @@ namespace BinanceBot.Core
 
         private static readonly Dictionary<string, StrategyCurrencyConfiguration> _dict = new()
         {
-            { "SOLUSDT", new StrategyCurrencyConfiguration { ProfitCible = 200m, QuantiteFixeCryptoAcheter = 100m, Interval = "1m", Periode = 20 } },
-            { "ETHUSDT", new StrategyCurrencyConfiguration { ProfitCible = 10m, QuantiteFixeCryptoAcheter = 5m, Interval = "1s", Periode = 900 } },
-            { "ADAUSDT", new StrategyCurrencyConfiguration { ProfitCible = 1m, QuantiteFixeCryptoAcheter = 2000m, Interval = "1s", Periode = 60 } }
+            { "SOLUSDT", new StrategyCurrencyConfiguration { TargetProfit = 30m, Quantity = 200m, Interval = "1m", Period = 60 } },
+            { "ETHUSDT", new StrategyCurrencyConfiguration { TargetProfit = 10m, Quantity = 5m, Interval = "1s", Period = 900 } },
+            { "ADAUSDT", new StrategyCurrencyConfiguration { TargetProfit = 1m, Quantity = 2000m, Interval = "1s", Period = 60 } }
         };
 
         private readonly TradingConfig _tradingConfig = new(_dict, _symbol);
 
         public MarketTradeHandler(IBinanceClient binanceClient,
-            ILogger logger)
+            ILogger logger,
+            TradingConfig? tradingConfig = null)
         {
             _binanceClient = binanceClient;
             _logger = logger;
+            if (tradingConfig != null)
+                _tradingConfig = tradingConfig;
         }
 
         public async Task TradeOnLimitAsync()
         {
-            while (true)
+            var lastTick = DateTime.UtcNow;
+            try
             {
-                try
+                while (true)
                 {
-                    var startLoop = DateTime.UtcNow;
-
+                    var now = DateTime.UtcNow;
+                    //if (now - lastTick > TimeSpan.FromMicroseconds(500))
+                    lastTick = now;
                     var getPriceTask = _binanceClient.GetPriceBySymbolAsync(_symbol);
                     var getKlinesTask = _binanceClient.GetKLinesBySymbolAsync(_symbol, _tradingConfig.Interval, _tradingConfig.Period.ToString());
 
@@ -60,11 +65,13 @@ namespace BinanceBot.Core
 
                     if (_tradingConfig.OpenPosition)
                     {
-                        decimal targetPrice = await Sell(currentCurrencyPrice, volatility);
+                        var (targetPrice, endProgram) = await Sell(currentCurrencyPrice, volatility);
+                        if (endProgram)
+                            break;
 
                         decimal targetBenefit = (_tradingConfig.TotalPurchaseCost + _tradingConfig.TargetProfit) - _tradingConfig.TotalPurchaseCost;
 
-                        _logger.WriteLog($"timeElapsed {DateTime.UtcNow - startLoop} | " +
+                        _logger.WriteLog($"timeElapsed {DateTime.UtcNow - now} | " +
                             $"diffMarge: {(targetPrice - _tradingConfig.CryptoPurchasePrice):F2} | " +
                             $"{_symbol}: {currentCurrencyPrice:F2} | " +
                             $"targetPrice: {targetPrice:F2} | " +
@@ -77,7 +84,7 @@ namespace BinanceBot.Core
                     }
                     else
                     {
-                        _logger.WriteLog($"timeElapsed: {DateTime.UtcNow - startLoop} | " +
+                        _logger.WriteLog($"timeElapsed: {DateTime.UtcNow - now} | " +
                             $"{_symbol}: {currentCurrencyPrice:F2} | " +
                             $"targetPriceFeesNotIncluded: {targetPriceFeesNotIncluded:F2} | " +
                             $"targetPriceFeesIncluded: {targetPriceFeesIncluded:F2} | " +
@@ -88,10 +95,11 @@ namespace BinanceBot.Core
                     }
 
                 }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Erreur: {ex.Message}", ex);
-                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erreur: {ex.Message}", ex);
+                throw;
             }
         }
 
@@ -116,7 +124,7 @@ namespace BinanceBot.Core
             _tradingConfig.OpenPosition = true;
         }
 
-        private async Task<decimal> Sell(decimal currentCurrencyPrice, decimal volatility)
+        private async Task<(decimal, bool)> Sell(decimal currentCurrencyPrice, decimal volatility)
         {
             decimal prixVenteCible = (_tradingConfig.TotalPurchaseCost + _tradingConfig.TargetProfit) / _tradingConfig.Quantity / (1 - _tradingConfig.FeePercentage);
 
@@ -149,11 +157,11 @@ namespace BinanceBot.Core
                 if (_tradingConfig.TotalBenefit >= _tradingConfig.LimitBenefit)
                 {
                     _logger.WriteLog("BENEFICE LIMITE ->> exit program");
-                    Console.ReadLine();
+                    return (prixVenteCible, true);
                 }
                 _tradingConfig.OpenPosition = false;
             }
-            return prixVenteCible;
+            return (prixVenteCible, false);
         }
 
         private decimal PercentageLossStrategy(decimal volatility)

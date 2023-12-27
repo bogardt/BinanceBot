@@ -1,19 +1,26 @@
-﻿namespace BinanceBot.Utils
+﻿using BinanceBot.Abstraction;
+
+namespace BinanceBot.Utils
 {
-    public static class Helper
+    public class Helper
     {
-        public static string GetSolutionPath()
+        private readonly IFileSystem _fileSystem;
+
+        public Helper(IFileSystem fileSystem)
         {
-            var currentDirectory = Directory.GetCurrentDirectory();
+            _fileSystem = fileSystem;
+        }
+
+        public string GetSolutionPath()
+        {
+            var currentDirectory = _fileSystem.GetCurrentDirectory();
 
             var directoryInfo = new DirectoryInfo(currentDirectory);
 
-            while (directoryInfo != null && !directoryInfo.GetFiles("*.sln").Any())
+            while (directoryInfo != null && !_fileSystem.GetFiles(directoryInfo.FullName, "*.sln").Any())
                 directoryInfo = directoryInfo.Parent;
 
-            var solutionPath = directoryInfo?.FullName;
-
-            return solutionPath;
+            return directoryInfo?.FullName;
         }
     }
 }

@@ -10,7 +10,7 @@ namespace BinanceBot.Core
 {
     public class BinanceClient : IBinanceClient
     {
-        private readonly HttpClient _client = new HttpClient();
+        private readonly HttpClient _client = new();
         private readonly bool _testApi;
         private static readonly string _baseEndpoint = "https://api.binance.com";
         private string _apiKey = string.Empty;
@@ -51,23 +51,30 @@ namespace BinanceBot.Core
 
         public async Task<List<Order>> GetOpenOrdersAsync(string symbol)
         {
-            var endpoint = $"{_baseEndpoint}/api/v3/openOrders";
-            var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-            var queryString = $"symbol={symbol}&timestamp={timestamp}";
-
-            var signature = Sign(queryString, _apiSecret);
-            queryString += $"&signature={signature}";
-
-            var requestUrl = $"{endpoint}?{queryString}";
-
-            using var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
-
-            var response = await _client.SendAsync(request);
-            //response.EnsureSuccessStatusCode();
-
-            var responseContent = await response.Content.ReadAsStringAsync();
-            //return JsonSerializer.Deserialize<List<Order>>(responseContent);
-            return JsonConvert.DeserializeObject<List<Order>>(responseContent);
+            var responseContent = string.Empty;
+            try
+            {
+                var endpoint = $"{_baseEndpoint}/api/v3/openOrders";
+                var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                var queryString = $"symbol={symbol}&timestamp={timestamp}";
+                var signature = Sign(queryString, _apiSecret);
+                queryString += $"&signature={signature}";
+                var requestUrl = $"{endpoint}?{queryString}";
+                using var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
+                var response = await _client.SendAsync(request);
+                //response.EnsureSuccessStatusCode();
+                responseContent = await response.Content.ReadAsStringAsync();
+                //return JsonSerializer.Deserialize<List<Order>>(responseContent);
+                var orders = JsonConvert.DeserializeObject<List<Order>>(responseContent);
+                return orders;
+            }
+            catch (Exception ex)
+            {
+                // log the error
+                Console.WriteLine(responseContent);
+                Console.WriteLine(ex.Message);
+                throw new Exception(ex.Message);
+            }
         }
 
         public async Task<string> PlaceOrderAsync(string symbol, decimal quantity, decimal price, string side)

@@ -21,7 +21,8 @@ internal class Program
             await binanceBot.TradeOnLimitAsync();
         }
 
-        var solutionPath = Helper.GetSolutionPath();
+        var helper = new Helper(new FileSystem());
+        var solutionPath = helper.GetSolutionPath();
 
         var config = new ConfigurationBuilder()
             .SetBasePath(solutionPath)
