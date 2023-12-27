@@ -1,0 +1,30 @@
+name: .NET
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '7.0'
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Run tests
+      run: dotnet test --collect:"XPlat Code Coverage"
+    - name: Generate coverage report
+      run: reportgenerator -reports:**/coverage.cobertura.xml -targetdir:coverage -reporttypes:Html
+    - name: Upload coverage to GitHub Artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: coverage-report
+        path: coverage/
