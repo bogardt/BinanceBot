@@ -21,6 +21,12 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
 
+    - name: Sync branch
+      run: |
+        git fetch origin coverage-report
+        git checkout coverage-report
+        git pull origin coverage-report
+      shell: powershell
 
     - name: Run tests with coverage
       run: dotnet test --collect:"XPlat Code Coverage"
@@ -37,13 +43,6 @@ jobs:
         files: coverage/**/*.xml
         fail_ci_if_error: true
 
-    - name: Sync branch
-      run: |
-        git fetch origin coverage-report
-        git checkout coverage-report
-        git pull origin coverage-report
-      shell: powershell
- 
     - name: Commit and push coverage report to GitHub Pages
       uses: EndBug/add-and-commit@v9
       with:
