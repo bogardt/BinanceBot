@@ -68,12 +68,13 @@ namespace BinanceBot.Core
 
                 await WaitSellAsync(symbol);
 
+                tradingConfig.OpenPosition = false;
+
                 if (tradingConfig.TotalBenefit >= tradingConfig.LimitBenefit)
                 {
                     _logger.WriteLog("BENEFICE LIMITE ->> exit program");
                     return (prixVenteCible, true);
                 }
-                tradingConfig.OpenPosition = false;
             }
             return (prixVenteCible, false);
         }
