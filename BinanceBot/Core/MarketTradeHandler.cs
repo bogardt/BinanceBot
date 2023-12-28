@@ -14,8 +14,8 @@ namespace BinanceBot.Core
 
         private static readonly Dictionary<string, StrategyCurrencyConfiguration> _dict = new()
         {
-            { "SOLUSDT", new StrategyCurrencyConfiguration { TargetProfit = 30m, Quantity = 200m, Interval = "1m", Period = 60 } },
-            { "ETHUSDT", new StrategyCurrencyConfiguration { TargetProfit = 10m, Quantity = 5m, Interval = "1s", Period = 900 } },
+            { "SOLUSDT", new StrategyCurrencyConfiguration { TargetProfit = 10m, Quantity = 100m, Interval = "1m", Period = 20 } },
+            { "ETHUSDT", new StrategyCurrencyConfiguration { TargetProfit = 10m, Quantity = 5m, Interval = "1s", Period = 300 } },
             { "ADAUSDT", new StrategyCurrencyConfiguration { TargetProfit = 1m, Quantity = 2000m, Interval = "1s", Period = 60 } }
         };
 

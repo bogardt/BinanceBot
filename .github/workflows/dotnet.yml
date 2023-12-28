@@ -1,4 +1,4 @@
-name: .NET
+name: .NET Coverage and GitHub Pages
 
 on:
   push:
@@ -7,43 +7,54 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
-
+  build-and-deploy:
     runs-on: windows-latest
 
     steps:
     - uses: actions/checkout@v2
+
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: '7.0.x'
 
+    - name: Check if gh-pages branch exists
+      run: |
+        if git ls-remote --heads origin gh-pages | grep gh-pages; then
+          echo "Branch gh-pages already exists"
+        else
+          git checkout --orphan gh-pages
+          git rm -rf .
+          git commit --allow-empty -m "Initial gh-pages commit"
+          git push origin gh-pages
+          git checkout main
+        fi
+      shell: bash
+
     - name: Restore dependencies
       run: dotnet restore
 
-    - name: Run tests
+    - name: Run tests with coverage
       run: dotnet test --collect:"XPlat Code Coverage"
 
     - name: Install ReportGenerator
       run: dotnet tool install -g dotnet-reportgenerator-globaltool
 
     - name: Generate coverage report
-      run: reportgenerator -reports:**/TestResults/**/*.cobertura.xml -targetdir:coverage -reporttypes:Html
+      run: reportgenerator -reports:**/TestResults/**/*.cobertura.xml -targetdir:docs -reporttypes:HtmlInline_AzurePipelines
+
+    - name: Commit and push coverage report to GitHub Pages
+      uses: EndBug/add-and-commit@v7
+      with:
+        author_name: github-actions
+        author_email: actions@github.com
+        message: 'Deploy Coverage Report to GitHub Pages'
+        add: 'docs/*'
+        default_author: github_actions
+        branch: 'gh-pages'
 
     - name: Upload coverage to GitHub Artifacts
       uses: actions/upload-artifact@v2
       with:
         name: coverage-report
-        path: coverage/
-
-    - name: List coverage report files
-      run: Get-ChildItem -Path coverage -Recurse | Select-Object FullName
-      shell: powershell
-
-    - name: Upload to Codecov
-      uses: codecov/codecov-action@v1
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
-        directory: coverage/
-        files: './coverage/index.html'
-        name: codecov-umbrella
+        path: docs/
