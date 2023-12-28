@@ -44,14 +44,24 @@ jobs:
         files: coverage/**/*.xml
         fail_ci_if_error: true
 
+    - name: Check if branch exists and set up branch variable
+      run: |
+        $branchExists = git ls-remote --heads origin coverage-report
+        if ($null -ne $branchExists) {
+          echo "branch_exists=true" | Out-File -Append -FilePath $Env:GITHUB_ENV
+        } else {
+          echo "branch_exists=false" | Out-File -Append -FilePath $Env:GITHUB_ENV
+        }
+      shell: powershell
+
     - name: Commit and push coverage report to GitHub Pages
       uses: EndBug/add-and-commit@v9
       with:
         author_name: github-actions
         author_email: actions@github.com
         message: 'Deploy Coverage Report to GitHub Pages'
-        add: 'coverage/*'        
-        new_branch: 'coverage-report'
+        add: 'coverage/*'
+        push: origin ${{ env.branch_exists == 'true' && 'coverage-report' || 'new:coverage-report' }}
         github_token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Upload coverage to GitHub Artifacts
@@ -59,3 +69,4 @@ jobs:
       with:
         name: coverage-report
         path: coverage/
+            
