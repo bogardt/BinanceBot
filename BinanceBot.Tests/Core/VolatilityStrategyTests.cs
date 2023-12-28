@@ -8,23 +8,29 @@ namespace BinanceBot.Tests.Core
     [TestClass]
     public class VolatilityStrategyTests
     {
+        private readonly Mock<IPriceRetriever> _mockPriceRetriever = new();
+        private readonly VolatilityStrategy _volatilityStrategy;
+
+        public VolatilityStrategyTests()
+        {
+            _volatilityStrategy = new VolatilityStrategy(_mockPriceRetriever.Object);
+        }
+
         [TestMethod]
         public void CalculateVolatility_ValidKlines_CalculatesVolatility()
         {
             // Arrange
-            var priceRetrieverMock = new Mock<IPriceRetriever>();
-            var volatilityStrategy = new VolatilityStrategy(priceRetrieverMock.Object);
             var klines = new List<List<object>>
             {
                 new List<object> { "100.5", "100.5", "100.5", "100.5", "100.6", "100.5" },
                 new List<object> { "100.5", "100.5", "100.5", "100.5", "101.6", "100.5" }
             };
             var expectedPrices = new List<decimal> { 100m, 102m, 98m, 101m, 99m };
-            priceRetrieverMock.Setup(pr => pr.GetRecentPrices(klines))
+            _mockPriceRetriever.Setup(pr => pr.GetRecentPrices(klines))
                 .Returns(expectedPrices);
 
             // Act
-            var result = volatilityStrategy.CalculateVolatility(klines);
+            var result = _volatilityStrategy.CalculateVolatility(klines);
 
             // Assert
             Assert.IsNotNull(result);
@@ -34,8 +40,6 @@ namespace BinanceBot.Tests.Core
         public void DetermineLossStrategy_GivenVolatilityAndConfig_CalculatesStopLossPrice()
         {
             // Arrange
-            var priceRetrieverMock = new Mock<IPriceRetriever>();
-            var volatilityStrategy = new VolatilityStrategy(priceRetrieverMock.Object);
             decimal volatility = 0.05m;
             var tradingConfig = new TradingConfig(TradeSetup.Dict, TradeSetup.Symbol)
             {
@@ -47,7 +51,7 @@ namespace BinanceBot.Tests.Core
             };
 
             // Act
-            var result = volatilityStrategy.DetermineLossStrategy(volatility, tradingConfig);
+            var result = _volatilityStrategy.DetermineLossStrategy(volatility, tradingConfig);
 
             // Assert
             Assert.IsTrue(result < tradingConfig.CryptoPurchasePrice);

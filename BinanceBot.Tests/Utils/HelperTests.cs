@@ -7,13 +7,11 @@ namespace BinanceBot.Tests.Utils
     [TestClass]
     public class HelperTests
     {
-        private Mock<IFileSystem> _mockFileSystem;
-        private Helper _helper;
+        private Mock<IFileSystem> _mockFileSystem = new();
+        private readonly Helper _helper;
 
-        [TestInitialize]
-        public void Setup()
+        public HelperTests()
         {
-            _mockFileSystem = new Mock<IFileSystem>();
             _helper = new Helper(_mockFileSystem.Object);
         }
 

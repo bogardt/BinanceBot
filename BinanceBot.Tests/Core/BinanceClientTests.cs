@@ -11,16 +11,13 @@ namespace BinanceBot.Tests.Core
     [TestClass]
     public class BinanceClientTests
     {
-        private readonly Mock<ILogger> _mockLogger;
-        private readonly Mock<IHttpClientWrapper> _mockHttpClientWrapper;
-        private readonly Mock<IConfiguration> _mockConfig;
+        private readonly Mock<ILogger> _mockLogger = new();
+        private readonly Mock<IHttpClientWrapper> _mockHttpClientWrapper = new();
+        private readonly Mock<IConfiguration> _mockConfig = new();
         private readonly BinanceClient _binanceClient;
 
         public BinanceClientTests()
         {
-            _mockConfig = new Mock<IConfiguration>();
-            _mockLogger = new Mock<ILogger>();
-            _mockHttpClientWrapper = new Mock<IHttpClientWrapper>();
             _binanceClient = new BinanceClient(_mockHttpClientWrapper.Object, _mockLogger.Object, _mockConfig.Object);
         }
 

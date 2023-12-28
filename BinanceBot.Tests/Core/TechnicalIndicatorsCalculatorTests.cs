@@ -7,12 +7,18 @@ namespace BinanceBot.Tests.Core
     [TestClass]
     public class TechnicalIndicatorsCalculatorTests
     {
+        private readonly Mock<IBinanceClient> _mockBinanceClient = new();
+        private readonly TechnicalIndicatorsCalculator _technicalIndicatorsCalculator;
+
+        public TechnicalIndicatorsCalculatorTests()
+        {
+            _technicalIndicatorsCalculator = new TechnicalIndicatorsCalculator(_mockBinanceClient.Object);
+            
+        }
         [TestMethod]
         public void CalculateMovingAverage_ValidKlines_CalculatesAverage()
         {
             // Arrange
-            var binanceClientMock = new Mock<IBinanceClient>();
-            var calculator = new TechnicalIndicatorsCalculator(binanceClientMock.Object);
             var klines = new List<List<object>>
             {
                 new List<object> { "100.5", "100.5", "100.5", "100.5", "100", "100.5" },
@@ -21,7 +27,7 @@ namespace BinanceBot.Tests.Core
             int period = 2;
 
             // Act
-            var result = calculator.CalculateMovingAverage(klines, period);
+            var result = _technicalIndicatorsCalculator.CalculateMovingAverage(klines, period);
 
             // Assert
             Assert.AreEqual(150m, result);
@@ -31,8 +37,6 @@ namespace BinanceBot.Tests.Core
         public void CalculateMovingAverage_InvalidKlines_ThrowsException()
         {
             // Arrange
-            var binanceClientMock = new Mock<IBinanceClient>();
-            var calculator = new TechnicalIndicatorsCalculator(binanceClientMock.Object);
             var klines = new List<List<object>>
             {
                 new List<object> { "100.5", "100.5", "100.5", "100.5", "invalid_data", "100.5" },
@@ -40,15 +44,13 @@ namespace BinanceBot.Tests.Core
             int period = 2;
 
             // Act & Assert
-            Assert.ThrowsException<InvalidCastException>(() => calculator.CalculateMovingAverage(klines, period));
+            Assert.ThrowsException<InvalidCastException>(() => _technicalIndicatorsCalculator.CalculateMovingAverage(klines, period));
         }
 
         [TestMethod]
         public void CalculateRSI_ValidKlines_CalculatesRSI()
         {
             // Arrange
-            var binanceClientMock = new Mock<IBinanceClient>();
-            var calculator = new TechnicalIndicatorsCalculator(binanceClientMock.Object);
             var symbol = "BTCUSDT";
             var interval = "1m";
             int period = 60;
@@ -69,11 +71,11 @@ namespace BinanceBot.Tests.Core
                 }
             }
 
-            binanceClientMock.Setup(c => c.GetKLinesBySymbolAsync(symbol, interval, (period + 1).ToString()))
+            _mockBinanceClient.Setup(c => c.GetKLinesBySymbolAsync(symbol, interval, period.ToString()))
                              .ReturnsAsync(klines);
 
             // Act
-            var result = calculator.CalculateRSI(klines, period);
+            var result = _technicalIndicatorsCalculator.CalculateRSI(klines, period);
 
             // Assert
             Assert.IsTrue(result < 50);
@@ -84,8 +86,6 @@ namespace BinanceBot.Tests.Core
         public void CalculateRSI_ApiThrowsException_ThrowsException()
         {
             // Arrange
-            var binanceClientMock = new Mock<IBinanceClient>();
-            var calculator = new TechnicalIndicatorsCalculator(binanceClientMock.Object);
             var symbol = "BTCUSDT";
             var interval = "1d";
             int period = 14;
@@ -94,19 +94,17 @@ namespace BinanceBot.Tests.Core
                 new List<object> { "100.5", "100.5", "100.5", "100.5", "invalid_data", "100.5" },
             };
 
-            binanceClientMock.Setup(c => c.GetKLinesBySymbolAsync(symbol, interval, (period + 1).ToString()))
+            _mockBinanceClient.Setup(c => c.GetKLinesBySymbolAsync(symbol, interval, period.ToString()))
                              .ThrowsAsync(new Exception("API Error"));
 
             // Act & Assert
-            Assert.ThrowsException<InvalidCastException>(() => calculator.CalculateRSI(klines, period));
+            Assert.ThrowsException<InvalidCastException>(() => _technicalIndicatorsCalculator.CalculateRSI(klines, period));
         }
 
         [TestMethod]
         public void CalculateRSI_InvalidKlinesData_ThrowsException()
         {
             // Arrange
-            var binanceClientMock = new Mock<IBinanceClient>();
-            var calculator = new TechnicalIndicatorsCalculator(binanceClientMock.Object);
             var symbol = "BTCUSDT";
             var interval = "1d";
             int period = 14;
@@ -116,11 +114,11 @@ namespace BinanceBot.Tests.Core
                 new List<object> { "100.5", "100.5", "100.5", "100.5", "invalid_data", "100.5" },
             };
 
-            binanceClientMock.Setup(c => c.GetKLinesBySymbolAsync(symbol, interval, (period + 1).ToString()))
+            _mockBinanceClient.Setup(c => c.GetKLinesBySymbolAsync(symbol, interval, period.ToString()))
                              .ReturnsAsync(klines);
 
             // Act & Assert
-            Assert.ThrowsException<InvalidCastException>(() => calculator.CalculateRSI(klines, period));
+            Assert.ThrowsException<InvalidCastException>(() => _technicalIndicatorsCalculator.CalculateRSI(klines, period));
         }
     }
 }

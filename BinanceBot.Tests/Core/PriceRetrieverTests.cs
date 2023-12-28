@@ -7,11 +7,17 @@ namespace BinanceBot.Tests.Core
     [TestClass]
     public class PriceRetrieverTests
     {
+        private readonly PriceRetriever _priceRetriever;
+
+        public PriceRetrieverTests()
+        {
+            _priceRetriever = new PriceRetriever();
+        }
+
         [TestMethod]
         public void GetRecentPrices_ValidKlines_ReturnsClosingPrices()
         {
             // Arrange
-            var priceRetriever = new PriceRetriever();
             var klines = new List<List<object>>
             {
                 new List<object> { "100.5", "100.5", "100.5", "100.5", "100.6", "100.5" },
@@ -19,7 +25,7 @@ namespace BinanceBot.Tests.Core
             };
 
             // Act
-            var result = priceRetriever.GetRecentPrices(klines);
+            var result = _priceRetriever.GetRecentPrices(klines);
 
             // Assert
             Assert.AreEqual(2, result.Count);
@@ -31,25 +37,23 @@ namespace BinanceBot.Tests.Core
         public void GetRecentPrices_InvalidKlines_ThrowsException()
         {
             // Arrange
-            var priceRetriever = new PriceRetriever();
             var klines = new List<List<object>>
             {
                 new List<object> { "100.5", "100.5", "100.5", "100.5", "not a number", "100.5" },
             };
 
             // Act & Assert
-            Assert.ThrowsException<InvalidCastException>(() => priceRetriever.GetRecentPrices(klines));
+            Assert.ThrowsException<InvalidCastException>(() => _priceRetriever.GetRecentPrices(klines));
         }
 
         [TestMethod]
         public void GetRecentPrices_HttpRequestException_ReturnsEmptyList()
         {
             // Arrange
-            var priceRetriever = new PriceRetriever();
             var klines = new List<List<object>>();
 
             // Act
-            var result = priceRetriever.GetRecentPrices(klines);
+            var result = _priceRetriever.GetRecentPrices(klines);
 
             // Assert
             Assert.AreEqual(0, result.Count);
