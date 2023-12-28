@@ -39,6 +39,7 @@ jobs:
         add: 'docs/*'
         default_author: github_actions
         branch: 'gh-pages'
+        token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Upload coverage to GitHub Artifacts
       uses: actions/upload-artifact@v2
