@@ -42,4 +42,4 @@
 
 ## Code Coverage Report
 
-Check out our [code coverage report](https://bogardt.github.io/BinanceBot/docs/) for more details.
+Check out our [code coverage report](https://bogardt.github.io/BinanceBot/docs/index.html) for more details.
