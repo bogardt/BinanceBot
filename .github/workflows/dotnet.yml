@@ -28,7 +28,13 @@ jobs:
       run: dotnet tool install -g dotnet-reportgenerator-globaltool
 
     - name: Generate coverage report
-      run: reportgenerator -reports:**/TestResults/**/*.cobertura.xml -targetdir:docs -reporttypes:Html
+      run: reportgenerator -reports:**/TestResults/**/*.cobertura.xml -targetdir:coverage -reporttypes:Cobertura
+
+    - name: Upload coverage report to Codecov
+      uses: codecov/codecov-action@v2
+      with:
+        files: coverage/**/*.xml
+        fail_ci_if_error: true
 
     - name: Commit and push coverage report to GitHub Pages
       uses: EndBug/add-and-commit@v7
@@ -36,7 +42,7 @@ jobs:
         author_name: github-actions
         author_email: actions@github.com
         message: 'Deploy Coverage Report to GitHub Pages'
-        add: 'docs/*'
+        add: 'coverage/*'
         branch: 'gh-pages'
         github_token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -44,4 +50,4 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: coverage-report
-        path: docs/
+        path: coverage/
