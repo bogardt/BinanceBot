@@ -26,6 +26,7 @@ jobs:
         git fetch origin coverage-report
         git checkout coverage-report
         git pull origin coverage-report
+        git checkout main
       shell: powershell
 
     - name: Run tests with coverage
