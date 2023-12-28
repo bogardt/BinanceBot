@@ -29,8 +29,8 @@ namespace BinanceBot.Core
         {
             var klinesEndpoint = $"{_baseEndpoint}/api/v3/klines?symbol={symbol}&interval={interval}&limit={limit}";
             var klinesResponse = await _httpClientWrapper.GetStringAsync(klinesEndpoint);
-            var klines = JsonConvert.DeserializeObject<List<List<object>>>(klinesResponse);
 
+            var klines = JsonConvert.DeserializeObject<List<List<object>>>(klinesResponse) ?? throw new JsonReaderException($"Unable to get klines for {symbol}");
             return klines;
         }
 
@@ -38,8 +38,8 @@ namespace BinanceBot.Core
         {
             var priceEndpoint = $"{_baseEndpoint}/api/v3/ticker/price?symbol={symbol}";
             var priceResponse = await _httpClientWrapper.GetStringAsync(priceEndpoint);
-            var currency = JsonConvert.DeserializeObject<Currency>(priceResponse);
 
+            var currency = JsonConvert.DeserializeObject<Currency>(priceResponse) ?? throw new JsonReaderException($"Unable to get price for {symbol}");
             return currency;
         }
 
@@ -54,9 +54,9 @@ namespace BinanceBot.Core
             using var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
             var response = await _httpClientWrapper.SendAsync(request);
             //response.EnsureSuccessStatusCode();
-            string responseContent = await response.Content.ReadAsStringAsync();
-            var orders = JsonConvert.DeserializeObject<List<Order>>(responseContent);
+            var responseContent = await response.Content.ReadAsStringAsync();
 
+            var orders = JsonConvert.DeserializeObject<List<Order>>(responseContent) ?? throw new JsonReaderException($"Unable to get orders for {symbol}");
             return orders;
         }
 

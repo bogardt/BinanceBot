@@ -44,7 +44,7 @@ namespace BinanceBot.Tests.Core
         }
 
         [TestMethod]
-        public async Task CalculateRSI_ValidKlines_CalculatesRSI()
+        public void CalculateRSI_ValidKlines_CalculatesRSI()
         {
             // Arrange
             var binanceClientMock = new Mock<IBinanceClient>();
@@ -81,7 +81,7 @@ namespace BinanceBot.Tests.Core
         }
 
         [TestMethod]
-        public async Task CalculateRSI_ApiThrowsException_ThrowsException()
+        public void CalculateRSI_ApiThrowsException_ThrowsException()
         {
             // Arrange
             var binanceClientMock = new Mock<IBinanceClient>();
@@ -102,7 +102,7 @@ namespace BinanceBot.Tests.Core
         }
 
         [TestMethod]
-        public async Task CalculateRSI_InvalidKlinesData_ThrowsException()
+        public void CalculateRSI_InvalidKlinesData_ThrowsException()
         {
             // Arrange
             var binanceClientMock = new Mock<IBinanceClient>();

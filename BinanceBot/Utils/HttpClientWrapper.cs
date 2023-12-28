@@ -17,6 +17,7 @@ namespace BinanceBot.Utils
             _httpClient = client;
             _httpClient.DefaultRequestHeaders.Add("X-MBX-APIKEY", config["AppSettings:Binance:ApiKey"]);
         }
+
         public void Dispose()
         {
             _httpClient.Dispose();

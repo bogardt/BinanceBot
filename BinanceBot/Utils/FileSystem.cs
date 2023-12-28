@@ -4,25 +4,13 @@ namespace BinanceBot.Utils
 {
     public class FileSystem : IFileSystem
     {
-        public string GetCurrentDirectory()
-        {
-            return Directory.GetCurrentDirectory();
-        }
+        public string GetCurrentDirectory() => Directory.GetCurrentDirectory();
 
-        public string GetDirectoryName(string path)
-        {
-            return Path.GetDirectoryName(path);
-        }
+        public string GetDirectoryName(string path) => Path.GetDirectoryName(path) ?? throw new DirectoryNotFoundException();
 
-        public bool DirectoryExists(string path)
-        {
-            return Directory.Exists(path);
-        }
+        public bool DirectoryExists(string path) => Directory.Exists(path);
 
-        public DirectoryInfo CreateDirectory(string path)
-        {
-            return Directory.CreateDirectory(path);
-        }
+        public DirectoryInfo CreateDirectory(string path) => Directory.CreateDirectory(path);
 
         public FileInfo[] GetFiles(string path, string searchPattern)
         {
