@@ -33,9 +33,10 @@ internal class Program
             .ConfigureServices((context, services) =>
             {
                 // todo : change testApi to false if you want to trade with real money
-                services.AddSingleton<IBinanceClient, BinanceClient>((s) => new BinanceClient(config, testApi: true));
+                services.AddSingleton<IBinanceClient, BinanceClient>();
                 services.AddSingleton<IMarketTradeHandler, MarketTradeHandler>();
                 services.AddSingleton<ILogger, Logger>();
+                services.AddSingleton<IHttpClientWrapper, HttpClientWrapper>();
                 services.AddSingleton<IConfiguration>(config);
             });
 
