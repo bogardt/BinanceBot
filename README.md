@@ -1,12 +1,19 @@
 # Bot Crypto Binance
+---
+[![.NET Coverage and GitHub Pages](https://github.com/bogardt/BinanceBot/actions/workflows/dotnet.yml/badge.svg?branch=main)](https://github.com/bogardt/BinanceBot/actions/workflows/dotnet.yml)
 [![codecov](https://codecov.io/github/bogardt/BinanceBot/graph/badge.svg?token=V2F65ESN7M)](https://codecov.io/github/bogardt/BinanceBot)
-## Getting Started
 
+### Code Coverage Report
+Check out our [code coverage report](https://bogardt.github.io/BinanceBot/index.html) for more details.
+![Code Coverage Graph](https://codecov.io/github/bogardt/BinanceBot/graphs/sunburst.svg?token=V2F65ESN7M)
+
+## Getting Started
+---
 ### Prerequisites
 * Visual Studio 2022
 * .Net Core 3.1
 
-### Installing
+### Start the bot
 * Clone the project
 * Open the solution with Visual Studio
 * Build the solution
@@ -39,8 +46,3 @@
   }
 }
 ```
-
-### Code Coverage Report
-
-Check out our [code coverage report](https://bogardt.github.io/BinanceBot/index.html) for more details.
-![Code Coverage Graph](https://codecov.io/github/bogardt/BinanceBot/graphs/sunburst.svg?token=V2F65ESN7M)
