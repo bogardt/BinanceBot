@@ -21,7 +21,7 @@ namespace BinanceBot.Tests
         {
             _mockBinanceClient = new Mock<IBinanceClient>();
             _mockLogger = new Mock<ILogger>();
-            _handler = new MarketTradeHandler(_mockBinanceClient.Object, _mockLogger.Object, new TradingConfig(_dict, _symbol) { LimitBenefit = 1000 }, _symbol);
+            _handler = new MarketTradeHandler(_mockBinanceClient.Object, _mockLogger.Object, new TradingConfig(_dict, _symbol) { LimitBenefit = 1000 });
         }
 
         [TestMethod]
