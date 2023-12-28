@@ -50,13 +50,13 @@ jobs:
         fail_ci_if_error: true
 
     - name: Commit and push coverage report to GitHub Pages
-      uses: EndBug/add-and-commit@v7
+      uses: EndBug/add-and-commit@v9
       with:
         author_name: github-actions
         author_email: actions@github.com
         message: 'Deploy Coverage Report to GitHub Pages'
         add: 'coverage/*'
-        branch: 'gh-pages'
+        new_branch: 'gh-pages'
         github_token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Upload coverage to GitHub Artifacts
