@@ -4,7 +4,7 @@ namespace BinanceBot.Utils
 {
     public class Logger : ILogger
     {
-        private static readonly string _logFilePath = "./logfile.log";
+        private static readonly string _logFilePath = $"./logfile-bot-{DateTime.Now.ToString("yyyy-MM-dd-hh-mm-ss")}.log";
         private readonly IFileSystem _fileSystem;
 
         public Logger(IFileSystem fileSystem)

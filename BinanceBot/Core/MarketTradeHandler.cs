@@ -74,10 +74,10 @@ namespace BinanceBot.Core
                     _logger.WriteLog((string.IsNullOrEmpty(output) ? "" : $"{output} | ") +
                         $"{_tradingConfig.Symbol}: {currentCurrencyPrice:F2} | " +
                         //$"targetPriceFeesIncluded: {targetPriceFeesIncluded:F2} | " +
-                        $"mobileAverage: {mobileAverage:F2} | rsi : {rsi:F2} | " +
+                        $"mobileAverage: {mobileAverage:F2} | " +
                         $"rsi: {rsi:F2} | " +
                         $"totalBenefit: {_tradingConfig.TotalBenefit:F2} | " +
-                        $"quantity:  {_tradingConfig.Quantity} | " +
+                        $"quantity: {_tradingConfig.Quantity} | " +
                         $"volatility: {volatility:F2}");
 
                 }

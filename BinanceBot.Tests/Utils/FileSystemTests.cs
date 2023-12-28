@@ -62,6 +62,18 @@ namespace BinanceBot.Tests.Utils
         }
 
         [TestMethod]
+        public void GetDirectoryName_InvalidPath_ThrowsException()
+        {
+            // Arrange
+            var invalidPath = "Z:\\";
+
+            // Act & Assert
+            Assert.ThrowsException<DirectoryNotFoundException>(
+                () => _fileSystem.GetDirectoryName(invalidPath)
+            );
+        }
+
+        [TestMethod]
         public void DirectoryExists_ExistingDirectory_ReturnsTrue()
         {
             var path = Directory.GetCurrentDirectory();

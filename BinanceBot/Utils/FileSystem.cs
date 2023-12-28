@@ -6,7 +6,15 @@ namespace BinanceBot.Utils
     {
         public string GetCurrentDirectory() => Directory.GetCurrentDirectory();
 
-        public string GetDirectoryName(string path) => Path.GetDirectoryName(path) ?? throw new DirectoryNotFoundException();
+        public string GetDirectoryName(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+                throw new ArgumentNullException(nameof(path));
+            var dir = Path.GetDirectoryName(path);
+            if (string.IsNullOrEmpty(dir))
+                throw new DirectoryNotFoundException();
+            return dir;
+        }
 
         public bool DirectoryExists(string path) => Directory.Exists(path);
 

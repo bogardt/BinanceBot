@@ -4,7 +4,7 @@
 [![codecov](https://codecov.io/github/bogardt/BinanceBot/graph/badge.svg?token=V2F65ESN7M)](https://codecov.io/github/bogardt/BinanceBot)
 
 ### Code Coverage Report
-Check out our [code coverage report](https://bogardt.github.io/BinanceBot/index.html) for more details.
+Check out our [code coverage report](https://codecov.io/github/bogardt/BinanceBot) for more details.
 ![Code Coverage Graph](https://codecov.io/github/bogardt/BinanceBot/graphs/sunburst.svg?token=V2F65ESN7M)
 
 ## Getting Started
