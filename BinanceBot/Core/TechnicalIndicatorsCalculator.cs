@@ -33,7 +33,6 @@ namespace BinanceBot.Core
         {
             try
             {
-                //var klines = await _binanceClient.GetKLinesBySymbolAsync(symbol, interval, (periode + 1).ToString());
                 decimal gainMoyen = 0, perteMoyenne = 0;
 
                 var prixHistoriques = klines.Select((it) =>

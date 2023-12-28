@@ -8,12 +8,6 @@ namespace BinanceBot.Tests.Core
     [TestClass]
     public class VolatilityStrategyTests
     {
-        private static readonly Dictionary<string, StrategyCurrencyConfiguration> _dict = new()
-        {
-            { "SOLUSDT", new StrategyCurrencyConfiguration { TargetProfit = 10m, Quantity = 200m, Interval = "1m", Period = 60 } },
-        };
-        private static readonly string _symbol = "SOLUSDT";
-
         [TestMethod]
         public void CalculateVolatility_ValidKlines_CalculatesVolatility()
         {
@@ -43,7 +37,7 @@ namespace BinanceBot.Tests.Core
             var priceRetrieverMock = new Mock<IPriceRetriever>();
             var volatilityStrategy = new VolatilityStrategy(priceRetrieverMock.Object);
             decimal volatility = 0.05m;
-            var tradingConfig = new TradingConfig(_dict, _symbol)
+            var tradingConfig = new TradingConfig(TradeSetup.Dict, TradeSetup.Symbol)
             {
                 CryptoPurchasePrice = 100m,
                 FloorStopLossPercentage = 0.02m,

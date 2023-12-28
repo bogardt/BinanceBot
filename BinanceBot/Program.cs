@@ -32,6 +32,7 @@ internal class Program
         var builder = Host.CreateDefaultBuilder(args)
             .ConfigureServices((context, services) =>
             {
+                services.AddSingleton<IMarketTradeHandler, MarketTradeHandler>();
                 services.AddSingleton<IBinanceClient, BinanceClient>();
                 services.AddSingleton<ITradeAction, TradeAction>();
                 services.AddSingleton<IFileSystem, FileSystem>();

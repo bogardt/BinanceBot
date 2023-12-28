@@ -1,4 +1,4 @@
-﻿using BinanceBot.Model;
+﻿using BinanceBot.Core;
 
 namespace BinanceBot.Abstraction
 {
