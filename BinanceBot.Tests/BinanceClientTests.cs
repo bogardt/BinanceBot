@@ -3,7 +3,6 @@ using BinanceBot.Core;
 using BinanceBot.Model;
 using Microsoft.Extensions.Configuration;
 using Moq;
-using Moq.Protected;
 using Newtonsoft.Json;
 using System.Net;
 
@@ -13,22 +12,23 @@ namespace BinanceBot.Tests
     public class BinanceClientTests
     {
         private readonly Mock<IBinanceClient> _mockClient;
-        private static IConfiguration config = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string>
-            {
-                { "Binance:ApiKey", "" },
-                { "Binance:ApiSecret", "" }
-            })
-            .Build();
         private readonly Mock<IHttpClientWrapper> _mockHttpClientWrapper;
-
         private readonly BinanceClient _binanceClient;
+        private readonly IConfiguration _config;
 
         public BinanceClientTests()
         {
+            var appSettings = new List<KeyValuePair<string, string?>>
+            {
+                new KeyValuePair<string, string?>("AppSettings:Binance:ApiKey", "***"),
+                new KeyValuePair<string, string?>("AppSettings:Binance:ApiSecret", "***")
+            };
+            _config = new ConfigurationBuilder()
+                .AddInMemoryCollection(appSettings)
+                .Build();
             _mockClient = new Mock<IBinanceClient>();
             _mockHttpClientWrapper = new Mock<IHttpClientWrapper>();
-            _binanceClient = new BinanceClient(_mockHttpClientWrapper.Object, config);
+            _binanceClient = new BinanceClient(_mockHttpClientWrapper.Object, _config);
         }
 
         [TestMethod]

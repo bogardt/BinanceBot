@@ -11,19 +11,26 @@ namespace BinanceBot.Utils
         {
             _httpClient.DefaultRequestHeaders.Add("X-MBX-APIKEY", config["AppSettings:Binance:ApiKey"]);
         }
+
+        public HttpClientWrapper(IConfiguration config, HttpClient client)
+        {
+            _httpClient = client;
+            _httpClient.DefaultRequestHeaders.Add("X-MBX-APIKEY", config["AppSettings:Binance:ApiKey"]);
+        }
+
         ~HttpClientWrapper()
         {
             _httpClient.Dispose();
         }
 
-        public Task<string> GetStringAsync(string uri)
+        public async Task<string> GetStringAsync(string uri)
         {
-            return _httpClient.GetStringAsync(uri);
+            return await _httpClient.GetStringAsync(uri);
         }
 
-        public Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken = default)
+        public async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken = default)
         {
-            return _httpClient.SendAsync(request, cancellationToken);
+            return await _httpClient.SendAsync(request, cancellationToken);
         }
     }
 }

@@ -2,6 +2,7 @@ using BinanceBot.Abstraction;
 using BinanceBot.Core;
 using BinanceBot.Model;
 using Moq;
+using Moq.Protected;
 
 namespace BinanceBot.Tests
 {
@@ -21,6 +22,9 @@ namespace BinanceBot.Tests
         {
             _mockBinanceClient = new Mock<IBinanceClient>();
             _mockLogger = new Mock<ILogger>();
+            //_mockBinanceClient.Protected()
+            //                  .SetupSet<IHttpClientWrapper>("_httpClientWrapper", new Mock<IHttpClientWrapper>())
+            //                  .Verifiable();
             _handler = new MarketTradeHandler(_mockBinanceClient.Object, _mockLogger.Object, new TradingConfig(_dict, _symbol) { LimitBenefit = 1000 });
         }
 

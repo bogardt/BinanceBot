@@ -1,9 +1,6 @@
 using BinanceBot.Abstraction;
 using BinanceBot.Utils;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using System.IO;
-using System.Linq;
 
 namespace BinanceBot.Tests
 {

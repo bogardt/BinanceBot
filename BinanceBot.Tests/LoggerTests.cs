@@ -1,6 +1,4 @@
-using BinanceBot.Abstraction;
 using BinanceBot.Utils;
-using Moq;
 
 namespace BinanceBot.Tests
 {
