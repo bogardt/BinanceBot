@@ -18,19 +18,6 @@ jobs:
       with:
         dotnet-version: '7.0.x'
 
-    - name: Check if gh-pages branch exists
-      run: |
-        if git ls-remote --heads origin gh-pages | grep gh-pages; then
-          echo "Branch gh-pages already exists"
-        else
-          git checkout --orphan gh-pages
-          git rm -rf .
-          git commit --allow-empty -m "Initial gh-pages commit"
-          git push origin gh-pages
-          git checkout main
-        fi
-      shell: bash
-
     - name: Restore dependencies
       run: dotnet restore
 
