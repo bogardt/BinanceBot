@@ -9,7 +9,7 @@ internal class Program
 {
     private static async Task Main(string[] args)
     {
-        static async Task ExemplifyDisposableScoping(IServiceProvider services, string scope)
+        static async Task RunBot(IServiceProvider services, string scope)
         {
             Console.WriteLine($"{scope}...");
 
@@ -33,6 +33,8 @@ internal class Program
             .ConfigureServices((context, services) =>
             {
                 services.AddSingleton<IBinanceClient, BinanceClient>();
+                services.AddSingleton<ITradeAction, TradeAction>();
+                services.AddSingleton<IFileSystem, FileSystem>();
                 services.AddSingleton<IVolatilityStrategy, VolatilityStrategy>();
                 services.AddSingleton<ITechnicalIndicatorsCalculator, TechnicalIndicatorsCalculator>();
                 services.AddSingleton<IPriceRetriever, PriceRetriever>();
@@ -44,7 +46,7 @@ internal class Program
 
         using IHost host = builder.Build();
 
-        await ExemplifyDisposableScoping(host.Services, "My singleton for BinanceBot is running...");
+        await RunBot(host.Services, "My singleton for BinanceBot is running...");
 
         Console.WriteLine();
 

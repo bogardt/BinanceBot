@@ -8,13 +8,14 @@ namespace BinanceBot.Core
         private readonly IBinanceClient _binanceClient;
         private readonly IVolatilityStrategy _volatilityStrategy;
         private readonly ITechnicalIndicatorsCalculator _technicalIndicatorsCalculator;
+        private readonly ITradeAction _tradeAction;
         private readonly ILogger _logger;
 
         private static readonly string _symbol = "SOLUSDT";
 
         private static readonly Dictionary<string, StrategyCurrencyConfiguration> _dict = new()
         {
-            { "SOLUSDT", new StrategyCurrencyConfiguration { TargetProfit = 20m, Quantity = 100m, Interval = "1m", Period = 60 } },
+            { "SOLUSDT", new StrategyCurrencyConfiguration { TargetProfit = 20m, Quantity = 10000m, Interval = "1s", Period = 10 } },
             { "ETHUSDT", new StrategyCurrencyConfiguration { TargetProfit = 50m, Quantity = 15m, Interval = "1s", Period = 300 } },
             { "ADAUSDT", new StrategyCurrencyConfiguration { TargetProfit = 1m, Quantity = 2000m, Interval = "1s", Period = 60 } }
         };
@@ -24,12 +25,14 @@ namespace BinanceBot.Core
         public MarketTradeHandler(IBinanceClient binanceClient,
             IVolatilityStrategy volatilityStrategy,
             ITechnicalIndicatorsCalculator technicalIndicatorsCalculator,
+            ITradeAction tradeAction,
             ILogger logger,
             TradingConfig? tradingConfig = null)
         {
             _binanceClient = binanceClient;
             _volatilityStrategy = volatilityStrategy;
             _technicalIndicatorsCalculator = technicalIndicatorsCalculator;
+            _tradeAction = tradeAction;
             _logger = logger;
             if (tradingConfig != null)
                 _tradingConfig = tradingConfig;
@@ -64,12 +67,12 @@ namespace BinanceBot.Core
 
                     if (!_tradingConfig.OpenPosition && rsi <= _tradingConfig.MaxRSI && currentCurrencyPrice < mobileAverage)
                     {
-                        await Buy(currentCurrencyPrice, volatility);
+                        await _tradeAction.Buy(_tradingConfig, currentCurrencyPrice, volatility, _symbol);
                     }
 
                     if (_tradingConfig.OpenPosition)
                     {
-                        var (targetPrice, endProgram) = await Sell(currentCurrencyPrice, volatility);
+                        var (targetPrice, endProgram) = await _tradeAction.Sell(_tradingConfig, currentCurrencyPrice, volatility, _symbol);
                         if (endProgram)
                             break;
 
@@ -104,107 +107,6 @@ namespace BinanceBot.Core
             {
                 Console.WriteLine($"Erreur: {ex.Message}", ex);
                 throw;
-            }
-        }
-
-        private async Task Buy(decimal currentCurrencyPrice, decimal volatility)
-        {
-            _tradingConfig.CryptoPurchasePrice = currentCurrencyPrice;
-            _tradingConfig.TotalPurchaseCost = _tradingConfig.Quantity * _tradingConfig.CryptoPurchasePrice;
-
-            decimal feesAmount = _tradingConfig.TotalPurchaseCost * _tradingConfig.FeePercentage;
-            _tradingConfig.TotalPurchaseCost *= (1 + _tradingConfig.FeePercentage);
-
-            _logger.WriteLog($"===> [ACHAT] {_tradingConfig.Quantity} | " +
-                $"feesAmount: {feesAmount} | " +
-                $"cryptoPurchasePrice: {_tradingConfig.CryptoPurchasePrice:F2} | " +
-                $"totalPurchaseCost: {_tradingConfig.TotalPurchaseCost:F2}");
-
-            string responseAchat = await _binanceClient.PlaceOrderAsync(_symbol, _tradingConfig.Quantity, currentCurrencyPrice, "BUY");
-            _logger.WriteLog($"{responseAchat}");
-
-            await WaitBuyAsync();
-
-            _tradingConfig.OpenPosition = true;
-        }
-
-        private async Task<(decimal, bool)> Sell(decimal currentCurrencyPrice, decimal volatility)
-        {
-            decimal prixVenteCible = (_tradingConfig.TotalPurchaseCost + _tradingConfig.TargetProfit) / _tradingConfig.Quantity / (1 - _tradingConfig.FeePercentage);
-
-            decimal montantVenteBrut = currentCurrencyPrice * _tradingConfig.Quantity;
-            decimal fraisVente = montantVenteBrut * _tradingConfig.FeePercentage;
-            decimal montantVenteNet = (currentCurrencyPrice * _tradingConfig.Quantity) * (1 - _tradingConfig.FeePercentage);
-
-            decimal beneficeBrut = montantVenteBrut - _tradingConfig.TotalPurchaseCost;
-            decimal beneficeNet = montantVenteNet - _tradingConfig.TotalPurchaseCost;
-
-            decimal stopLossPrice = _volatilityStrategy.DetermineLossStrategy(volatility, _tradingConfig);
-
-            if (currentCurrencyPrice >= prixVenteCible)
-            {
-                if (currentCurrencyPrice <= stopLossPrice)
-                {
-                    _logger.WriteLog("STOPP LOSS");
-                }
-
-                _tradingConfig.TotalBenefit += beneficeNet;
-                _logger.WriteLog($"===> [VENTE] {_tradingConfig.Quantity:F2} | " +
-                    $"currentCurrencyPrice: {currentCurrencyPrice:F2} | " +
-                    $"totalBenefit: {_tradingConfig.TotalBenefit:F2}");
-
-                string responseVente = await _binanceClient.PlaceOrderAsync(_symbol, _tradingConfig.Quantity, currentCurrencyPrice, "SELL");
-                _logger.WriteLog($"{responseVente}");
-
-                await WaitSellAsync();
-
-                if (_tradingConfig.TotalBenefit >= _tradingConfig.LimitBenefit)
-                {
-                    _logger.WriteLog("BENEFICE LIMITE ->> exit program");
-                    return (prixVenteCible, true);
-                }
-                _tradingConfig.OpenPosition = false;
-            }
-            return (prixVenteCible, false);
-        }
-
-        public async Task WaitBuyAsync()
-        {
-            var orders = await _binanceClient.GetOpenOrdersAsync(_symbol);
-
-            while (true)
-            {
-                if (orders.Any((it) => it.Symbol == _symbol && it.Side == "BUY"))
-                {
-                    Console.WriteLine("En attente de la fin de l'achat");
-                    orders = await _binanceClient.GetOpenOrdersAsync(_symbol);
-                }
-                else
-                {
-                    Console.WriteLine("Achat terminé");
-                    break;
-                }
-                await Task.Delay(300);
-            }
-        }
-
-        public async Task WaitSellAsync()
-        {
-            var orders = await _binanceClient.GetOpenOrdersAsync(_symbol);
-
-            while (true)
-            {
-                if (orders.Any((it) => it.Symbol == _symbol && it.Side == "SELL"))
-                {
-                    Console.WriteLine("En attente de la fin de la vente");
-                    orders = await _binanceClient.GetOpenOrdersAsync(_symbol);
-                }
-                else
-                {
-                    Console.WriteLine("Vente terminé");
-                    break;
-                }
-                await Task.Delay(300);
             }
         }
     }

@@ -5,18 +5,23 @@ namespace BinanceBot.Utils
     public class Logger : ILogger
     {
         private static readonly string _logFilePath = "./logfile.log";
+        private readonly IFileSystem _fileSystem;
 
+        public Logger(IFileSystem fileSystem)
+        {
+            _fileSystem = fileSystem;
+        }
         public void WriteLog(string message)
         {
             try
             {
-                var logDirectory = Path.GetDirectoryName(_logFilePath);
-                if (!Directory.Exists(logDirectory))
+                var logDirectory = _fileSystem.GetDirectoryName(_logFilePath);
+                if (!_fileSystem.DirectoryExists(logDirectory))
                 {
-                    Directory.CreateDirectory(logDirectory);
+                    _fileSystem.CreateDirectory(logDirectory);
                 }
 
-                using StreamWriter writer = new StreamWriter(_logFilePath, true);
+                using StreamWriter writer = new(_logFilePath, true);
 
                 writer.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss} - {message}");
                 Console.WriteLine(message);

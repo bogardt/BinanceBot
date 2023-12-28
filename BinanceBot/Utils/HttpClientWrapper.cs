@@ -3,7 +3,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace BinanceBot.Utils
 {
-    public class HttpClientWrapper : IHttpClientWrapper
+    public class HttpClientWrapper : IHttpClientWrapper, IDisposable
     {
         private readonly HttpClient _httpClient = new();
 
@@ -17,8 +17,7 @@ namespace BinanceBot.Utils
             _httpClient = client;
             _httpClient.DefaultRequestHeaders.Add("X-MBX-APIKEY", config["AppSettings:Binance:ApiKey"]);
         }
-
-        ~HttpClientWrapper()
+        public void Dispose()
         {
             _httpClient.Dispose();
         }

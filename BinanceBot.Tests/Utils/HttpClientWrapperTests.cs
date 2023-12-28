@@ -78,5 +78,54 @@ namespace BinanceBot.Tests.Utils
             Assert.IsTrue(response.IsSuccessStatusCode);
             Assert.AreEqual("Success", await response.Content.ReadAsStringAsync());
         }
+
+        [TestMethod]
+        public void HttpClientWrapper_DisposeCalledExplicitly()
+        {
+            // Arrange
+            var configurationMock = new Mock<IConfiguration>();
+            configurationMock.Setup(c => c["AppSettings:Binance:ApiKey"]).Returns("test_key");
+
+            var wrapper = new HttpClientWrapper(configurationMock.Object);
+
+            // Act
+            wrapper.Dispose();
+
+            // Assert
+            Assert.ThrowsException<ObjectDisposedException>(() =>
+            {
+                var task = wrapper.GetStringAsync("http://test.com");
+                task.GetAwaiter().GetResult();
+            });
+        }
+
+        public class TestableHttpClientWrapper : HttpClientWrapper, IDisposable
+        {
+            public bool Disposed { get; private set; } = false;
+
+            public TestableHttpClientWrapper(IConfiguration config) : base(config)
+            {
+            }
+
+            public new void Dispose()
+            {
+                base.Dispose();
+                Disposed = true;
+            }
+        }
+
+        [TestMethod]
+        public void Dispose_ShouldBeCalled()
+        {
+            // Arrange
+            var configurationMock = new Mock<IConfiguration>();
+            var wrapper = new TestableHttpClientWrapper(configurationMock.Object);
+
+            // Act
+            wrapper.Dispose();
+
+            // Assert
+            Assert.IsTrue(wrapper.Disposed);
+        }
     }
 }

@@ -7,13 +7,11 @@ namespace BinanceBot.Tests.Core
     [TestClass]
     public class PriceRetrieverTests
     {
-        private readonly Mock<ILogger> _logger = new();
-
         [TestMethod]
         public void GetRecentPrices_ValidKlines_ReturnsClosingPrices()
         {
             // Arrange
-            var priceRetriever = new PriceRetriever(_logger.Object);
+            var priceRetriever = new PriceRetriever();
             var klines = new List<List<object>>
             {
                 new List<object> { "100.5", "100.5", "100.5", "100.5", "100.6", "100.5" },
@@ -33,7 +31,7 @@ namespace BinanceBot.Tests.Core
         public void GetRecentPrices_InvalidKlines_ThrowsException()
         {
             // Arrange
-            var priceRetriever = new PriceRetriever(_logger.Object);
+            var priceRetriever = new PriceRetriever();
             var klines = new List<List<object>>
             {
                 new List<object> { "100.5", "100.5", "100.5", "100.5", "not a number", "100.5" },
@@ -41,14 +39,13 @@ namespace BinanceBot.Tests.Core
 
             // Act & Assert
             Assert.ThrowsException<InvalidCastException>(() => priceRetriever.GetRecentPrices(klines));
-            _logger.Verify(log => log.WriteLog(It.IsAny<string>()), Times.Never);
         }
 
         [TestMethod]
         public void GetRecentPrices_HttpRequestException_ReturnsEmptyList()
         {
             // Arrange
-            var priceRetriever = new PriceRetriever(_logger.Object);
+            var priceRetriever = new PriceRetriever();
             var klines = new List<List<object>>();
 
             // Act
@@ -56,7 +53,6 @@ namespace BinanceBot.Tests.Core
 
             // Assert
             Assert.AreEqual(0, result.Count);
-            _logger.Verify(log => log.WriteLog(It.IsAny<string>()), Times.Never);
         }
     }
 }
