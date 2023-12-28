@@ -21,13 +21,18 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
   
-    - name: Create gh-pages branch if not exists
-      run: |
-          git checkout gh-pages
-          git pull origin gh-pages
-          git config --global user.email "actions@github.com"
-          git config --global user.name "github-actions"
-      shell: powershell
+    # - name: Create gh-pages branch if not exists
+    #   run: |
+    #     if (-not (git ls-remote --exit-code --heads origin gh-pages)) {
+    #       git checkout --orphan gh-pages
+    #       git rm -rf .
+    #       git config --global user.email "actions@github.com"
+    #       git config --global user.name "github-actions"
+    #       git commit --allow-empty -m "Initial gh-pages branch"
+    #       git push origin gh-pages
+    #       git checkout main
+    #     }
+    #   shell: powershell
 
     - name: Run tests with coverage
       run: dotnet test --collect:"XPlat Code Coverage"
@@ -51,7 +56,7 @@ jobs:
         author_email: actions@github.com
         message: 'Deploy Coverage Report to GitHub Pages'
         add: 'coverage/*'
-        new_branch: 'gh-pages'
+        new_branch: 'coverage-report'
         github_token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Upload coverage to GitHub Artifacts
