@@ -6,7 +6,7 @@ using Moq;
 using Newtonsoft.Json;
 using System.Net;
 
-namespace BinanceBot.Tests
+namespace BinanceBot.Tests.Core
 {
     [TestClass]
     public class BinanceClientTests
@@ -164,7 +164,7 @@ namespace BinanceBot.Tests
             var invalidSymbolResponse = "{\"code\":-1121,\"msg\":\"Invalid symbol.\"}";
             _mockHttpClientWrapper.Setup(client => client.GetStringAsync(It.IsAny<string>()))
                 .ReturnsAsync(invalidSymbolResponse);
-            
+
             // Act
             var result = await _binanceClient.GetPriceBySymbolAsync("BTCUSDT_FAKE_SYMBOL");
 

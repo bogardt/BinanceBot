@@ -4,7 +4,7 @@ using Moq;
 using System.Net;
 using Microsoft.Extensions.Configuration;
 
-namespace BinanceBot.Tests
+namespace BinanceBot.Tests.Utils
 {
     [TestClass]
     public class HttpClientWrapperTests

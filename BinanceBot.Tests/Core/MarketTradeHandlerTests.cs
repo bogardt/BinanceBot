@@ -2,30 +2,31 @@ using BinanceBot.Abstraction;
 using BinanceBot.Core;
 using BinanceBot.Model;
 using Moq;
-using Moq.Protected;
 
-namespace BinanceBot.Tests
+namespace BinanceBot.Tests.Core
 {
     [TestClass]
     public class MarketTradeHandlerTests
     {
         private readonly MarketTradeHandler _handler;
-        private readonly Mock<IBinanceClient> _mockBinanceClient;
-        private readonly Mock<ILogger> _mockLogger;
-        private static readonly string _symbol = "SOLUSDT";
+        private readonly Mock<IBinanceClient> _mockBinanceClient = new();
+        private readonly Mock<IPriceRetriever> _mockPricerRetriever = new();
+        private readonly Mock<ITechnicalIndicatorsCalculator> _mockTechnicalIndicatorsCalculator = new();
+        private readonly Mock<IVolatilityStrategy> _mockVolatilityStrategy = new();
+        private readonly Mock<ILogger> _mockLogger = new();
         private static readonly Dictionary<string, StrategyCurrencyConfiguration> _dict = new()
         {
             { "SOLUSDT", new StrategyCurrencyConfiguration { TargetProfit = 10m, Quantity = 200m, Interval = "1m", Period = 60 } },
         };
+        private static readonly string _symbol = "SOLUSDT";
 
         public MarketTradeHandlerTests()
         {
-            _mockBinanceClient = new Mock<IBinanceClient>();
-            _mockLogger = new Mock<ILogger>();
-            //_mockBinanceClient.Protected()
-            //                  .SetupSet<IHttpClientWrapper>("_httpClientWrapper", new Mock<IHttpClientWrapper>())
-            //                  .Verifiable();
-            _handler = new MarketTradeHandler(_mockBinanceClient.Object, _mockLogger.Object, new TradingConfig(_dict, _symbol) { LimitBenefit = 1000 });
+            _handler = new MarketTradeHandler(_mockBinanceClient.Object,
+                _mockVolatilityStrategy.Object,
+                _mockTechnicalIndicatorsCalculator.Object,
+                _mockLogger.Object,
+                new TradingConfig(_dict, _symbol) { LimitBenefit = 1000 });
         }
 
         [TestMethod]
@@ -37,10 +38,23 @@ namespace BinanceBot.Tests
             var kline = new List<object> { 100m, 100m, 100m, 100m, 100m, 100m, 100m, 100m, 100m, 100m, 100m, 100m };
             var klines = Enumerable.Repeat(kline, period).ToList();
 
+
             _mockBinanceClient.Setup(c => c.GetKLinesBySymbolAsync(_symbol, interval, period.ToString()))
                               .ReturnsAsync(klines);
             _mockBinanceClient.Setup(c => c.GetKLinesBySymbolAsync(_symbol, interval, (period + 1).ToString()))
                               .ReturnsAsync(klines);
+
+            _mockTechnicalIndicatorsCalculator.Setup(c => c.CalculateRSI(klines, period))
+                .Returns(30m);
+
+            _mockTechnicalIndicatorsCalculator.Setup(c => c.CalculateMovingAverage(klines, period))
+                .Returns(100m);
+
+            //_mockPricerRetriever.Setup(c => c.GetRecentPrices(It.IsAny<List<List<object>>>()))
+            //    .Returns(new List<decimal> { 100m, 105m, 110m });
+
+            _mockVolatilityStrategy.Setup(c => c.CalculateVolatility(It.IsAny<List<List<object>>>()))
+                .Returns(0.25m);
 
             var currencyForBuy = new Currency { Symbol = _symbol, Price = 90m };
             var currencyForSell = new Currency { Symbol = _symbol, Price = 100m };
@@ -59,6 +73,10 @@ namespace BinanceBot.Tests
             await _handler.TradeOnLimitAsync();
 
             // Assert
+            _mockTechnicalIndicatorsCalculator.Verify(c => c.CalculateRSI(klines, period), Times.Exactly(2));
+            //_mockPricerRetriever.Verify(c => c.GetRecentPrices(It.IsAny<List<List<object>>>()), Times.AtLeastOnce());
+            _mockVolatilityStrategy.Verify(c => c.CalculateVolatility(It.IsAny<List<List<object>>>()), Times.Exactly(2));
+            _mockBinanceClient.Verify(c => c.GetOpenOrdersAsync(_symbol), Times.Exactly(2));
             _mockBinanceClient.Verify(c => c.GetKLinesBySymbolAsync(_symbol, interval, period.ToString()), Times.Exactly(2));
             _mockBinanceClient.Verify(c => c.GetPriceBySymbolAsync(_symbol), Times.Exactly(2));
             _mockBinanceClient.Verify(c => c.PlaceOrderAsync(It.IsAny<string>(), It.IsAny<decimal>(), It.IsAny<decimal>(), It.IsAny<string>()), Times.Exactly(2));

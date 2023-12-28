@@ -2,7 +2,7 @@ using BinanceBot.Abstraction;
 using BinanceBot.Utils;
 using Moq;
 
-namespace BinanceBot.Tests
+namespace BinanceBot.Tests.Utils
 {
     [TestClass]
     public class HelperTests

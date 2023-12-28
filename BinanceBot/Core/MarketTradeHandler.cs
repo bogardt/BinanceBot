@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json;
-using System.Globalization;
-using BinanceBot.Model;
+﻿using BinanceBot.Model;
 using BinanceBot.Abstraction;
 
 namespace BinanceBot.Core
@@ -8,13 +6,15 @@ namespace BinanceBot.Core
     public class MarketTradeHandler : IMarketTradeHandler
     {
         private readonly IBinanceClient _binanceClient;
+        private readonly IVolatilityStrategy _volatilityStrategy;
+        private readonly ITechnicalIndicatorsCalculator _technicalIndicatorsCalculator;
         private readonly ILogger _logger;
 
         private static readonly string _symbol = "SOLUSDT";
 
         private static readonly Dictionary<string, StrategyCurrencyConfiguration> _dict = new()
         {
-            { "SOLUSDT", new StrategyCurrencyConfiguration { TargetProfit = 20m, Quantity = 100m, Interval = "1m", Period = 10 } },
+            { "SOLUSDT", new StrategyCurrencyConfiguration { TargetProfit = 20m, Quantity = 100m, Interval = "1m", Period = 60 } },
             { "ETHUSDT", new StrategyCurrencyConfiguration { TargetProfit = 50m, Quantity = 15m, Interval = "1s", Period = 300 } },
             { "ADAUSDT", new StrategyCurrencyConfiguration { TargetProfit = 1m, Quantity = 2000m, Interval = "1s", Period = 60 } }
         };
@@ -22,10 +22,14 @@ namespace BinanceBot.Core
         private readonly TradingConfig _tradingConfig = new(_dict, _symbol);
 
         public MarketTradeHandler(IBinanceClient binanceClient,
+            IVolatilityStrategy volatilityStrategy,
+            ITechnicalIndicatorsCalculator technicalIndicatorsCalculator,
             ILogger logger,
             TradingConfig? tradingConfig = null)
         {
             _binanceClient = binanceClient;
+            _volatilityStrategy = volatilityStrategy;
+            _technicalIndicatorsCalculator = technicalIndicatorsCalculator;
             _logger = logger;
             if (tradingConfig != null)
                 _tradingConfig = tradingConfig;
@@ -51,9 +55,9 @@ namespace BinanceBot.Core
 
                     decimal currentCurrencyPrice = currency.Price;
 
-                    decimal mobileAverage = MobileAverageCalculation(klines, periode: _tradingConfig.Period);
-                    decimal rsi = await RSICalculation(_symbol, _tradingConfig.Interval, periode: _tradingConfig.Period);
-                    decimal volatility = VolatilityCalculation(klines);
+                    decimal mobileAverage = _technicalIndicatorsCalculator.CalculateMovingAverage(klines, periode: _tradingConfig.Period);
+                    decimal rsi = _technicalIndicatorsCalculator.CalculateRSI(klines, periode: _tradingConfig.Period);
+                    decimal volatility = _volatilityStrategy.CalculateVolatility(klines);
 
                     decimal targetPriceFeesNotIncluded = ((currentCurrencyPrice * _tradingConfig.Quantity) + _tradingConfig.TargetProfit) / _tradingConfig.Quantity;
                     decimal targetPriceFeesIncluded = targetPriceFeesNotIncluded * (1 + _tradingConfig.FeePercentage);
@@ -135,7 +139,7 @@ namespace BinanceBot.Core
             decimal beneficeBrut = montantVenteBrut - _tradingConfig.TotalPurchaseCost;
             decimal beneficeNet = montantVenteNet - _tradingConfig.TotalPurchaseCost;
 
-            decimal stopLossPrice = PercentageLossStrategy(volatility);
+            decimal stopLossPrice = _volatilityStrategy.DetermineLossStrategy(volatility, _tradingConfig);
 
             if (currentCurrencyPrice >= prixVenteCible)
             {
@@ -162,102 +166,6 @@ namespace BinanceBot.Core
                 _tradingConfig.OpenPosition = false;
             }
             return (prixVenteCible, false);
-        }
-
-        private decimal PercentageLossStrategy(decimal volatility)
-        {
-            decimal pourcentageStopLossCalcule = volatility * _tradingConfig.VolatilityMultiplier;
-            pourcentageStopLossCalcule = Math.Max(_tradingConfig.FloorStopLossPercentage, pourcentageStopLossCalcule);
-            pourcentageStopLossCalcule = Math.Min(_tradingConfig.CeilingStopLossPercentage, pourcentageStopLossCalcule);
-            _tradingConfig.StopLossPercentage = (_tradingConfig.StopLossPercentage + pourcentageStopLossCalcule) / 2;
-            decimal prixStopLoss = _tradingConfig.CryptoPurchasePrice * (1 - _tradingConfig.StopLossPercentage);
-
-            return prixStopLoss;
-        }
-
-        private static decimal MobileAverageCalculation(List<List<object>> klines, int periode)
-        {
-            var prixHistoriques = klines.Select((it) =>
-            {
-                if (!decimal.TryParse(it[4].ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out var ret))
-                    throw new InvalidCastException($"it cannot be converted to decimal for klines {JsonConvert.SerializeObject(it)}");
-                return ret;
-            }).ToList();
-
-            decimal somme = 0;
-
-            foreach (var prix in prixHistoriques)
-                somme += prix;
-
-            return somme / periode;
-        }
-
-        private async Task<decimal> RSICalculation(string symbol, string interval, int periode)
-        {
-            try
-            {
-                var klines = await _binanceClient.GetKLinesBySymbolAsync(symbol, interval, (periode + 1).ToString());
-                decimal gainMoyen = 0, perteMoyenne = 0;
-
-                var prixHistoriques = klines.Select((it) =>
-                {
-                    if (!decimal.TryParse(it[4].ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out var ret))
-                        throw new InvalidCastException($"it cannot be converted to decimal for klines {JsonConvert.SerializeObject(it)}");
-                    return ret;
-                }).ToList();
-
-                for (int i = 1; i < prixHistoriques.Count(); i++)
-                {
-                    decimal delta = prixHistoriques[i] - prixHistoriques[i - 1];
-
-                    if (delta > 0)
-                        gainMoyen += delta;
-                    else
-                        perteMoyenne -= delta;
-                }
-
-                gainMoyen /= periode;
-                perteMoyenne /= periode;
-
-                decimal rs = perteMoyenne == 0 ? 0 : (gainMoyen / perteMoyenne);
-                return 100 - (100 / (1 + rs));
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        }
-
-
-        private decimal VolatilityCalculation(List<List<object>> klines)
-        {
-            var prixRecent = RecuperePrixRecent(klines);
-            decimal moyenne = prixRecent.Average();
-            decimal sommeDesCarres = prixRecent.Sum(prix => (prix - moyenne) * (prix - moyenne));
-            decimal ecartType = (decimal)Math.Sqrt((double)(sommeDesCarres / 50));
-
-            return ecartType;
-        }
-
-        private List<decimal> RecuperePrixRecent(List<List<object>> klines)
-        {
-            try
-            {
-                var closingPrices = new List<decimal>();
-                foreach (var kline in klines)
-                {
-                    if (!decimal.TryParse(kline[4].ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out var ret))
-                        throw new InvalidCastException($"it cannot be converted to decimal for klines {JsonConvert.SerializeObject(kline)}");
-                    closingPrices.Add(ret); // 4 is the index for closing price
-                }
-
-                return closingPrices;
-            }
-            catch (HttpRequestException e)
-            {
-                _logger.WriteLog($"Erreur dans la requête HTTP: {e.Message}");
-                return new List<decimal>();
-            }
         }
 
         public async Task WaitBuyAsync()

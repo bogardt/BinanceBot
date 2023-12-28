@@ -32,8 +32,10 @@ internal class Program
         var builder = Host.CreateDefaultBuilder(args)
             .ConfigureServices((context, services) =>
             {
-                // todo : change testApi to false if you want to trade with real money
                 services.AddSingleton<IBinanceClient, BinanceClient>();
+                services.AddSingleton<IVolatilityStrategy, VolatilityStrategy>();
+                services.AddSingleton<ITechnicalIndicatorsCalculator, TechnicalIndicatorsCalculator>();
+                services.AddSingleton<IPriceRetriever, PriceRetriever>();
                 services.AddSingleton<IMarketTradeHandler, MarketTradeHandler>();
                 services.AddSingleton<ILogger, Logger>();
                 services.AddSingleton<IHttpClientWrapper, HttpClientWrapper>();

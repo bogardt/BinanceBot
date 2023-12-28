@@ -1,6 +1,6 @@
 ﻿using BinanceBot.Utils;
 
-namespace BinanceBot.Tests
+namespace BinanceBot.Tests.Utils
 {
     [TestClass]
     public class FileSystemTests
