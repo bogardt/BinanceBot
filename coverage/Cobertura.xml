@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE coverage SYSTEM "http://cobertura.sourceforge.net/xml/coverage-04.dtd">
-<coverage line-rate="0.5906735751295337" branch-rate="0.5384615384615384" lines-covered="228" lines-valid="386" branches-covered="28" branches-valid="52" complexity="108" version="0" timestamp="1703733478">
+<coverage line-rate="0.5906735751295337" branch-rate="0.5384615384615384" lines-covered="228" lines-valid="386" branches-covered="28" branches-valid="52" complexity="108" version="0" timestamp="1703735359">
   <sources>
     <source>D:\a\BinanceBot\BinanceBot\BinanceBot\</source>
   </sources>
