@@ -4,9 +4,8 @@ namespace BinanceBot.Utils
 {
     public class Logger : ILogger
     {
-        private static readonly string _logFilePath = $"./logfile-bot-{DateTime.Now.ToString("yyyy-MM-dd-hh-mm-ss")}.log";
+        public string LogFilePath { get; set; } = $"./logfile-bot-{DateTime.Now.ToString("yyyy-MM-dd-hh-mm-ss")}.log";
         private readonly IFileSystem _fileSystem;
-
         public Logger(IFileSystem fileSystem)
         {
             _fileSystem = fileSystem;
@@ -15,13 +14,13 @@ namespace BinanceBot.Utils
         {
             try
             {
-                var logDirectory = _fileSystem.GetDirectoryName(_logFilePath);
+                var logDirectory = _fileSystem.GetDirectoryName(LogFilePath);
                 if (!_fileSystem.DirectoryExists(logDirectory))
                 {
                     _fileSystem.CreateDirectory(logDirectory);
                 }
 
-                using StreamWriter writer = new(_logFilePath, true);
+                using StreamWriter writer = new(LogFilePath, true);
 
                 writer.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss} - {message}");
                 Console.WriteLine(message);

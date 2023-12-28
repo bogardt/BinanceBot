@@ -20,8 +20,8 @@ namespace BinanceBot.Tests.Utils
             _logger.WriteLog("test");
             _logger.WriteLog("toto");
             _logger.WriteLog("tata");
-            Assert.IsTrue(File.Exists("./logfile.log"));
-            using StreamReader reader = new StreamReader("./logfile.log");
+            Assert.IsTrue(File.Exists(_logger.LogFilePath));
+            using StreamReader reader = new StreamReader(_logger.LogFilePath);
             var content = await reader.ReadToEndAsync();
             Assert.IsTrue(content.Contains("test"));
             Assert.IsTrue(content.Contains("toto"));
@@ -32,8 +32,8 @@ namespace BinanceBot.Tests.Utils
         public async Task WriteLogTests_Console_Output()
         {
             _logger.WriteLog("test");
-            Assert.IsTrue(File.Exists("./logfile.log"));
-            using StreamReader reader = new StreamReader("./logfile.log");
+            Assert.IsTrue(File.Exists(_logger.LogFilePath));
+            using StreamReader reader = new StreamReader(_logger.LogFilePath);
             var content = await reader.ReadToEndAsync();
             Assert.IsTrue(content.Contains("test"));
         }
