@@ -16,11 +16,11 @@
 * Open Test Explorer
 * Run all tests
 
-## Built With
+### Built With
 * [Visual Studio 2022](https://visualstudio.microsoft.com/fr/downloads/) - The development IDE
 * [.Net Core 3.1](https://www.microsoft.com/net/download/dotnet-core/3.1) - The framework
 
-## Configuration settings
+### Configuration settings
 * Create a file appsettings.json in the project root solution folder with your binance api key and secret
 ```json
 {
@@ -40,7 +40,7 @@
 }
 ```
 
-## Code Coverage Report
+### Code Coverage Report
 
 Check out our [code coverage report](https://bogardt.github.io/BinanceBot/index.html) for more details.
 ![Code Coverage Graph](https://codecov.io/github/bogardt/BinanceBot/graphs/sunburst.svg?token=V2F65ESN7M)
