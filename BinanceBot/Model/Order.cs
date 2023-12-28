@@ -5,7 +5,7 @@ namespace BinanceBot.Model
     public class Order
     {
         [JsonProperty("symbol")]
-        public string Symbol { get; set; }
+        public required string Symbol { get; set; }
 
         [JsonProperty("orderId")]
         public long OrderId { get; set; }
