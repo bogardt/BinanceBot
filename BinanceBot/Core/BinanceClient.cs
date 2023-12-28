@@ -15,11 +15,14 @@ namespace BinanceBot.Core
         private readonly string _apiSecret = string.Empty;
         private readonly bool _testApi;
 
-        public BinanceClient(IHttpClientWrapper httpClientWrapper, IConfiguration config)
+        public BinanceClient(IHttpClientWrapper httpClientWrapper,
+            ILogger logger,
+            IConfiguration config)
         {
             _testApi = true;
             _apiSecret = config["AppSettings:Binance:ApiSecret"] ?? string.Empty;
             _httpClientWrapper = httpClientWrapper;
+            logger.WriteLog($"start in {(_testApi ? "test" : "real")} mode.");
         }
 
         public async Task<List<List<object>>> GetKLinesBySymbolAsync(string symbol, string interval, string limit)

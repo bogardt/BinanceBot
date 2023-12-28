@@ -56,6 +56,8 @@ namespace BinanceBot.Core
                         await _tradeAction.Buy(_tradingConfig, currentCurrencyPrice, volatility, _tradingConfig.Symbol);
                     }
 
+                    var output = string.Empty;
+
                     if (_tradingConfig.OpenPosition)
                     {
                         var (targetPrice, endProgram) = await _tradeAction.Sell(_tradingConfig, currentCurrencyPrice, volatility, _tradingConfig.Symbol);
@@ -64,28 +66,19 @@ namespace BinanceBot.Core
 
                         decimal targetBenefit = (_tradingConfig.TotalPurchaseCost + _tradingConfig.TargetProfit) - _tradingConfig.TotalPurchaseCost;
 
-                        _logger.WriteLog($"timeElapsed {DateTime.UtcNow - now} | " +
-                            $"diffMarge: {(targetPrice - _tradingConfig.CryptoPurchasePrice):F2} | " +
-                            $"{_tradingConfig.Symbol}: {currentCurrencyPrice:F2} | " +
-                            $"targetPrice: {targetPrice:F2} | " +
-                            $"mobileAverage: {mobileAverage:F2} | " +
-                            $"rsi: {rsi:F2} | " +
-                            $"targetBenefit: {targetBenefit:F2} | " +
-                            $"totalBenefit: {_tradingConfig.TotalBenefit:F2} | " +
-                            $"quantity: {_tradingConfig.Quantity} | " +
-                            $"volatility: {volatility:F2}");
+                        output += $"diffMarge: {(targetPrice - _tradingConfig.CryptoPurchasePrice):F2} | ";
+                        output += $"targetBenefit: {targetBenefit:F2} | ";
+                        output += $"targetPrice: {targetPrice:F2}";
                     }
-                    else
-                    {
-                        _logger.WriteLog($"timeElapsed: {DateTime.UtcNow - now} | " +
-                            $"{_tradingConfig.Symbol}: {currentCurrencyPrice:F2} | " +
-                            $"targetPriceFeesNotIncluded: {targetPriceFeesNotIncluded:F2} | " +
-                            $"targetPriceFeesIncluded: {targetPriceFeesIncluded:F2} | " +
-                            $"mobileAverage: {mobileAverage:F2} | rsi : {rsi:F2} | " +
-                            $"totalBenefit: {_tradingConfig.TotalBenefit:F2} | " +
-                            $"quantity:  {_tradingConfig.Quantity} | " +
-                            $"volatility: {volatility:F2}");
-                    }
+
+                    _logger.WriteLog((string.IsNullOrEmpty(output) ? "" : $"{output} | ") +
+                        $"{_tradingConfig.Symbol}: {currentCurrencyPrice:F2} | " +
+                        //$"targetPriceFeesIncluded: {targetPriceFeesIncluded:F2} | " +
+                        $"mobileAverage: {mobileAverage:F2} | rsi : {rsi:F2} | " +
+                        $"rsi: {rsi:F2} | " +
+                        $"totalBenefit: {_tradingConfig.TotalBenefit:F2} | " +
+                        $"quantity:  {_tradingConfig.Quantity} | " +
+                        $"volatility: {volatility:F2}");
 
                 }
             }

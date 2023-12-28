@@ -1,11 +1,7 @@
 using BinanceBot.Abstraction;
 using BinanceBot.Core;
 using BinanceBot.Model;
-using Microsoft.Extensions.Configuration;
 using Moq;
-using Newtonsoft.Json;
-using System.Net;
-using System.Reflection.Metadata;
 
 namespace BinanceBot.Tests.Core
 {

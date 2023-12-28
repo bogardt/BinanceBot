@@ -12,6 +12,7 @@ namespace BinanceBot.Tests.Core
     public class BinanceClientTests
     {
         private readonly Mock<IBinanceClient> _mockClient;
+        private readonly Mock<ILogger> _mockLogger;
         private readonly Mock<IHttpClientWrapper> _mockHttpClientWrapper;
         private readonly BinanceClient _binanceClient;
         private readonly IConfiguration _config;
@@ -27,8 +28,9 @@ namespace BinanceBot.Tests.Core
                 .AddInMemoryCollection(appSettings)
                 .Build();
             _mockClient = new Mock<IBinanceClient>();
+            _mockLogger = new Mock<ILogger>();
             _mockHttpClientWrapper = new Mock<IHttpClientWrapper>();
-            _binanceClient = new BinanceClient(_mockHttpClientWrapper.Object, _config);
+            _binanceClient = new BinanceClient(_mockHttpClientWrapper.Object, _mockLogger.Object, _config);
         }
 
         [TestMethod]
