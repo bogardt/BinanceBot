@@ -15,7 +15,7 @@ namespace BinanceBot.Tests.Core
         }
 
         [TestMethod]
-        public void GetRecentPrices_ValidKlines_ReturnsClosingPrices()
+        public void GetRecentPricesValidKlinesReturnsClosingPrices()
         {
             // Arrange
             var klines = new List<List<object>>
@@ -34,7 +34,7 @@ namespace BinanceBot.Tests.Core
         }
 
         [TestMethod]
-        public void GetRecentPrices_InvalidKlines_ThrowsException()
+        public void GetRecentPricesInvalidKlinesThrowsException()
         {
             // Arrange
             var klines = new List<List<object>>
@@ -47,7 +47,7 @@ namespace BinanceBot.Tests.Core
         }
 
         [TestMethod]
-        public void GetRecentPrices_HttpRequestException_ReturnsEmptyList()
+        public void GetRecentPricesHttpRequestExceptionReturnsEmptyList()
         {
             // Arrange
             var klines = new List<List<object>>();

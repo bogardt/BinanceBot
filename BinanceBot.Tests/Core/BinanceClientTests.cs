@@ -22,7 +22,7 @@ namespace BinanceBot.Tests.Core
         }
 
         [TestMethod]
-        public async Task GetKLinesBySymbolAsync_ReturnsKLinesData()
+        public async Task GetKLinesBySymbolAsyncReturnsKLinesData()
         {
             // Arrange
             var kline = new List<object> { 100m, 100m, 100m, 100m, 100m, 100m, 100m, 100m, 100m, 100m, 100m, 100m };
@@ -42,7 +42,7 @@ namespace BinanceBot.Tests.Core
         }
 
         [TestMethod]
-        public async Task GetKLinesBySymbolAsync_ReturnsKLinesDataEmpty()
+        public async Task GetKLinesBySymbolAsyncReturnsKLinesDataEmpty()
         {
             // Arrange
             var expectedJsonResponse = "[]\r\n";
@@ -59,7 +59,7 @@ namespace BinanceBot.Tests.Core
         }
 
         [TestMethod]
-        public async Task GetPriceBySymbolMockAsync_ReturnsPriceSuccessfully()
+        public async Task GetPriceBySymbolMockAsyncReturnsPriceSuccessfully()
         {
             // Arrange
             var expectedJsonResponse = "{\"price\":\"50000.00\"}";
@@ -75,7 +75,7 @@ namespace BinanceBot.Tests.Core
         }
 
         [TestMethod]
-        public async Task GetPriceBySymbolMockAsync_HandlesMalformedResponse()
+        public async Task GetPriceBySymbolMockAsyncHandlesMalformedResponse()
         {
             // Arrange
             var malformedJsonResponse = "error";
@@ -89,7 +89,7 @@ namespace BinanceBot.Tests.Core
         }
 
         [TestMethod]
-        public async Task GetPriceBySymbolMockAsync_HandlesConnectionFailure()
+        public async Task GetPriceBySymbolMockAsyncHandlesConnectionFailure()
         {
             // Arrange
             _mockHttpClientWrapper.Setup(client => client.GetStringAsync(It.IsAny<string>()))
@@ -102,7 +102,7 @@ namespace BinanceBot.Tests.Core
         }
 
         [TestMethod]
-        public async Task GetPriceBySymbolMockAsync_HandlesInvalidSymbol()
+        public async Task GetPriceBySymbolMockAsyncHandlesInvalidSymbol()
         {
             // Arrange
             var invalidSymbolResponse = "{\"code\":-1121,\"msg\":\"Invalid symbol.\"}";
@@ -119,7 +119,7 @@ namespace BinanceBot.Tests.Core
         }
 
         [TestMethod]
-        public async Task GetOpenOrdersAsync_ReturnsOpenOrdersSuccessfully()
+        public async Task GetOpenOrdersAsyncReturnsOpenOrdersSuccessfully()
         {
             // Arrange
             var expectedJsonResponse = "[{\"orderId\": 1, \"symbol\": \"BTCUSDT\"}, {\"orderId\": 2, \"symbol\": \"ETHUSDT\"}]";
@@ -139,7 +139,7 @@ namespace BinanceBot.Tests.Core
         }
 
         [TestMethod]
-        public async Task GetOpenOrdersAsync_HandlesMalformedResponse()
+        public async Task GetOpenOrdersAsyncHandlesMalformedResponse()
         {
             // Arrange
             var malformedJsonResponse = "error";
@@ -157,7 +157,7 @@ namespace BinanceBot.Tests.Core
         }
 
         [TestMethod]
-        public async Task GetOpenOrdersAsync_HandlesConnectionFailure()
+        public async Task GetOpenOrdersAsyncHandlesConnectionFailure()
         {
             // Arrange
             _mockHttpClientWrapper.Setup(client => client.SendAsync(It.IsAny<HttpRequestMessage>(), It.IsAny<CancellationToken>()))
@@ -170,7 +170,7 @@ namespace BinanceBot.Tests.Core
         }
 
         [TestMethod]
-        public async Task GetOpenOrdersAsync_HandlesNoOpenOrders()
+        public async Task GetOpenOrdersAsyncHandlesNoOpenOrders()
         {
             // Arrange
             var emptyJsonResponse = "[]";
@@ -190,7 +190,7 @@ namespace BinanceBot.Tests.Core
         }
 
         [TestMethod]
-        public async Task PlaceOrderAsync_SuccessfullyPlacesOrder()
+        public async Task PlaceOrderAsyncSuccessfullyPlacesOrder()
         {
             // Arrange
             var expectedJsonResponse = "{\"orderId\": 12345, \"status\": \"SUCCESS\"}";
@@ -210,7 +210,7 @@ namespace BinanceBot.Tests.Core
         }
 
         [TestMethod]
-        public async Task PlaceOrderAsync_HandlesMalformedResponse()
+        public async Task PlaceOrderAsyncHandlesMalformedResponse()
         {
             // Arrange
             var malformedJsonResponse = "{\"unexpectedField\":\"value\"}";
@@ -227,7 +227,7 @@ namespace BinanceBot.Tests.Core
         }
 
         [TestMethod]
-        public async Task PlaceOrderAsync_HandlesConnectionFailure()
+        public async Task PlaceOrderAsyncHandlesConnectionFailure()
         {
             // Arrange
             _mockHttpClientWrapper.Setup(client => client.SendAsync(It.IsAny<HttpRequestMessage>(), It.IsAny<CancellationToken>()))
@@ -240,7 +240,7 @@ namespace BinanceBot.Tests.Core
         }
 
         [TestMethod]
-        public async Task PlaceOrderAsync_HandlesInvalidParameters()
+        public async Task PlaceOrderAsyncHandlesInvalidParameters()
         {
             // Arrange
             var errorResponse = "{\"code\": -1100, \"msg\": \"Illegal characters found in parameter 'price'; legal range is '^([0-9]{1,20})(\\.[0-9]{1,8})?$'.\"}";

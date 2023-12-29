@@ -8,7 +8,7 @@ namespace BinanceBot.Tests.Utils
         private FileSystem _fileSystem = new();
 
         [TestMethod]
-        public void GetCurrentDirectory_ReturnsCorrectDirectory()
+        public void GetCurrentDirectoryReturnsCorrectDirectory()
         {
             // Act
             var currentDirectory = _fileSystem.GetCurrentDirectory();
@@ -18,7 +18,7 @@ namespace BinanceBot.Tests.Utils
         }
 
         [TestMethod]
-        public void GetFiles_ReturnsCorrectFiles()
+        public void GetFilesReturnsCorrectFiles()
         {
             var currentDirectory = Directory.GetCurrentDirectory();
             var searchPattern = "*.dll";
@@ -33,7 +33,7 @@ namespace BinanceBot.Tests.Utils
         }
 
         [TestMethod]
-        public void GetFiles_InvalidPath_ThrowsException()
+        public void GetFilesInvalidPathThrowsException()
         {
             // Arrange
             var invalidPath = "Z:\\NonExistentDirectory";
@@ -45,7 +45,7 @@ namespace BinanceBot.Tests.Utils
         }
 
         [TestMethod]
-        public void GetCurrentDirectory_ReturnsCurrentDirectory()
+        public void GetCurrentDirectoryReturnsCurrentDirectory()
         {
             var expected = Directory.GetCurrentDirectory();
             var actual = _fileSystem.GetCurrentDirectory();
@@ -53,7 +53,7 @@ namespace BinanceBot.Tests.Utils
         }
 
         [TestMethod]
-        public void GetDirectoryName_ValidPath_ReturnsDirectoryName()
+        public void GetDirectoryNameValidPathReturnsDirectoryName()
         {
             var path = "C:\\test\\myfile.txt";
             var expected = Path.GetDirectoryName(path);
@@ -62,7 +62,19 @@ namespace BinanceBot.Tests.Utils
         }
 
         [TestMethod]
-        public void GetDirectoryName_InvalidPath_ThrowsException()
+        public void GetDirectoryNameNullPathThrowsException()
+        {
+            // Arrange
+            string? nullPath = null;
+
+            // Act & Assert
+            Assert.ThrowsException<ArgumentNullException>(
+                () => _fileSystem.GetDirectoryName(nullPath)
+            );
+        }
+
+        [TestMethod]
+        public void GetDirectoryNameInvalidPathThrowsException()
         {
             // Arrange
             var invalidPath = "Z:\\";
@@ -74,7 +86,7 @@ namespace BinanceBot.Tests.Utils
         }
 
         [TestMethod]
-        public void DirectoryExists_ExistingDirectory_ReturnsTrue()
+        public void DirectoryExistsExistingDirectoryReturnsTrue()
         {
             var path = Directory.GetCurrentDirectory();
             var actual = _fileSystem.DirectoryExists(path);
@@ -82,7 +94,7 @@ namespace BinanceBot.Tests.Utils
         }
 
         [TestMethod]
-        public void DirectoryExists_NonExistingDirectory_ReturnsFalse()
+        public void DirectoryExistsNonExistingDirectoryReturnsFalse()
         {
             var path = "C:\\NonExisting\\Path";
             var actual = _fileSystem.DirectoryExists(path);
@@ -90,7 +102,7 @@ namespace BinanceBot.Tests.Utils
         }
 
         [TestMethod]
-        public void CreateDirectory_CreateNewDirectory_ReturnsDirectoryInfo()
+        public void CreateDirectoryCreateNewDirectoryReturnsDirectoryInfo()
         {
             var path = Path.Combine(Directory.GetCurrentDirectory(), "TestDirectory");
             if (Directory.Exists(path))
@@ -104,7 +116,7 @@ namespace BinanceBot.Tests.Utils
         }
 
         [TestMethod]
-        public void GetFiles_DirectoryWithoutMatchingFiles_ReturnsNoFiles()
+        public void GetFilesDirectoryWithoutMatchingFilesReturnsNoFiles()
         {
             var path = Directory.GetCurrentDirectory();
             var pattern = "*.abcdef";

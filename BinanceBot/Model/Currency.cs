@@ -5,12 +5,12 @@ namespace BinanceBot.Model
     public class Currency
     {
         [JsonProperty("symbol")]
-        public string Symbol { get; set; }
+        public string? Symbol { get; set; }
         [JsonProperty("price")]
         public decimal Price { get; set; }
         [JsonProperty("code")]
         public int Code { get; set; }
         [JsonProperty("msg")]
-        public string Msg { get; set; }
+        public string? Msg { get; set; }
     }
 }

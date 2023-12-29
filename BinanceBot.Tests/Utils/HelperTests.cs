@@ -16,7 +16,7 @@ namespace BinanceBot.Tests.Utils
         }
 
         [TestMethod]
-        public void GetSolutionPath_ReturnsCorrectPath()
+        public void GetSolutionPathReturnsCorrectPath()
         {
             // Arrange
             var fakeCurrentDirectory = "C:\\Projects\\MySolution";
@@ -33,7 +33,7 @@ namespace BinanceBot.Tests.Utils
         }
 
         [TestMethod]
-        public void GetSolutionPath_ReturnsNull_WhenSolutionFileNotFound()
+        public void GetSolutionPathReturnsNullWhenSolutionFileNotFound()
         {
             // Arrange
             var fakeCurrentDirectory = "C:\\Projects\\MySolution";

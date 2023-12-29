@@ -27,7 +27,7 @@ namespace BinanceBot.Tests.Core
         }
 
         [TestMethod]
-        public async Task TradeOnLimitAsync_ValidTradeScenario()
+        public async Task TradeOnLimitAsyncValidTradeScenario()
         {
             // Arrange
             var interval = TradeSetup.Dict[TradeSetup.Symbol].Interval;
@@ -76,7 +76,7 @@ namespace BinanceBot.Tests.Core
         }
 
         [TestMethod]
-        public async Task TradeOnLimitAsync_WhenApiThrowsException_HandlesException()
+        public async Task TradeOnLimitAsyncWhenApiThrowsExceptionHandlesException()
         {
             // Arrange
             var interval = TradeSetup.Dict[TradeSetup.Symbol].Interval;

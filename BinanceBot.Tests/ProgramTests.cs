@@ -12,7 +12,7 @@ namespace BinanceBot.Tests
     public class ProgramTests
     {
         [TestMethod]
-        public void ServiceConfiguration_ValidConfiguration_ServicesCanBeResolved()
+        public void ServiceConfigurationValidConfigurationServicesCanBeResolved()
         {
             var host = Host.CreateDefaultBuilder()
                 .ConfigureServices((context, services) =>
@@ -44,7 +44,7 @@ namespace BinanceBot.Tests
         }
 
         [TestMethod]
-        public async Task MainFlow_RunsSuccessfully()
+        public async Task MainFlowRunsSuccessfully()
         {
             var binanceClientMock = new Mock<IBinanceClient>();
             var fileSystemMock = new Mock<IFileSystem>();

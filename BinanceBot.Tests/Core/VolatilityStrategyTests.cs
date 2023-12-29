@@ -17,7 +17,7 @@ namespace BinanceBot.Tests.Core
         }
 
         [TestMethod]
-        public void CalculateVolatility_ValidKlines_CalculatesVolatility()
+        public void CalculateVolatilityValidKlinesCalculatesVolatility()
         {
             // Arrange
             var klines = new List<List<object>>
@@ -37,7 +37,7 @@ namespace BinanceBot.Tests.Core
         }
 
         [TestMethod]
-        public void DetermineLossStrategy_GivenVolatilityAndConfig_CalculatesStopLossPrice()
+        public void DetermineLossStrategyGivenVolatilityAndConfigCalculatesStopLossPrice()
         {
             // Arrange
             decimal volatility = 0.05m;

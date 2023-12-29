@@ -24,7 +24,7 @@ namespace BinanceBot.Tests.Utils
         }
 
         [TestMethod]
-        public async Task GetStringAsync_ReturnsStringSuccessfully()
+        public async Task GetStringAsyncReturnsStringSuccessfully()
         {
             // Arrange
             var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
@@ -51,7 +51,7 @@ namespace BinanceBot.Tests.Utils
         }
 
         [TestMethod]
-        public async Task SendAsync_SendsRequestSuccessfully()
+        public async Task SendAsyncSendsRequestSuccessfully()
         {
             // Arrange
             var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
@@ -80,7 +80,7 @@ namespace BinanceBot.Tests.Utils
         }
 
         [TestMethod]
-        public void HttpClientWrapper_DisposeCalledExplicitly()
+        public void HttpClientWrapperDisposeCalledExplicitly()
         {
             // Arrange
             var configurationMock = new Mock<IConfiguration>();
@@ -115,7 +115,7 @@ namespace BinanceBot.Tests.Utils
         }
 
         [TestMethod]
-        public void Dispose_ShouldBeCalled()
+        public void DisposeShouldBeCalled()
         {
             // Arrange
             var configurationMock = new Mock<IConfiguration>();

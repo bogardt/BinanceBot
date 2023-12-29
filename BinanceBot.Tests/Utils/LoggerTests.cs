@@ -29,7 +29,7 @@ namespace BinanceBot.Tests.Utils
         }
 
         [TestMethod]
-        public async Task WriteLogTests_Console_Output()
+        public async Task WriteLogTestsConsoleOutput()
         {
             _logger.WriteLog("test");
             Assert.IsTrue(File.Exists(_logger.LogFilePath));
@@ -39,7 +39,7 @@ namespace BinanceBot.Tests.Utils
         }
 
         [TestMethod]
-        public void WriteLogTests_FolderNotExist()
+        public void WriteLogTestsFolderNotExist()
         {
             // Arrange
             _fileSystem.Setup(f => f.GetDirectoryName(It.IsAny<string>())).Returns("log_directory_path");
@@ -55,7 +55,7 @@ namespace BinanceBot.Tests.Utils
         }
 
         [TestMethod]
-        public void WriteLog_WhenFileSystemThrowsException_HandlesException()
+        public void WriteLogWhenFileSystemThrowsExceptionHandlesException()
         {
             // Arrange
             _fileSystem.Setup(fs => fs.GetDirectoryName(It.IsAny<string>()))

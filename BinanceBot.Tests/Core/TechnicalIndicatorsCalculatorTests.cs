@@ -16,7 +16,7 @@ namespace BinanceBot.Tests.Core
             
         }
         [TestMethod]
-        public void CalculateMovingAverage_ValidKlines_CalculatesAverage()
+        public void CalculateMovingAverageValidKlinesCalculatesAverage()
         {
             // Arrange
             var klines = new List<List<object>>
@@ -34,7 +34,7 @@ namespace BinanceBot.Tests.Core
         }
 
         [TestMethod]
-        public void CalculateMovingAverage_InvalidKlines_ThrowsException()
+        public void CalculateMovingAverageInvalidKlinesThrowsException()
         {
             // Arrange
             var klines = new List<List<object>>
@@ -48,7 +48,7 @@ namespace BinanceBot.Tests.Core
         }
 
         [TestMethod]
-        public void CalculateRSI_ValidKlines_CalculatesRSI()
+        public void CalculateRSIValidKlinesCalculatesRSI()
         {
             // Arrange
             var symbol = "BTCUSDT";
@@ -83,7 +83,7 @@ namespace BinanceBot.Tests.Core
         }
 
         [TestMethod]
-        public void CalculateRSI_ApiThrowsException_ThrowsException()
+        public void CalculateRSIApiThrowsExceptionThrowsException()
         {
             // Arrange
             var symbol = "BTCUSDT";
@@ -102,7 +102,7 @@ namespace BinanceBot.Tests.Core
         }
 
         [TestMethod]
-        public void CalculateRSI_InvalidKlinesData_ThrowsException()
+        public void CalculateRSIInvalidKlinesDataThrowsException()
         {
             // Arrange
             var symbol = "BTCUSDT";
