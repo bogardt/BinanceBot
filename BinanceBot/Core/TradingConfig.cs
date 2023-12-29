@@ -13,7 +13,7 @@ namespace BinanceBot.Core
         public decimal CryptoPurchasePrice { get; set; } = 0;
         public int LimitBenefit { get; set; } = 1000;
         public int Period { get; set; }
-        public string Interval { get; set; }
+        public string? Interval { get; set; }
         public bool OpenPosition { get; set; } = false;
         public decimal StopLossPercentage { get; set; }
         public decimal VolatilityMultiplier { get; set; }

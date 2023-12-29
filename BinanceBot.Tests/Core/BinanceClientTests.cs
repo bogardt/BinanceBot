@@ -22,6 +22,12 @@ namespace BinanceBot.Tests.Core
         }
 
         [TestMethod]
+        public void CheckLoggerCallOnConstructorCall()
+        {
+            _mockLogger.Verify(logger => logger.WriteLog(It.IsAny<string>()), Times.Once);
+        }
+
+        [TestMethod]
         public async Task GetKLinesBySymbolAsyncReturnsKLinesData()
         {
             // Arrange
@@ -89,6 +95,19 @@ namespace BinanceBot.Tests.Core
         }
 
         [TestMethod]
+        public async Task GetPriceBySymbolMockAsyncHandlesNullResponse()
+        {
+            // Arrange
+            _mockHttpClientWrapper.Setup(client => client.GetStringAsync(It.IsAny<string>()))
+                .ReturnsAsync(string.Empty);
+
+            // Act & Assert
+            await Assert.ThrowsExceptionAsync<JsonReaderException>(
+                () => _binanceClient.GetPriceBySymbolAsync("BTCUSDT")
+            );
+        }
+
+        [TestMethod]
         public async Task GetPriceBySymbolMockAsyncHandlesConnectionFailure()
         {
             // Arrange
@@ -146,6 +165,23 @@ namespace BinanceBot.Tests.Core
             var fakeResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
             {
                 Content = new StringContent(malformedJsonResponse)
+            };
+            _mockHttpClientWrapper.Setup(client => client.SendAsync(It.IsAny<HttpRequestMessage>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(fakeResponseMessage);
+
+            // Act & Assert
+            await Assert.ThrowsExceptionAsync<JsonReaderException>(
+                () => _binanceClient.GetOpenOrdersAsync("BTCUSDT")
+            );
+        }
+
+        [TestMethod]
+        public async Task GetOpenOrdersAsyncHandlesNullResponse()
+        {
+            // Arrange
+            var fakeResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent(string.Empty)
             };
             _mockHttpClientWrapper.Setup(client => client.SendAsync(It.IsAny<HttpRequestMessage>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(fakeResponseMessage);

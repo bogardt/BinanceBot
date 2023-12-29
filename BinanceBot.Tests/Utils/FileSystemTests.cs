@@ -65,11 +65,11 @@ namespace BinanceBot.Tests.Utils
         public void GetDirectoryNameNullPathThrowsException()
         {
             // Arrange
-            string? nullPath = null;
+            var emptyPath = string.Empty;
 
             // Act & Assert
             Assert.ThrowsException<ArgumentNullException>(
-                () => _fileSystem.GetDirectoryName(nullPath)
+                () => _fileSystem.GetDirectoryName(emptyPath)
             );
         }
 

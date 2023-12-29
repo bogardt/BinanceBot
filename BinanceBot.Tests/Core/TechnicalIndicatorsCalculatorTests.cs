@@ -7,24 +7,18 @@ namespace BinanceBot.Tests.Core
     [TestClass]
     public class TechnicalIndicatorsCalculatorTests
     {
-        private readonly Mock<IBinanceClient> _mockBinanceClient = new();
-        private readonly TechnicalIndicatorsCalculator _technicalIndicatorsCalculator;
+        private readonly TechnicalIndicatorsCalculator _technicalIndicatorsCalculator = new TechnicalIndicatorsCalculator();
 
-        public TechnicalIndicatorsCalculatorTests()
-        {
-            _technicalIndicatorsCalculator = new TechnicalIndicatorsCalculator(_mockBinanceClient.Object);
-            
-        }
         [TestMethod]
         public void CalculateMovingAverageValidKlinesCalculatesAverage()
         {
             // Arrange
+            var period = 2;
             var klines = new List<List<object>>
             {
                 new List<object> { "100.5", "100.5", "100.5", "100.5", "100", "100.5" },
                 new List<object> { "100.5", "100.5", "100.5", "100.5", "200", "100.5" }
             };
-            int period = 2;
 
             // Act
             var result = _technicalIndicatorsCalculator.CalculateMovingAverage(klines, period);
@@ -37,11 +31,11 @@ namespace BinanceBot.Tests.Core
         public void CalculateMovingAverageInvalidKlinesThrowsException()
         {
             // Arrange
+            var period = 2;
             var klines = new List<List<object>>
             {
                 new List<object> { "100.5", "100.5", "100.5", "100.5", "invalid_data", "100.5" },
             };
-            int period = 2;
 
             // Act & Assert
             Assert.ThrowsException<InvalidCastException>(() => _technicalIndicatorsCalculator.CalculateMovingAverage(klines, period));
@@ -51,10 +45,7 @@ namespace BinanceBot.Tests.Core
         public void CalculateRSIValidKlinesCalculatesRSI()
         {
             // Arrange
-            var symbol = "BTCUSDT";
-            var interval = "1m";
-            int period = 60;
-
+            var period = 60;
             var kline = new List<object> { 100m, 100m, 100m, 100m, 100m, 100m, 100m, 100m, 100m, 100m, 100m, 100m };
             var kline2 = new List<object> { 50m, 50m, 50m, 50m, 50m, 50m, 50m, 50m, 50m, 50m, 50m, 50m };
             var klines = new List<List<object>>();
@@ -71,9 +62,6 @@ namespace BinanceBot.Tests.Core
                 }
             }
 
-            _mockBinanceClient.Setup(c => c.GetKLinesBySymbolAsync(symbol, interval, period.ToString()))
-                             .ReturnsAsync(klines);
-
             // Act
             var result = _technicalIndicatorsCalculator.CalculateRSI(klines, period);
 
@@ -86,36 +74,11 @@ namespace BinanceBot.Tests.Core
         public void CalculateRSIApiThrowsExceptionThrowsException()
         {
             // Arrange
-            var symbol = "BTCUSDT";
-            var interval = "1d";
-            int period = 14;
+            var period = 14;
             var klines = new List<List<object>>
             {
                 new List<object> { "100.5", "100.5", "100.5", "100.5", "invalid_data", "100.5" },
             };
-
-            _mockBinanceClient.Setup(c => c.GetKLinesBySymbolAsync(symbol, interval, period.ToString()))
-                             .ThrowsAsync(new Exception("API Error"));
-
-            // Act & Assert
-            Assert.ThrowsException<InvalidCastException>(() => _technicalIndicatorsCalculator.CalculateRSI(klines, period));
-        }
-
-        [TestMethod]
-        public void CalculateRSIInvalidKlinesDataThrowsException()
-        {
-            // Arrange
-            var symbol = "BTCUSDT";
-            var interval = "1d";
-            int period = 14;
-
-            var klines = new List<List<object>>
-            {
-                new List<object> { "100.5", "100.5", "100.5", "100.5", "invalid_data", "100.5" },
-            };
-
-            _mockBinanceClient.Setup(c => c.GetKLinesBySymbolAsync(symbol, interval, period.ToString()))
-                             .ReturnsAsync(klines);
 
             // Act & Assert
             Assert.ThrowsException<InvalidCastException>(() => _technicalIndicatorsCalculator.CalculateRSI(klines, period));

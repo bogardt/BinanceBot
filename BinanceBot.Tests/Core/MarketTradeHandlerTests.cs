@@ -73,6 +73,7 @@ namespace BinanceBot.Tests.Core
             _mockBinanceClient.Verify(c => c.GetPriceBySymbolAsync(TradeSetup.Symbol), Times.Exactly(2));
             _mockBinanceClient.Verify(c => c.PlaceOrderAsync(It.IsAny<string>(), It.IsAny<decimal>(), It.IsAny<decimal>(), It.IsAny<string>()), Times.Exactly(2));
             _mockBinanceClient.Verify(c => c.GetOpenOrdersAsync(TradeSetup.Symbol), Times.Exactly(2));
+            _mockLogger.Verify(c => c.WriteLog(It.IsAny<string>()), Times.Exactly(6));
         }
 
         [TestMethod]
@@ -91,6 +92,5 @@ namespace BinanceBot.Tests.Core
             await Assert.ThrowsExceptionAsync<Exception>(() => _handler.TradeOnLimitAsync());
             _mockBinanceClient.Verify(c => c.GetPriceBySymbolAsync(TradeSetup.Symbol), Times.Once);
         }
-
     }
 }

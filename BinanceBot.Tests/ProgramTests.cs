@@ -113,7 +113,6 @@ namespace BinanceBot.Tests
             // run bot
             await binanceBot.TradeOnLimitAsync();
 
-
             technicalIndicatorsCalculatorMock.Verify(c => c.CalculateRSI(klines, period), Times.Exactly(2));
             volatilityStrategyMock.Verify(c => c.CalculateVolatility(It.IsAny<List<List<object>>>()), Times.Exactly(2));
             binanceClientMock.Verify(c => c.GetOpenOrdersAsync(TradeSetup.Symbol), Times.Exactly(2));

@@ -6,12 +6,6 @@ namespace BinanceBot.Core
 {
     public class TechnicalIndicatorsCalculator : ITechnicalIndicatorsCalculator
     {
-        private readonly IBinanceClient _binanceClient;
-
-        public TechnicalIndicatorsCalculator(IBinanceClient binanceClient)
-        {
-            _binanceClient = binanceClient;
-        }
         public decimal CalculateMovingAverage(List<List<object>> klines, int periode)
         {
             var prixHistoriques = klines.Select((it) =>
