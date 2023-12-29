@@ -6,7 +6,11 @@ namespace BinanceBot.Abstraction
     {
         Task<List<List<object>>> GetKLinesBySymbolAsync(string symbol, string interval, string limit);
         Task<Currency> GetPriceBySymbolAsync(string symbol);
-        Task<string> PlaceOrderAsync(string symbol, decimal quantity, decimal price, string side);
+        Task<TestOrder> PlaceTestOrderAsync(string symbol, decimal quantity, decimal price, string side);
+        //Task<Order> PlaceOrderAsync(string symbol, decimal quantity, decimal price, string side);
         Task<List<Order>> GetOpenOrdersAsync(string symbol);
+        Task<Account> GetAcountInfosAsync();
+        Task<Commission> GetCommissionBySymbolAsync(string symbol);
+
     }
 }

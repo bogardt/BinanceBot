@@ -1,4 +1,6 @@
 ﻿using BinanceBot.Abstraction;
+using BinanceBot.Strategy;
+using Newtonsoft.Json;
 
 namespace BinanceBot.Core
 {
@@ -7,17 +9,20 @@ namespace BinanceBot.Core
 
         private readonly IBinanceClient _binanceClient;
         private readonly IVolatilityStrategy _volatilityStrategy;
+        private readonly IPriceRetriever _priceRetriever;
         private readonly ILogger _logger;
         public TradeAction(IBinanceClient binanceClient, 
             IVolatilityStrategy volatilityStrategy, 
+            IPriceRetriever priceRetriever,
             ILogger logger)
         {
             _binanceClient = binanceClient;
             _volatilityStrategy = volatilityStrategy;
+            _priceRetriever = priceRetriever;
             _logger = logger;
         }
 
-        public async Task Buy(TradingConfig tradingConfig, decimal currentCurrencyPrice, decimal volatility, string symbol)
+        public async Task Buy(TradingStrategy tradingConfig, decimal currentCurrencyPrice, decimal volatility, string symbol)
         {
             tradingConfig.CryptoPurchasePrice = currentCurrencyPrice;
             tradingConfig.TotalPurchaseCost = tradingConfig.Quantity * tradingConfig.CryptoPurchasePrice;
@@ -30,26 +35,35 @@ namespace BinanceBot.Core
                 $"cryptoPurchasePrice: {tradingConfig.CryptoPurchasePrice:F2} | " +
                 $"totalPurchaseCost: {tradingConfig.TotalPurchaseCost:F2}");
 
-            string responseAchat = await _binanceClient.PlaceOrderAsync(symbol, tradingConfig.Quantity, currentCurrencyPrice, "BUY");
-            _logger.WriteLog($"{responseAchat}");
+            var response = await _binanceClient.PlaceTestOrderAsync(symbol, tradingConfig.Quantity, currentCurrencyPrice, "BUY");
+            _logger.WriteLog($"{JsonConvert.SerializeObject(response, Formatting.Indented)}");
 
             await WaitBuyAsync(symbol);
 
             tradingConfig.OpenPosition = true;
         }
 
-        public async Task<(decimal, bool)> Sell(TradingConfig tradingConfig, decimal currentCurrencyPrice, decimal volatility, string symbol)
+        public async Task<(decimal, bool)> Sell(TradingStrategy tradingConfig,
+            decimal currentCurrencyPrice,
+            decimal volatility,
+            string symbol)
         {
-            decimal prixVenteCible = (tradingConfig.TotalPurchaseCost + tradingConfig.TargetProfit) / tradingConfig.Quantity / (1 - tradingConfig.FeePercentage);
-
-            decimal montantVenteBrut = currentCurrencyPrice * tradingConfig.Quantity;
-            decimal fraisVente = montantVenteBrut * tradingConfig.FeePercentage;
-            decimal montantVenteNet = (currentCurrencyPrice * tradingConfig.Quantity) * (1 - tradingConfig.FeePercentage);
-
-            decimal beneficeBrut = montantVenteBrut - tradingConfig.TotalPurchaseCost;
-            decimal beneficeNet = montantVenteNet - tradingConfig.TotalPurchaseCost;
-
-            decimal stopLossPrice = _volatilityStrategy.DetermineLossStrategy(volatility, tradingConfig);
+            decimal prixVenteCible = _priceRetriever.CalculateMinimumSellingPrice(
+                tradingConfig.CryptoPurchasePrice,
+                tradingConfig.Quantity,
+                tradingConfig.FeePercentage,
+                tradingConfig.Discount,
+                tradingConfig.TargetProfit);
+            //decimal prixVenteCible2 = (tradingConfig.TotalPurchaseCost + tradingConfig.TargetProfit) / tradingConfig.Quantity / (1 - tradingConfig.FeePercentage);
+            
+            decimal commissionAchatBrute = tradingConfig.CryptoPurchasePrice * tradingConfig.Quantity * tradingConfig.FeePercentage;
+            decimal commissionAchat = commissionAchatBrute * (1 - tradingConfig.Discount);
+            decimal commissionVenteBrute = currentCurrencyPrice * tradingConfig.Quantity * tradingConfig.FeePercentage;
+            decimal commissionVente = commissionVenteBrute * (1 - tradingConfig.Discount);
+            decimal prixVenteTotal = currentCurrencyPrice * tradingConfig.Quantity;
+            decimal prixAchatTotal = tradingConfig.CryptoPurchasePrice * tradingConfig.Quantity;
+            decimal beneficeNet = (prixVenteTotal - commissionVente) - (prixAchatTotal + commissionAchat);
+            decimal stopLossPrice = _volatilityStrategy.DetermineLossStrategy(tradingConfig.CryptoPurchasePrice, volatility);
 
             if (currentCurrencyPrice >= prixVenteCible)
             {
@@ -63,8 +77,8 @@ namespace BinanceBot.Core
                     $"currentCurrencyPrice: {currentCurrencyPrice:F2} | " +
                     $"totalBenefit: {tradingConfig.TotalBenefit:F2}");
 
-                string responseVente = await _binanceClient.PlaceOrderAsync(symbol, tradingConfig.Quantity, currentCurrencyPrice, "SELL");
-                _logger.WriteLog($"{responseVente}");
+                var response = await _binanceClient.PlaceTestOrderAsync(symbol, tradingConfig.Quantity, currentCurrencyPrice, "SELL");
+                _logger.WriteLog($"{JsonConvert.SerializeObject(response, Formatting.Indented)}");
 
                 await WaitSellAsync(symbol);
 

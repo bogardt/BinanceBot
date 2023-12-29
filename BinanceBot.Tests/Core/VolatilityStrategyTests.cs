@@ -1,6 +1,7 @@
 using BinanceBot.Abstraction;
 using BinanceBot.Core;
 using BinanceBot.Model;
+using BinanceBot.Strategy;
 using Moq;
 
 namespace BinanceBot.Tests.Core
@@ -26,7 +27,7 @@ namespace BinanceBot.Tests.Core
                 new List<object> { "100.5", "100.5", "100.5", "100.5", "101.6", "100.5" }
             };
             var expectedPrices = new List<decimal> { 100m, 102m, 98m, 101m, 99m };
-            _mockPriceRetriever.Setup(pr => pr.GetRecentPrices(klines))
+            _mockPriceRetriever.Setup(pr => pr.GetClosingPrices(klines))
                 .Returns(expectedPrices);
 
             // Act
@@ -41,20 +42,13 @@ namespace BinanceBot.Tests.Core
         {
             // Arrange
             decimal volatility = 0.05m;
-            var tradingConfig = new TradingConfig(TradeSetup.Dict, TradeSetup.Symbol)
-            {
-                CryptoPurchasePrice = 100m,
-                FloorStopLossPercentage = 0.02m,
-                CeilingStopLossPercentage = 0.10m,
-                VolatilityMultiplier = 2,
-                StopLossPercentage = 0.05m
-            };
+            decimal cryptoPurchasePrice = 100m;
 
             // Act
-            var result = _volatilityStrategy.DetermineLossStrategy(volatility, tradingConfig);
+            var result = _volatilityStrategy.DetermineLossStrategy(cryptoPurchasePrice, volatility);
 
             // Assert
-            Assert.IsTrue(result < tradingConfig.CryptoPurchasePrice);
+            Assert.IsTrue(result < cryptoPurchasePrice);
         }
     }
 }

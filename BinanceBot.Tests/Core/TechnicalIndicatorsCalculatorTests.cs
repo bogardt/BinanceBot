@@ -7,7 +7,13 @@ namespace BinanceBot.Tests.Core
     [TestClass]
     public class TechnicalIndicatorsCalculatorTests
     {
-        private readonly TechnicalIndicatorsCalculator _technicalIndicatorsCalculator = new TechnicalIndicatorsCalculator();
+        private readonly Mock<IPriceRetriever> _mockPriceRetriever = new();
+        private readonly TechnicalIndicatorsCalculator _technicalIndicatorsCalculator;
+
+        public TechnicalIndicatorsCalculatorTests()
+        {
+            _technicalIndicatorsCalculator = new(_mockPriceRetriever.Object);
+        }
 
         [TestMethod]
         public void CalculateMovingAverageValidKlinesCalculatesAverage()
@@ -20,6 +26,11 @@ namespace BinanceBot.Tests.Core
                 new List<object> { "100.5", "100.5", "100.5", "100.5", "200", "100.5" }
             };
 
+            var priceRetriever = new PriceRetriever();
+            var clothingPrices = priceRetriever.GetClosingPrices(klines);
+
+            _mockPriceRetriever.Setup(c => c.GetClosingPrices(klines)).Returns(clothingPrices);
+
             // Act
             var result = _technicalIndicatorsCalculator.CalculateMovingAverage(klines, period);
 
@@ -31,6 +42,8 @@ namespace BinanceBot.Tests.Core
         public void CalculateMovingAverageInvalidKlinesThrowsException()
         {
             // Arrange
+            var priceRetriever = new PriceRetriever();
+            var technicalIndicatorsCalculator = new TechnicalIndicatorsCalculator(priceRetriever);
             var period = 2;
             var klines = new List<List<object>>
             {
@@ -38,14 +51,46 @@ namespace BinanceBot.Tests.Core
             };
 
             // Act & Assert
-            Assert.ThrowsException<InvalidCastException>(() => _technicalIndicatorsCalculator.CalculateMovingAverage(klines, period));
+            Assert.ThrowsException<InvalidCastException>(() => technicalIndicatorsCalculator.CalculateMovingAverage(klines, period));
         }
 
         [TestMethod]
         public void CalculateRSIValidKlinesCalculatesRSI()
         {
             // Arrange
+            var priceRetriever = new PriceRetriever();
+            var technicalIndicatorsCalculator = new TechnicalIndicatorsCalculator(priceRetriever);
             var period = 60;
+            var klines = CreateLines(period);
+
+            // Act
+            var result = technicalIndicatorsCalculator.CalculateRSI(klines, period);
+
+            // Assert
+            Assert.IsTrue(result < 50);
+            Assert.IsTrue(result > 49);
+        }
+
+
+        [TestMethod]
+        public void CalculateRSIApiThrowsExceptionThrowsException()
+        {
+            // Arrange
+            var priceRetriever = new PriceRetriever();
+            var technicalIndicatorsCalculator = new TechnicalIndicatorsCalculator(priceRetriever);
+            var period = 14;
+            var klines = new List<List<object>>
+            {
+                new List<object> { "100.5", "100.5", "100.5", "100.5", "invalid_data", "100.5" },
+            };
+
+            // Act & Assert
+            Assert.ThrowsException<InvalidCastException>(() => technicalIndicatorsCalculator.CalculateRSI(klines, period));
+        }
+
+
+        private static List<List<object>> CreateLines(int period)
+        {
             var kline = new List<object> { 100m, 100m, 100m, 100m, 100m, 100m, 100m, 100m, 100m, 100m, 100m, 100m };
             var kline2 = new List<object> { 50m, 50m, 50m, 50m, 50m, 50m, 50m, 50m, 50m, 50m, 50m, 50m };
             var klines = new List<List<object>>();
@@ -62,26 +107,7 @@ namespace BinanceBot.Tests.Core
                 }
             }
 
-            // Act
-            var result = _technicalIndicatorsCalculator.CalculateRSI(klines, period);
-
-            // Assert
-            Assert.IsTrue(result < 50);
-            Assert.IsTrue(result > 49);
-        }
-
-        [TestMethod]
-        public void CalculateRSIApiThrowsExceptionThrowsException()
-        {
-            // Arrange
-            var period = 14;
-            var klines = new List<List<object>>
-            {
-                new List<object> { "100.5", "100.5", "100.5", "100.5", "invalid_data", "100.5" },
-            };
-
-            // Act & Assert
-            Assert.ThrowsException<InvalidCastException>(() => _technicalIndicatorsCalculator.CalculateRSI(klines, period));
+            return klines;
         }
     }
 }

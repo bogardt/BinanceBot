@@ -25,7 +25,7 @@ namespace BinanceBot.Tests.Core
             };
 
             // Act
-            var result = _priceRetriever.GetRecentPrices(klines);
+            var result = _priceRetriever.GetClosingPrices(klines);
 
             // Assert
             Assert.AreEqual(2, result.Count);
@@ -43,7 +43,7 @@ namespace BinanceBot.Tests.Core
             };
 
             // Act & Assert
-            Assert.ThrowsException<InvalidCastException>(() => _priceRetriever.GetRecentPrices(klines));
+            Assert.ThrowsException<InvalidCastException>(() => _priceRetriever.GetClosingPrices(klines));
         }
 
         [TestMethod]
@@ -53,7 +53,7 @@ namespace BinanceBot.Tests.Core
             var klines = new List<List<object>>();
 
             // Act
-            var result = _priceRetriever.GetRecentPrices(klines);
+            var result = _priceRetriever.GetClosingPrices(klines);
 
             // Assert
             Assert.AreEqual(0, result.Count);

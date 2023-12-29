@@ -1,23 +1,23 @@
 ﻿using BinanceBot.Abstraction;
-using Newtonsoft.Json;
-using System.Globalization;
 
 namespace BinanceBot.Core
 {
     public class TechnicalIndicatorsCalculator : ITechnicalIndicatorsCalculator
     {
+        private readonly IPriceRetriever _priceRetriever;
+
+        public TechnicalIndicatorsCalculator(IPriceRetriever priceRetriever)
+        {
+            _priceRetriever = priceRetriever;
+        }
+
         public decimal CalculateMovingAverage(List<List<object>> klines, int periode)
         {
-            var prixHistoriques = klines.Select((it) =>
-            {
-                if (!decimal.TryParse(it[4].ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out var ret))
-                    throw new InvalidCastException($"it cannot be converted to decimal for klines {JsonConvert.SerializeObject(it)}");
-                return ret;
-            }).ToList();
+            var closingPrices = _priceRetriever.GetClosingPrices(klines);
 
             decimal somme = 0;
 
-            foreach (var prix in prixHistoriques)
+            foreach (var prix in closingPrices)
                 somme += prix;
 
             return somme / periode;
@@ -25,19 +25,13 @@ namespace BinanceBot.Core
 
         public decimal CalculateRSI(List<List<object>> klines, int periode)
         {
-
             decimal gainMoyen = 0, perteMoyenne = 0;
 
-            var prixHistoriques = klines.Select((it) =>
-            {
-                if (!decimal.TryParse(it[4].ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out var ret))
-                    throw new InvalidCastException($"it cannot be converted to decimal for klines {JsonConvert.SerializeObject(it)}");
-                return ret;
-            }).ToList();
+            var closingPrices = _priceRetriever.GetClosingPrices(klines);
 
-            for (int i = 1; i < prixHistoriques.Count(); i++)
+            for (int i = 1; i < closingPrices.Count(); i++)
             {
-                decimal delta = prixHistoriques[i] - prixHistoriques[i - 1];
+                decimal delta = closingPrices[i] - closingPrices[i - 1];
 
                 if (delta > 0)
                     gainMoyen += delta;
@@ -49,8 +43,8 @@ namespace BinanceBot.Core
             perteMoyenne /= periode;
 
             decimal rs = perteMoyenne == 0 ? 0 : (gainMoyen / perteMoyenne);
-            return 100 - (100 / (1 + rs));
 
+            return 100 - (100 / (1 + rs));
         }
 
     }
