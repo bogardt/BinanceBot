@@ -64,16 +64,15 @@ namespace BinanceBot.Tests
             var mockHttpClientWrapper = new Mock<IHttpClientWrapper>();
 
             //
-            var priceRetriever = new PriceRetriever();
-            var tradeActionMock = new TradeAction(mockBinanceClient.Object, mockVolatilityStrategy.Object, priceRetriever, mockLogger.Object);
-            var marketTradeHandler = new MarketTradeHandler(mockBinanceClient.Object, mockVolatilityStrategy.Object, mockTechnicalIndicatorsCalculator.Object, tradeActionMock, mockLogger.Object, tradingStrategy);
-
+            var priceRetriever = new PriceRetriever(mockBinanceClient.Object, mockLogger.Object);
+            var tradeAction = new TradeAction(mockBinanceClient.Object, mockVolatilityStrategy.Object, priceRetriever, mockLogger.Object);
+            var marketTradeHandler = new MarketTradeHandler(mockBinanceClient.Object, mockVolatilityStrategy.Object, mockTechnicalIndicatorsCalculator.Object, priceRetriever, tradeAction, mockLogger.Object, tradingStrategy);
 
             var host = Host.CreateDefaultBuilder()
                 .ConfigureServices((context, services) =>
                 {
                     services.AddSingleton<IBinanceClient>(mockBinanceClient.Object);
-                    services.AddSingleton<ITradeAction>(tradeActionMock);
+                    services.AddSingleton<ITradeAction>(tradeAction);
                     services.AddSingleton<IFileSystem>(mockFileSystem.Object);
                     services.AddSingleton<IVolatilityStrategy>(mockVolatilityStrategy.Object);
                     services.AddSingleton<ITechnicalIndicatorsCalculator>(mockTechnicalIndicatorsCalculator.Object);
@@ -119,6 +118,54 @@ namespace BinanceBot.Tests
             var orders = new List<Order>();
             mockBinanceClient.Setup(c => c.GetOpenOrdersAsync(tradingStrategy.Symbol))
                               .ReturnsAsync(orders);
+
+            mockBinanceClient.Setup(c => c.GetAcountInfosAsync())
+                .ReturnsAsync(new Account
+                {
+                    Balances = new []
+                    {
+                        new Balance
+                        {
+                            Asset = "BNB",
+                            Free = "1"
+                        },
+                        new Balance
+                        {
+                            Asset = "USDT",
+                            Free = "1"
+                        },
+                        new Balance
+                        {
+                            Asset = "SOL",
+                            Free = "1"
+                        },
+                    }
+                });
+
+            mockBinanceClient.Setup(c => c.GetPriceBySymbolAsync("BNBUSDT"))
+                .ReturnsAsync(new Currency
+                {
+                    Price = 100m
+                });
+
+            mockBinanceClient.Setup(c => c.GetCommissionBySymbolAsync(tradingStrategy.Symbol))
+                .ReturnsAsync(new Commission
+                {
+                    StandardCommission = new CommissionRates
+                    {
+                        Maker = "0.001"
+                    },
+                    TaxCommission = new CommissionRates
+                    {
+                        Maker = "0.000"
+                    },
+                    Discount = new Discount
+                    {
+                        DiscountValue = "0.25",
+                        EnabledForAccount = true,
+                        EnabledForSymbol = true
+                    }
+                });
 
             // run bot
             await binanceBot.TradeOnLimitAsync();

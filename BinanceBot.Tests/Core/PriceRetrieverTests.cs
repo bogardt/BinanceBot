@@ -11,7 +11,9 @@ namespace BinanceBot.Tests.Core
 
         public PriceRetrieverTests()
         {
-            _priceRetriever = new PriceRetriever();
+            var mockLogger = new Mock<ILogger>();
+            var mockBinanceClient = new Mock<IBinanceClient>();
+            _priceRetriever = new PriceRetriever(mockBinanceClient.Object, mockLogger.Object);
         }
 
         [TestMethod]

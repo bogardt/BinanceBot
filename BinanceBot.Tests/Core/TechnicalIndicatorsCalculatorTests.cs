@@ -26,7 +26,9 @@ namespace BinanceBot.Tests.Core
                 new List<object> { "100.5", "100.5", "100.5", "100.5", "200", "100.5" }
             };
 
-            var priceRetriever = new PriceRetriever();
+            var mockLogger = new Mock<ILogger>();
+            var mockBinanceClient = new Mock<IBinanceClient>();
+            var priceRetriever = new PriceRetriever(mockBinanceClient.Object, mockLogger.Object);
             var clothingPrices = priceRetriever.GetClosingPrices(klines);
 
             _mockPriceRetriever.Setup(c => c.GetClosingPrices(klines)).Returns(clothingPrices);
@@ -42,7 +44,9 @@ namespace BinanceBot.Tests.Core
         public void CalculateMovingAverageInvalidKlinesThrowsException()
         {
             // Arrange
-            var priceRetriever = new PriceRetriever();
+            var mockLogger = new Mock<ILogger>();
+            var mockBinanceClient = new Mock<IBinanceClient>();
+            var priceRetriever = new PriceRetriever(mockBinanceClient.Object, mockLogger.Object);
             var technicalIndicatorsCalculator = new TechnicalIndicatorsCalculator(priceRetriever);
             var period = 2;
             var klines = new List<List<object>>
@@ -58,7 +62,9 @@ namespace BinanceBot.Tests.Core
         public void CalculateRSIValidKlinesCalculatesRSI()
         {
             // Arrange
-            var priceRetriever = new PriceRetriever();
+            var mockLogger = new Mock<ILogger>();
+            var mockBinanceClient = new Mock<IBinanceClient>();
+            var priceRetriever = new PriceRetriever(mockBinanceClient.Object, mockLogger.Object);
             var technicalIndicatorsCalculator = new TechnicalIndicatorsCalculator(priceRetriever);
             var period = 60;
             var klines = CreateLines(period);
@@ -76,7 +82,9 @@ namespace BinanceBot.Tests.Core
         public void CalculateRSIApiThrowsExceptionThrowsException()
         {
             // Arrange
-            var priceRetriever = new PriceRetriever();
+            var mockLogger = new Mock<ILogger>();
+            var mockBinanceClient = new Mock<IBinanceClient>();
+            var priceRetriever = new PriceRetriever(mockBinanceClient.Object, mockLogger.Object);
             var technicalIndicatorsCalculator = new TechnicalIndicatorsCalculator(priceRetriever);
             var period = 14;
             var klines = new List<List<object>>

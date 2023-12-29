@@ -15,7 +15,8 @@ namespace BinanceBot.Tests.Core
         private readonly Mock<ITechnicalIndicatorsCalculator> _mockTechnicalIndicatorsCalculator = new();
         private readonly Mock<IVolatilityStrategy> _mockVolatilityStrategy = new();
         private readonly Mock<ILogger> _mockLogger = new();
-        private readonly PriceRetriever _priceRetriever = new();
+        private readonly Mock<IPriceRetriever> _mockPriceRetriever = new();
+        private readonly PriceRetriever _priceRetriever;
         private static readonly TradingStrategy _tradingStrategy = new()
         {
             TargetProfit = 10m,
@@ -28,11 +29,12 @@ namespace BinanceBot.Tests.Core
 
         public MarketTradeHandlerTests()
         {
+            _priceRetriever = new PriceRetriever(_mockBinanceClient.Object, _mockLogger.Object);
             _tradeAction = new TradeAction(_mockBinanceClient.Object, _mockVolatilityStrategy.Object, _priceRetriever, _mockLogger.Object);
             _handler = new MarketTradeHandler(_mockBinanceClient.Object,
                 _mockVolatilityStrategy.Object,
                 _mockTechnicalIndicatorsCalculator.Object,
-                _priceRetriever,
+                _mockPriceRetriever.Object,
                 _tradeAction,
                 _mockLogger.Object,
                 _tradingStrategy);
@@ -73,7 +75,7 @@ namespace BinanceBot.Tests.Core
             var orders = new List<Order>();
             _mockBinanceClient.Setup(c => c.GetOpenOrdersAsync(_tradingStrategy.Symbol))
                               .ReturnsAsync(orders);
-
+            
             // Act
             await _handler.TradeOnLimitAsync();
 
@@ -95,14 +97,27 @@ namespace BinanceBot.Tests.Core
             var interval = _tradingStrategy.Interval;
             var period = _tradingStrategy.Period;
 
-            _mockBinanceClient.Setup(c => c.GetKLinesBySymbolAsync(_tradingStrategy.Symbol, interval, period.ToString()))
+            var mockBinanceClient = new Mock<IBinanceClient>();
+            mockBinanceClient.Setup(c => c.GetKLinesBySymbolAsync(_tradingStrategy.Symbol, interval, period.ToString()))
                               .ReturnsAsync(new List<List<object>>());
-            _mockBinanceClient.Setup(c => c.GetPriceBySymbolAsync(_tradingStrategy.Symbol))
+            mockBinanceClient.Setup(c => c.GetPriceBySymbolAsync(_tradingStrategy.Symbol))
                               .ThrowsAsync(new Exception("API Error"));
 
+            var priceRetriever = new Mock<IPriceRetriever>();
+            priceRetriever.Setup(c => c.HandleDiscountAsync(_tradingStrategy))
+                .Returns(Task.CompletedTask);
+
+            var marketTradeHandler = new MarketTradeHandler(mockBinanceClient.Object,
+                                                            _mockVolatilityStrategy.Object,
+                                                            _mockTechnicalIndicatorsCalculator.Object,
+                                                            priceRetriever.Object,
+                                                            _tradeAction,
+                                                            _mockLogger.Object,
+                                                            _tradingStrategy);
+
             // Act & Assert
-            await Assert.ThrowsExceptionAsync<Exception>(() => _handler.TradeOnLimitAsync());
-            _mockBinanceClient.Verify(c => c.GetPriceBySymbolAsync(_tradingStrategy.Symbol), Times.Once);
+            await Assert.ThrowsExceptionAsync<Exception>(() => marketTradeHandler.TradeOnLimitAsync());
+            mockBinanceClient.Verify(c => c.GetPriceBySymbolAsync(_tradingStrategy.Symbol), Times.Once);
         }
     }
 }

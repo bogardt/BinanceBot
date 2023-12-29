@@ -44,7 +44,7 @@ namespace BinanceBot.Core
             return minimumSellingPricePerItem;
         }
 
-        public async Task HandleDiscount(TradingStrategy tradingStrategy)
+        public async Task HandleDiscountAsync(TradingStrategy tradingStrategy)
         {
             var account = await _binanceClient.GetAcountInfosAsync();
             var bnbPrice = await _binanceClient.GetPriceBySymbolAsync("BNBUSDT");

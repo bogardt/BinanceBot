@@ -35,7 +35,7 @@ namespace BinanceBot.Core
         {
             try
             {
-                await _priceRetriever.HandleDiscount(_tradingStrategy);
+                await _priceRetriever.HandleDiscountAsync(_tradingStrategy);
 
                 while (true)
                 {
