@@ -68,7 +68,7 @@ namespace BinanceBot.Core
             var klinesEndpoint = $"{_baseEndpoint}/api/v3/klines?symbol={symbol}&interval={interval}&limit={limit}";
             var res = await _httpClientWrapper.GetStringAsync(klinesEndpoint);
             if (string.IsNullOrEmpty(res))
-                throw new JsonReaderException($"Unable to get klines for {symbol}";
+                throw new JsonReaderException($"Unable to get klines for {symbol}");
 
             var klines = JsonConvert.DeserializeObject<List<List<object>>>(res) ??
                 throw new JsonReaderException($"Unable to get klines for {symbol}");
