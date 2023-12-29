@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Moq;
 using Newtonsoft.Json;
 using System.Net;
+using System.Security.Principal;
 
 namespace BinanceBot.Tests.Core
 {
@@ -33,7 +34,7 @@ namespace BinanceBot.Tests.Core
             // Arrange
             var kline = new List<object> { 100m, 100m, 100m, 100m, 100m, 100m, 100m, 100m, 100m, 100m, 100m, 100m };
             var klines = Enumerable.Repeat(kline, 10).ToList();
-            
+
             _mockHttpClientWrapper.Setup(client => client.GetStringAsync(It.IsAny<string>()))
                 .ReturnsAsync(JsonConvert.SerializeObject(klines));
 
@@ -316,6 +317,101 @@ namespace BinanceBot.Tests.Core
             // Assert
             Assert.IsTrue(result.Code == -1100);
             Assert.IsTrue(result?.Message?.Contains("Illegal characters found in parameter 'price'"));
+        }
+
+        [TestMethod]
+        public async Task GetAccountInfosAsyncReturnsAccount()
+        {
+            // construit moi un objet account entierement
+            // Arrange
+            var account = new Account
+            {
+                Balances = new[]
+                {
+                    new Balance
+                    {
+                        Asset = "BNB",
+                        Free = "1"
+                    },
+                    new Balance
+                    {
+                        Asset = "USDT",
+                        Free = "1"
+                    },
+                    new Balance
+                    {
+                        Asset = "SOL",
+                        Free = "1"
+                    },
+                }
+            };
+            var response = new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = new StringContent(JsonConvert.SerializeObject(account))
+            };
+            _mockHttpClientWrapper.Setup(client => client.SendAsync(It.IsAny<HttpRequestMessage>(), It.IsAny<CancellationToken>()))
+                                  .ReturnsAsync(response);
+
+            // Act
+            var result = await _binanceClient.GetAccountInfosAsync();
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual(3, result.Balances.Length);
+            Assert.AreEqual("BNB", result.Balances[0].Asset);
+            Assert.AreEqual("1", result.Balances[0].Free);
+            Assert.AreEqual("USDT", result.Balances[1].Asset);
+            Assert.AreEqual("1", result.Balances[1].Free);
+            Assert.AreEqual("SOL", result.Balances[2].Asset);
+            Assert.AreEqual("1", result.Balances[2].Free);
+        }
+
+        [TestMethod]
+        public async Task GetCommissionBySymbolAsyncReturnsCommission()
+        {
+            // Arrange
+            var commission = new Commission
+            {
+                StandardCommission = new CommissionRates
+                {
+                    Maker = "0.001",
+                    Taker = "0.001"
+                },
+                TaxCommission = new CommissionRates
+                {
+                    Maker = "0.000",
+                    Taker = "0.000"
+                },
+                Discount = new Discount
+                {
+                    DiscountValue = "0.75",
+                    EnabledForAccount = false,
+                    EnabledForSymbol = false
+                }
+            };
+            var response = new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = new StringContent(JsonConvert.SerializeObject(commission))
+            };
+            _mockHttpClientWrapper.Setup(client => client.SendAsync(It.IsAny<HttpRequestMessage>(), It.IsAny<CancellationToken>()))
+                                  .ReturnsAsync(response);
+
+            string symbol = "SOLUSDT";
+
+            // Act
+            var result = await _binanceClient.GetCommissionBySymbolAsync(symbol);
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual("0.001", result.StandardCommission.Maker);
+            Assert.AreEqual("0.001", result.StandardCommission.Taker);
+            Assert.AreEqual("0.000", result.TaxCommission.Maker);
+            Assert.AreEqual("0.000", result.TaxCommission.Taker);
+            Assert.AreEqual("0.75", result.Discount.DiscountValue);
+            Assert.IsFalse(result.Discount.EnabledForAccount);
+            Assert.IsFalse(result.Discount.EnabledForSymbol);
         }
     }
 }

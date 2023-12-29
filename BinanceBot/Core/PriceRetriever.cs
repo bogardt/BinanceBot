@@ -46,7 +46,7 @@ namespace BinanceBot.Core
 
         public async Task HandleDiscountAsync(TradingStrategy tradingStrategy)
         {
-            var account = await _binanceClient.GetAcountInfosAsync();
+            var account = await _binanceClient.GetAccountInfosAsync();
             var bnbPrice = await _binanceClient.GetPriceBySymbolAsync("BNBUSDT");
             var re = await _binanceClient.GetCommissionBySymbolAsync(tradingStrategy.Symbol);
 

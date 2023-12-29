@@ -10,7 +10,5 @@ namespace BinanceBot.Model
         [JsonProperty("free")]
         public string Free { get; set; }
 
-        [JsonProperty("locked")]
-        public string Locked { get; set; }
     }
 }

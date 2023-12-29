@@ -22,7 +22,8 @@ namespace BinanceBot.Core
             _httpClientWrapper = httpClientWrapper;
             //logger.WriteLog($"start in {(_testApi ? "test" : "real")} mode.");
         }
-        public async Task<Account> GetAcountInfosAsync()
+
+        public async Task<Account> GetAccountInfosAsync()
         {
             var endpoint = $"{_baseEndpoint}/api/v3/account";
             var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();

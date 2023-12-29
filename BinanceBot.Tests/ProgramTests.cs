@@ -119,7 +119,7 @@ namespace BinanceBot.Tests
             mockBinanceClient.Setup(c => c.GetOpenOrdersAsync(tradingStrategy.Symbol))
                               .ReturnsAsync(orders);
 
-            mockBinanceClient.Setup(c => c.GetAcountInfosAsync())
+            mockBinanceClient.Setup(c => c.GetAccountInfosAsync())
                 .ReturnsAsync(new Account
                 {
                     Balances = new []
