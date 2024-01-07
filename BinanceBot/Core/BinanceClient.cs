@@ -20,7 +20,6 @@ namespace BinanceBot.Core
         {
             _apiSecret = config["AppSettings:Binance:ApiSecret"] ?? string.Empty;
             _httpClientWrapper = httpClientWrapper;
-            //logger.WriteLog($"start in {(_testApi ? "test" : "real")} mode.");
         }
 
         public async Task<Account> GetAccountInfosAsync()
@@ -39,7 +38,11 @@ namespace BinanceBot.Core
                 throw new JsonReaderException($"Unable to get account infos");
 
             var account = JsonConvert.DeserializeObject<Account>(res) ??
-                throw new JsonReaderException($"Unable to get account infos");
+                throw new JsonReaderException($"Unable to get account infos {res}");
+
+            if (account.Code != null && account.Message != null)
+                throw new Exception($"Unable to get account infos {res}");
+
             return account;
         }
 
@@ -56,10 +59,14 @@ namespace BinanceBot.Core
             //response.EnsureSuccessStatusCode();
             var res = await response.Content.ReadAsStringAsync();
             if (string.IsNullOrEmpty(res))
-                throw new JsonReaderException($"Unable to get wallet for {symbol}");
+                throw new JsonReaderException($"Unable to get wallet for {symbol} : {res}");
 
             var commission = JsonConvert.DeserializeObject<Commission>(res) ??
-                throw new JsonReaderException($"Unable to get wallet for {symbol}");
+                throw new JsonReaderException($"Unable to get wallet for {symbol} : {res}");
+
+            if (commission.Code != null && commission.Message != null)
+                throw new Exception($"Unable to get wallet for {symbol} : {res}");
+
             return commission;
         }
 
@@ -68,10 +75,11 @@ namespace BinanceBot.Core
             var klinesEndpoint = $"{_baseEndpoint}/api/v3/klines?symbol={symbol}&interval={interval}&limit={limit}";
             var res = await _httpClientWrapper.GetStringAsync(klinesEndpoint);
             if (string.IsNullOrEmpty(res))
-                throw new JsonReaderException($"Unable to get klines for {symbol}");
+                throw new JsonReaderException($"Unable to get klines for {symbol} : {res}");
 
             var klines = JsonConvert.DeserializeObject<List<List<object>>>(res) ??
-                throw new JsonReaderException($"Unable to get klines for {symbol}");
+                throw new JsonReaderException($"Unable to get klines for {symbol} : {res}");
+
             return klines;
         }
 
@@ -80,10 +88,14 @@ namespace BinanceBot.Core
             var priceEndpoint = $"{_baseEndpoint}/api/v3/ticker/price?symbol={symbol}";
             var res = await _httpClientWrapper.GetStringAsync(priceEndpoint);
             if (string.IsNullOrEmpty(res))
-                throw new JsonReaderException($"Unable to get price for {symbol}");
+                throw new JsonReaderException($"Unable to get price for {symbol} : {res}");
 
             var currency = JsonConvert.DeserializeObject<Currency>(res) ??
-                throw new JsonReaderException($"Unable to get price for {symbol}");
+                throw new JsonReaderException($"Unable to get price for {symbol} : {res}");
+
+            if (currency.Code != null && currency.Message != null)
+                throw new Exception($"Unable to get price for {symbol} : {res}");
+
             return currency;
         }
 
@@ -100,10 +112,11 @@ namespace BinanceBot.Core
             //response.EnsureSuccessStatusCode();
             var res = await response.Content.ReadAsStringAsync();
             if (string.IsNullOrEmpty(res))
-                throw new JsonReaderException($"Unable to get orders for {symbol}");
+                throw new JsonReaderException($"Unable to get orders for {symbol} : {res}");
 
             var orders = JsonConvert.DeserializeObject<List<Order>>(res) ??
-                throw new JsonReaderException($"Unable to get orders for {symbol}");
+                throw new JsonReaderException($"Unable to get orders for {symbol} : {res}");
+
             return orders;
         }
 
@@ -125,11 +138,44 @@ namespace BinanceBot.Core
             //response.EnsureSuccessStatusCode();
             var res = await response.Content.ReadAsStringAsync();
             if (string.IsNullOrEmpty(res))
-                throw new JsonReaderException($"Unable to place test order for {symbol}");
+                throw new JsonReaderException($"Unable to place test order for {symbol} : {res}");
 
-            var testOrder = JsonConvert.DeserializeObject<TestOrder>(res) ??
-                throw new JsonReaderException($"Unable to place test order for {symbol}");
-            return testOrder;
+            var order = JsonConvert.DeserializeObject<TestOrder>(res) ??
+                throw new JsonReaderException($"Unable to place test order for {symbol} : {res}");
+
+            if (order.Code != null && order.Message != null)
+                throw new Exception($"Unable to place test order for {symbol} : {res}");
+
+            return order;
+        }
+
+        public async Task<Order> PlaceOrderAsync(string symbol, decimal quantity, decimal price, string side)
+        {
+            var endpoint = $"{_baseEndpoint}/api/v3/order";
+            var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            var quantitystr = quantity.ToString("0.######", CultureInfo.InvariantCulture);
+            var pricestr = price.ToString("0.######", CultureInfo.InvariantCulture);
+            var queryString = $"symbol={symbol}&side={side}&type=LIMIT&timeInForce=GTC&quantity={quantitystr}" +
+                $"&price={pricestr}&timestamp={timestamp}&computeCommissionRates=true";
+            var signature = Sign(queryString, _apiSecret);
+
+            var finalUrl = $"{endpoint}?{queryString}&signature={signature}";
+
+            using var request = new HttpRequestMessage(HttpMethod.Post, finalUrl);
+
+            var response = await _httpClientWrapper.SendAsync(request);
+            //response.EnsureSuccessStatusCode();
+            var res = await response.Content.ReadAsStringAsync();
+            if (string.IsNullOrEmpty(res))
+                throw new JsonReaderException($"Unable to place order for {symbol} : {res}");
+
+            var order = JsonConvert.DeserializeObject<Order>(res) ??
+                throw new JsonReaderException($"Unable to place order for {symbol} : {res}");
+
+            if (order.Code != null && order.Message != null)
+                throw new Exception($"Unable to place order for {symbol} : {res}");
+
+            return order;
         }
 
         private static string Sign(string data, string secret)

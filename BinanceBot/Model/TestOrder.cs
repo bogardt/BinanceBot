@@ -4,6 +4,10 @@ namespace BinanceBot.Model
 {
     public class TestOrder
     {
+        [JsonProperty("code")]
+        public int? Code { get; set; }
+        [JsonProperty("msg")]
+        public string? Message { get; set; }
         [JsonProperty("standardCommissionForOrder")]
         public CommissionRates StandardCommissionForOrder { get; set; }
 
@@ -12,9 +16,5 @@ namespace BinanceBot.Model
 
         [JsonProperty("discount")]
         public Discount Discount { get; set; }
-        [JsonProperty("msg")]
-        public string? Message { get; set; }
-        [JsonProperty("code")]
-        public int? Code { get; set; }
     }
 }

@@ -4,7 +4,7 @@ namespace BinanceBot.Tests
 {
     public static class TradeSetup
     {
-        public static readonly TradingStrategy TradingConfig = new()
+        public static readonly TradingStrategy tradingStrategy = new()
         {
             TargetProfit = 10m,
             Quantity = 200m,

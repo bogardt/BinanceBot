@@ -64,17 +64,29 @@ namespace BinanceBot.Core
 
                     var output = string.Empty;
 
+                    decimal forecastSellingPrice = _priceRetriever.CalculateMinimumSellingPrice(
+                        currentCurrencyPrice,
+                        _tradingStrategy.Quantity,
+                        _tradingStrategy.FeePercentage,
+                        _tradingStrategy.Discount,
+                        _tradingStrategy.TargetProfit);
+
                     if (_tradingStrategy.OpenPosition)
                     {
                         var (targetPrice, endProgram) = await _tradeAction.Sell(_tradingStrategy, currentCurrencyPrice, volatility, _tradingStrategy.Symbol);
                         if (endProgram)
                             break;
 
-                        //decimal targetBenefit = (_tradingConfig.TotalPurchaseCost + _tradingConfig.TargetProfit) - _tradingConfig.CryptoPurchasePrice;
+                        //decimal targetBenefit = (_tradingStrategy.TotalPurchaseCost + _tradingStrategy.TargetProfit) - _tradingStrategy.CryptoPurchasePrice;
 
                         output += $"diffMarge: {(targetPrice - _tradingStrategy.CryptoPurchasePrice):F2} | ";
                         //output += $"targetBenefit: {targetBenefit:F2} | ";
                         output += $"targetPrice: {targetPrice:F2}";
+                    }
+                    else
+                    {
+                        output += $"diffMarge: {(forecastSellingPrice - currentCurrencyPrice):F2} | ";
+                        output += $"forecastTargetPrice: {forecastSellingPrice:F2}";
                     }
 
                     _logger.WriteLog((string.IsNullOrEmpty(output) ? "" : $"{output} | ") +
@@ -91,7 +103,7 @@ namespace BinanceBot.Core
             catch (Exception ex)
             {
                 Console.WriteLine($"Erreur: {ex.Message}", ex);
-                throw;
+                throw ex;
             }
         }
     }

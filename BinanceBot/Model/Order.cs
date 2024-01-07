@@ -4,6 +4,10 @@ namespace BinanceBot.Model
 {
     public class Order
     {
+        [JsonProperty("code")]
+        public int? Code { get; set; }
+        [JsonProperty("msg")]
+        public string? Message { get; set; }
         [JsonProperty("symbol")]
         public string Symbol { get; set; }
         [JsonProperty("orderId")]

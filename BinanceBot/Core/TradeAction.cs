@@ -1,4 +1,5 @@
 ﻿using BinanceBot.Abstraction;
+using BinanceBot.Model;
 using BinanceBot.Strategy;
 using Newtonsoft.Json;
 
@@ -22,48 +23,48 @@ namespace BinanceBot.Core
             _logger = logger;
         }
 
-        public async Task Buy(TradingStrategy tradingConfig, decimal currentCurrencyPrice, decimal volatility, string symbol)
+        public async Task Buy(TradingStrategy tradingStrategy, decimal currentCurrencyPrice, decimal volatility, string symbol)
         {
-            tradingConfig.CryptoPurchasePrice = currentCurrencyPrice;
-            tradingConfig.TotalPurchaseCost = tradingConfig.Quantity * tradingConfig.CryptoPurchasePrice;
+            tradingStrategy.CryptoPurchasePrice = currentCurrencyPrice;
+            tradingStrategy.TotalPurchaseCost = tradingStrategy.Quantity * tradingStrategy.CryptoPurchasePrice;
 
-            decimal feesAmount = tradingConfig.TotalPurchaseCost * tradingConfig.FeePercentage;
-            tradingConfig.TotalPurchaseCost *= (1 + tradingConfig.FeePercentage);
+            decimal feesAmount = tradingStrategy.TotalPurchaseCost * tradingStrategy.FeePercentage;
+            tradingStrategy.TotalPurchaseCost *= (1 + tradingStrategy.FeePercentage);
 
-            _logger.WriteLog($"===> [ACHAT] {tradingConfig.Quantity} | " +
+            _logger.WriteLog($"===> [ACHAT] {tradingStrategy.Quantity} | " +
                 $"feesAmount: {feesAmount} | " +
-                $"cryptoPurchasePrice: {tradingConfig.CryptoPurchasePrice:F2} | " +
-                $"totalPurchaseCost: {tradingConfig.TotalPurchaseCost:F2}");
+                $"cryptoPurchasePrice: {tradingStrategy.CryptoPurchasePrice:F2} | " +
+                $"totalPurchaseCost: {tradingStrategy.TotalPurchaseCost:F2}");
 
-            var response = await _binanceClient.PlaceTestOrderAsync(symbol, tradingConfig.Quantity, currentCurrencyPrice, "BUY");
+            var response = await _binanceClient.PlaceTestOrderAsync(symbol, tradingStrategy.Quantity, currentCurrencyPrice, "BUY");
             _logger.WriteLog($"{JsonConvert.SerializeObject(response, Formatting.Indented)}");
 
             await WaitBuyAsync(symbol);
 
-            tradingConfig.OpenPosition = true;
+            tradingStrategy.OpenPosition = true;
         }
 
-        public async Task<(decimal, bool)> Sell(TradingStrategy tradingConfig,
+        public async Task<(decimal, bool)> Sell(TradingStrategy tradingStrategy,
             decimal currentCurrencyPrice,
             decimal volatility,
             string symbol)
         {
             decimal prixVenteCible = _priceRetriever.CalculateMinimumSellingPrice(
-                tradingConfig.CryptoPurchasePrice,
-                tradingConfig.Quantity,
-                tradingConfig.FeePercentage,
-                tradingConfig.Discount,
-                tradingConfig.TargetProfit);
-            //decimal prixVenteCible2 = (tradingConfig.TotalPurchaseCost + tradingConfig.TargetProfit) / tradingConfig.Quantity / (1 - tradingConfig.FeePercentage);
+                tradingStrategy.CryptoPurchasePrice,
+                tradingStrategy.Quantity,
+                tradingStrategy.FeePercentage,
+                tradingStrategy.Discount,
+                tradingStrategy.TargetProfit);
+            //decimal prixVenteCible2 = (tradingStrategy.TotalPurchaseCost + tradingStrategy.TargetProfit) / tradingStrategy.Quantity / (1 - tradingStrategy.FeePercentage);
             
-            decimal commissionAchatBrute = tradingConfig.CryptoPurchasePrice * tradingConfig.Quantity * tradingConfig.FeePercentage;
-            decimal commissionAchat = commissionAchatBrute * (1 - tradingConfig.Discount);
-            decimal commissionVenteBrute = currentCurrencyPrice * tradingConfig.Quantity * tradingConfig.FeePercentage;
-            decimal commissionVente = commissionVenteBrute * (1 - tradingConfig.Discount);
-            decimal prixVenteTotal = currentCurrencyPrice * tradingConfig.Quantity;
-            decimal prixAchatTotal = tradingConfig.CryptoPurchasePrice * tradingConfig.Quantity;
+            decimal commissionAchatBrute = tradingStrategy.CryptoPurchasePrice * tradingStrategy.Quantity * tradingStrategy.FeePercentage;
+            decimal commissionAchat = commissionAchatBrute * (1 - tradingStrategy.Discount);
+            decimal commissionVenteBrute = currentCurrencyPrice * tradingStrategy.Quantity * tradingStrategy.FeePercentage;
+            decimal commissionVente = commissionVenteBrute * (1 - tradingStrategy.Discount);
+            decimal prixVenteTotal = currentCurrencyPrice * tradingStrategy.Quantity;
+            decimal prixAchatTotal = tradingStrategy.CryptoPurchasePrice * tradingStrategy.Quantity;
             decimal beneficeNet = (prixVenteTotal - commissionVente) - (prixAchatTotal + commissionAchat);
-            decimal stopLossPrice = _volatilityStrategy.DetermineLossStrategy(tradingConfig.CryptoPurchasePrice, volatility);
+            decimal stopLossPrice = _volatilityStrategy.DetermineLossStrategy(tradingStrategy.CryptoPurchasePrice, volatility);
 
             if (currentCurrencyPrice >= prixVenteCible)
             {
@@ -72,19 +73,28 @@ namespace BinanceBot.Core
                     _logger.WriteLog("STOPP LOSS");
                 }
 
-                tradingConfig.TotalBenefit += beneficeNet;
-                _logger.WriteLog($"===> [VENTE] {tradingConfig.Quantity:F2} | " +
+                tradingStrategy.TotalBenefit += beneficeNet;
+                _logger.WriteLog($"===> [VENTE] {tradingStrategy.Quantity:F2} | " +
                     $"currentCurrencyPrice: {currentCurrencyPrice:F2} | " +
-                    $"totalBenefit: {tradingConfig.TotalBenefit:F2}");
+                    $"totalBenefit: {tradingStrategy.TotalBenefit:F2}");
 
-                var response = await _binanceClient.PlaceTestOrderAsync(symbol, tradingConfig.Quantity, currentCurrencyPrice, "SELL");
-                _logger.WriteLog($"{JsonConvert.SerializeObject(response, Formatting.Indented)}");
+                if (tradingStrategy.TestMode)
+                {
+                    var orderResponse = await _binanceClient.PlaceTestOrderAsync(symbol, tradingStrategy.Quantity, currentCurrencyPrice, "SELL");
+                    _logger.WriteLog($"{JsonConvert.SerializeObject(orderResponse, Formatting.Indented)}");
+                }
+                else
+                {
+                    var orderResponse = await _binanceClient.PlaceOrderAsync(symbol, tradingStrategy.Quantity, currentCurrencyPrice, "SELL");
+                    _logger.WriteLog($"{JsonConvert.SerializeObject(orderResponse, Formatting.Indented)}");
+                }
+
 
                 await WaitSellAsync(symbol);
 
-                tradingConfig.OpenPosition = false;
+                tradingStrategy.OpenPosition = false;
 
-                if (tradingConfig.TotalBenefit >= tradingConfig.LimitBenefit)
+                if (tradingStrategy.TotalBenefit >= tradingStrategy.LimitBenefit)
                 {
                     _logger.WriteLog("BENEFICE LIMITE ->> exit program");
                     return (prixVenteCible, true);

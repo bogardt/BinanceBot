@@ -17,17 +17,12 @@ namespace BinanceBot.Core
             _logger = logger;
         }
 
-        public List<decimal> GetClosingPrices(List<List<object>> klines)
+        public List<decimal> GetClosingPrices(List<List<object>> klines) => klines.Select((it) =>
         {
-            var closingPrices = klines.Select((it) =>
-            {
-                if (!decimal.TryParse(it[4].ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out var ret))
-                    throw new InvalidCastException($"it cannot be converted to decimal for klines {JsonConvert.SerializeObject(it)}");
-                return ret;
-            }).ToList();
-
-            return closingPrices;
-        }
+            if (!decimal.TryParse(it[4].ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out var ret))
+                throw new InvalidCastException($"it cannot be converted to decimal for klines {JsonConvert.SerializeObject(it)}");
+            return ret;
+        }).ToList();
 
         public decimal CalculateMinimumSellingPrice(decimal cryptoPurchasePrice, decimal quantity, decimal feePercentage, decimal discount, decimal targetProfit)
         {

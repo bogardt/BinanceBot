@@ -4,6 +4,10 @@ namespace BinanceBot.Model
 {
     public class Commission
     {
+        [JsonProperty("code")]
+        public int? Code { get; set; }
+        [JsonProperty("msg")]
+        public string? Message { get; set; }
 
         [JsonProperty("standardCommission")]
         public CommissionRates StandardCommission { get; set; }
