@@ -112,7 +112,33 @@ namespace BinanceBot.Tests.Core
             _mockLogger.Verify(c => c.WriteLog(It.Is<string>(s => s.Contains("real : " + JsonConvert.SerializeObject(order, Formatting.Indented)))), Times.AtLeastOnce);
             _mockLogger.Verify(c => c.WriteLog(It.Is<string>(s => s.Contains("[VENTE]"))), Times.AtLeastOnce);
             _mockLogger.Verify(c => c.WriteLog(It.Is<string>(s => s.Contains("BENEFICE LIMITE"))), Times.AtLeastOnce);
+            Assert.IsTrue(_tradingStrategy.TotalBenefit >= _tradingStrategy.LimitBenefit);
             Assert.IsTrue(!_tradingStrategy.OpenPosition);
+        }
+
+        [TestMethod]
+        public async Task SellSkipSelling()
+        {
+            // Arrange
+            var stopLossStrategy = new StopLossStrategy();
+            decimal currentCurrencyPrice = 100m;
+            decimal volatility = 0.05m;
+            var order = new Order
+            {
+                OrderId = 1,
+                Symbol = "BTCUSDT"
+            };
+            _tradingStrategy.OpenPosition = true;
+            _mockPriceRetriever.Setup(c => c.CalculateMinimumSellingPrice(_tradingStrategy.CryptoPurchasePrice, _tradingStrategy.Quantity, _tradingStrategy.FeePercentage, _tradingStrategy.Discount, _tradingStrategy.TargetProfit)).Returns(currentCurrencyPrice + 100);
+            _mockBinanceClient.Setup(c => c.GetOpenOrdersAsync(_tradingStrategy.Symbol)).ReturnsAsync(new List<Order>());
+
+            // Act
+            var (prixVenteCible, maxBenefitDone) = await _tradeAction.Sell(_tradingStrategy, currentCurrencyPrice, volatility, _tradingStrategy.Symbol);
+
+            // Assert
+            _mockLogger.Verify(c => c.WriteLog(It.IsAny<string>()), Times.Never);
+            Assert.IsTrue(maxBenefitDone == false);
+            Assert.IsTrue(_tradingStrategy.OpenPosition);
         }
 
         [TestMethod]
@@ -194,6 +220,7 @@ namespace BinanceBot.Tests.Core
             _mockLogger.Verify(c => c.WriteLog(It.Is<string>(s => s.Contains("test : " + JsonConvert.SerializeObject(testOrder, Formatting.Indented)))), Times.AtLeastOnce);
             _mockLogger.Verify(c => c.WriteLog(It.Is<string>(s => s.Contains("[VENTE]"))), Times.AtLeastOnce);
             _mockLogger.Verify(c => c.WriteLog(It.Is<string>(s => s.Contains("BENEFICE LIMITE"))), Times.AtLeastOnce);
+            Assert.IsTrue(_tradingStrategyTest.TotalBenefit >= _tradingStrategyTest.LimitBenefit);
             Assert.IsTrue(!_tradingStrategyTest.OpenPosition);
         }
     }
