@@ -326,7 +326,7 @@ namespace BinanceBot.Tests.Core
         {
             // Arrange
             _mockHttpClientWrapper.Setup(client => client.GetStringAsync(It.IsAny<string>()))
-                .ReturnsAsync((string?)null);
+                .ReturnsAsync(JsonConvert.SerializeObject(null));
 
             // Act & Assert
             var exception = await Assert.ThrowsExceptionAsync<JsonReaderException>(

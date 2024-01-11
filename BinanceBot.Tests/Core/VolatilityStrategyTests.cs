@@ -1,7 +1,5 @@
 using BinanceBot.Abstraction;
 using BinanceBot.Core;
-using BinanceBot.Model;
-using BinanceBot.Strategy;
 using Moq;
 
 namespace BinanceBot.Tests.Core
