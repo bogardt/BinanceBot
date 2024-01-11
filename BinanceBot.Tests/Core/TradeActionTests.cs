@@ -10,7 +10,6 @@ namespace BinanceBot.Tests.Core
     [TestClass]
     public class TradeActionTests
     {
-        private readonly Mock<IBinanceClient> _mockBinanceClientTest = new();
         private readonly Mock<IBinanceClient> _mockBinanceClient = new();
         private readonly Mock<IPriceRetriever> _mockPriceRetriever = new();
         private readonly Mock<IVolatilityStrategy> _mockVolatilityStrategy = new();

@@ -75,7 +75,7 @@ namespace BinanceBot.Tests.Core
             var orders = new List<Order>();
             _mockBinanceClient.Setup(c => c.GetOpenOrdersAsync(_tradingStrategy.Symbol))
                               .ReturnsAsync(orders);
-            
+
             // Act
             await _handler.TradeOnLimitAsync();
 
@@ -86,9 +86,63 @@ namespace BinanceBot.Tests.Core
             _mockBinanceClient.Verify(c => c.GetKLinesBySymbolAsync(_tradingStrategy.Symbol, interval, period.ToString()), Times.Exactly(2));
             _mockBinanceClient.Verify(c => c.GetPriceBySymbolAsync(_tradingStrategy.Symbol), Times.Exactly(2));
             _mockBinanceClient.Verify(c => c.PlaceTestOrderAsync(It.IsAny<string>(), It.IsAny<decimal>(), It.IsAny<decimal>(), It.IsAny<string>()), Times.Exactly(2));
-            _mockBinanceClient.Verify(c => c.GetOpenOrdersAsync(_tradingStrategy.Symbol), Times.Exactly(2));
             _mockLogger.Verify(c => c.WriteLog(It.IsAny<string>()), Times.Exactly(6));
+            Assert.IsTrue(_tradingStrategy.TotalBenefit >= _tradingStrategy.LimitBenefit);
             //_mockLogger.Verify(c => c.WriteLog(It.Is<string>(str => str.Contains("diffMarge") && str.Contains("forecastTargetPrice"))), Times.AtLeastOnce());
+        }
+
+
+        [TestMethod]
+        public async Task TradeOnLimitAsyncValidTradeScenario2()
+        {
+            // Arrange
+            var interval = _tradingStrategy.Interval;
+            var period = _tradingStrategy.Period;
+            var kline = new List<object> { 100m, 100m, 100m, 100m, 100m, 100m, 100m, 100m, 100m, 100m, 100m, 100m };
+            var klines = Enumerable.Repeat(kline, period).ToList();
+
+            _mockBinanceClient.Setup(c => c.GetKLinesBySymbolAsync(_tradingStrategy.Symbol, interval, period.ToString()))
+                              .ReturnsAsync(klines);
+            _mockBinanceClient.Setup(c => c.GetKLinesBySymbolAsync(_tradingStrategy.Symbol, interval, (period + 1).ToString()))
+                              .ReturnsAsync(klines);
+
+            _mockTechnicalIndicatorsCalculator.Setup(c => c.CalculateRSI(klines, period))
+                .Returns(30m);
+
+            _mockTechnicalIndicatorsCalculator.Setup(c => c.CalculateMovingAverage(klines, period))
+                .Returns(100m);
+
+            _mockVolatilityStrategy.Setup(c => c.CalculateVolatility(It.IsAny<List<List<object>>>()))
+                .Returns(0.25m);
+
+            var currencyForBuy1 = new Currency { Symbol = _tradingStrategy.Symbol, Price = 110m };
+            var currencyForBuy2 = new Currency { Symbol = _tradingStrategy.Symbol, Price = 90m };
+            var currencyForSell2 = new Currency { Symbol = _tradingStrategy.Symbol, Price = 100m };
+            _mockBinanceClient.SetupSequence(c => c.GetPriceBySymbolAsync(_tradingStrategy.Symbol))
+                              .ReturnsAsync(currencyForBuy1)
+                              .ReturnsAsync(currencyForBuy2)
+                              .ReturnsAsync(currencyForSell2);
+
+            _mockBinanceClient.Setup(c => c.PlaceTestOrderAsync(It.IsAny<string>(), It.IsAny<decimal>(), It.IsAny<decimal>(), It.IsAny<string>()))
+                              .ReturnsAsync(It.IsAny<TestOrder>());
+
+            var orders = new List<Order>();
+            _mockBinanceClient.Setup(c => c.GetOpenOrdersAsync(_tradingStrategy.Symbol))
+                              .ReturnsAsync(orders);
+
+            // Act
+            await _handler.TradeOnLimitAsync();
+
+            // Assert
+            _mockTechnicalIndicatorsCalculator.Verify(c => c.CalculateRSI(klines, period), Times.Exactly(3));
+            _mockVolatilityStrategy.Verify(c => c.CalculateVolatility(It.IsAny<List<List<object>>>()), Times.Exactly(3));
+            _mockBinanceClient.Verify(c => c.GetOpenOrdersAsync(_tradingStrategy.Symbol), Times.Exactly(2));
+            _mockBinanceClient.Verify(c => c.GetKLinesBySymbolAsync(_tradingStrategy.Symbol, interval, period.ToString()), Times.Exactly(3));
+            _mockBinanceClient.Verify(c => c.GetPriceBySymbolAsync(_tradingStrategy.Symbol), Times.Exactly(3));
+            _mockBinanceClient.Verify(c => c.PlaceTestOrderAsync(It.IsAny<string>(), It.IsAny<decimal>(), It.IsAny<decimal>(), It.IsAny<string>()), Times.Exactly(2));
+            _mockLogger.Verify(c => c.WriteLog(It.IsAny<string>()), Times.Exactly(7));
+            Assert.IsTrue(_tradingStrategy.TotalBenefit >= _tradingStrategy.LimitBenefit);
+            _mockLogger.Verify(c => c.WriteLog(It.Is<string>(str => str.Contains("diffMarge") && str.Contains("forecastTargetPrice"))), Times.AtLeastOnce());
         }
 
         [TestMethod]
