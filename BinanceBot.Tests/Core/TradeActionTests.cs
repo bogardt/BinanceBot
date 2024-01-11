@@ -123,13 +123,15 @@ namespace BinanceBot.Tests.Core
             var stopLossStrategy = new StopLossStrategy();
             decimal currentCurrencyPrice = 100m;
             decimal volatility = 0.05m;
+            decimal minimumSellingPrice = currentCurrencyPrice + 100;
             var order = new Order
             {
                 OrderId = 1,
                 Symbol = "BTCUSDT"
             };
+            _tradingStrategy.CryptoPurchasePrice = 100m;
             _tradingStrategy.OpenPosition = true;
-            _mockPriceRetriever.Setup(c => c.CalculateMinimumSellingPrice(_tradingStrategy.CryptoPurchasePrice, _tradingStrategy.Quantity, _tradingStrategy.FeePercentage, _tradingStrategy.Discount, _tradingStrategy.TargetProfit)).Returns(currentCurrencyPrice + 100);
+            _mockPriceRetriever.Setup(c => c.CalculateMinimumSellingPrice(_tradingStrategy.CryptoPurchasePrice, _tradingStrategy.Quantity, _tradingStrategy.FeePercentage, _tradingStrategy.Discount, _tradingStrategy.TargetProfit)).Returns(minimumSellingPrice);
             _mockBinanceClient.Setup(c => c.GetOpenOrdersAsync(_tradingStrategy.Symbol)).ReturnsAsync(new List<Order>());
 
             // Act
@@ -139,6 +141,7 @@ namespace BinanceBot.Tests.Core
             _mockLogger.Verify(c => c.WriteLog(It.IsAny<string>()), Times.Never);
             Assert.IsTrue(maxBenefitDone == false);
             Assert.IsTrue(_tradingStrategy.OpenPosition);
+            Assert.IsFalse(currentCurrencyPrice >= minimumSellingPrice);
         }
 
         [TestMethod]
