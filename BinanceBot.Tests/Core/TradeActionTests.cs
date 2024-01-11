@@ -3,6 +3,7 @@ using BinanceBot.Core;
 using BinanceBot.Model;
 using BinanceBot.Strategy;
 using Moq;
+using Newtonsoft.Json;
 
 namespace BinanceBot.Tests.Core
 {
@@ -65,8 +66,13 @@ namespace BinanceBot.Tests.Core
             // Arrange
             decimal currentCurrencyPrice = 100m;
             decimal volatility = 0.05m;
+            var order = new Order
+            {
+                OrderId = 1,
+                Symbol = "BTCUSDT"
+            };
 
-            _mockBinanceClient.Setup(c => c.PlaceOrderAsync(_tradingStrategy.Symbol, _tradingStrategy.Quantity, currentCurrencyPrice, "BUY")).ReturnsAsync(It.IsAny<Order>());
+            _mockBinanceClient.Setup(c => c.PlaceOrderAsync(_tradingStrategy.Symbol, _tradingStrategy.Quantity, currentCurrencyPrice, "BUY")).ReturnsAsync(order);
             _mockBinanceClient.Setup(c => c.GetOpenOrdersAsync(_tradingStrategy.Symbol)).ReturnsAsync(new List<Order>());
 
             // Act
@@ -76,6 +82,7 @@ namespace BinanceBot.Tests.Core
             _mockBinanceClient.Verify(c => c.PlaceOrderAsync(_tradingStrategy.Symbol, _tradingStrategy.Quantity, currentCurrencyPrice, "BUY"), Times.Once);
             _mockLogger.Verify(c => c.WriteLog(It.IsAny<string>()), Times.Exactly(2));
             _mockLogger.Verify(c => c.WriteLog(It.Is<string>(s => s.Contains("[ACHAT]"))), Times.AtLeastOnce);
+            _mockLogger.Verify(c => c.WriteLog(It.Is<string>(s => s.Contains(JsonConvert.SerializeObject(order, Formatting.Indented)))), Times.AtLeastOnce);
             Assert.IsTrue(_tradingStrategy.OpenPosition);
         }
 
@@ -86,9 +93,14 @@ namespace BinanceBot.Tests.Core
             var stopLossStrategy = new StopLossStrategy();
             decimal currentCurrencyPrice = 100m;
             decimal volatility = 0.05m;
+            var order = new Order
+            {
+                OrderId = 1,
+                Symbol = "BTCUSDT"
+            };
 
             _mockVolatilityStrategy.Setup(c => c.DetermineLossStrategy(_tradingStrategy.CryptoPurchasePrice, volatility)).Returns(10000);
-            _mockBinanceClient.Setup(c => c.PlaceOrderAsync(_tradingStrategy.Symbol, _tradingStrategy.Quantity, currentCurrencyPrice, "SELL")).ReturnsAsync(It.IsAny<Order>());
+            _mockBinanceClient.Setup(c => c.PlaceOrderAsync(_tradingStrategy.Symbol, _tradingStrategy.Quantity, currentCurrencyPrice, "SELL")).ReturnsAsync(order);
             _mockBinanceClient.Setup(c => c.GetOpenOrdersAsync(_tradingStrategy.Symbol)).ReturnsAsync(new List<Order>());
 
             // Act
@@ -98,7 +110,7 @@ namespace BinanceBot.Tests.Core
             _mockBinanceClient.Verify(c => c.PlaceOrderAsync(_tradingStrategy.Symbol, _tradingStrategy.Quantity, currentCurrencyPrice, "SELL"), Times.Once);
             _mockLogger.Verify(c => c.WriteLog(It.IsAny<string>()), Times.Exactly(4));
             _mockLogger.Verify(c => c.WriteLog(It.Is<string>(s => s.Contains("STOPP LOSS"))), Times.AtLeastOnce);
-            _mockLogger.Verify(c => c.WriteLog(It.Is<string>(s => s.Contains("null"))), Times.AtLeastOnce);
+            _mockLogger.Verify(c => c.WriteLog(It.Is<string>(s => s.Contains(JsonConvert.SerializeObject(order, Formatting.Indented)))), Times.AtLeastOnce);
             _mockLogger.Verify(c => c.WriteLog(It.Is<string>(s => s.Contains("[VENTE]"))), Times.AtLeastOnce);
             _mockLogger.Verify(c => c.WriteLog(It.Is<string>(s => s.Contains("BENEFICE LIMITE"))), Times.AtLeastOnce);
             Assert.IsTrue(!_tradingStrategy.OpenPosition);
@@ -110,8 +122,26 @@ namespace BinanceBot.Tests.Core
             // Arrange
             decimal currentCurrencyPrice = 100m;
             decimal volatility = 0.05m;
-
-            _mockBinanceClient.Setup(c => c.PlaceTestOrderAsync(_tradingStrategyTest.Symbol, _tradingStrategyTest.Quantity, currentCurrencyPrice, "BUY")).ReturnsAsync(It.IsAny<TestOrder>());
+            var testOrder = new TestOrder
+            {
+                StandardCommissionForOrder = new CommissionRates
+                {
+                    Maker = "0.001",
+                    Taker = "0.001"
+                },
+                TaxCommissionForOrder = new CommissionRates
+                {
+                    Maker = "0.000",
+                    Taker = "0.000"
+                },
+                Discount = new Discount
+                {
+                    DiscountValue = "0.75",
+                    EnabledForAccount = false,
+                    EnabledForSymbol = false
+                }
+            };
+            _mockBinanceClient.Setup(c => c.PlaceTestOrderAsync(_tradingStrategyTest.Symbol, _tradingStrategyTest.Quantity, currentCurrencyPrice, "BUY")).ReturnsAsync(testOrder);
             _mockBinanceClient.Setup(c => c.GetOpenOrdersAsync(_tradingStrategyTest.Symbol)).ReturnsAsync(new List<Order>());
 
             // Act
@@ -121,6 +151,7 @@ namespace BinanceBot.Tests.Core
             _mockBinanceClient.Verify(c => c.PlaceTestOrderAsync(_tradingStrategyTest.Symbol, _tradingStrategyTest.Quantity, currentCurrencyPrice, "BUY"), Times.Once);
             _mockLogger.Verify(c => c.WriteLog(It.IsAny<string>()), Times.Exactly(2));
             _mockLogger.Verify(c => c.WriteLog(It.Is<string>(s => s.Contains("[ACHAT]"))), Times.AtLeastOnce);
+            _mockLogger.Verify(c => c.WriteLog(It.Is<string>(s => s.Contains(JsonConvert.SerializeObject(testOrder, Formatting.Indented)))), Times.AtLeastOnce);
             Assert.IsTrue(_tradingStrategyTest.OpenPosition);
         }
 
@@ -131,9 +162,27 @@ namespace BinanceBot.Tests.Core
             var stopLossStrategy = new StopLossStrategy();
             decimal currentCurrencyPrice = 100m;
             decimal volatility = 0.05m;
-
+            var testOrder = new TestOrder
+            {
+                StandardCommissionForOrder = new CommissionRates
+                {
+                    Maker = "0.001",
+                    Taker = "0.001"
+                },
+                TaxCommissionForOrder = new CommissionRates
+                {
+                    Maker = "0.000",
+                    Taker = "0.000"
+                },
+                Discount = new Discount
+                {
+                    DiscountValue = "0.75",
+                    EnabledForAccount = false,
+                    EnabledForSymbol = false
+                }
+            };
             _mockVolatilityStrategy.Setup(c => c.DetermineLossStrategy(_tradingStrategyTest.CryptoPurchasePrice, volatility)).Returns(10000);
-            _mockBinanceClient.Setup(c => c.PlaceTestOrderAsync(_tradingStrategyTest.Symbol, _tradingStrategyTest.Quantity, currentCurrencyPrice, "SELL")).ReturnsAsync(It.IsAny<TestOrder>());
+            _mockBinanceClient.Setup(c => c.PlaceTestOrderAsync(_tradingStrategyTest.Symbol, _tradingStrategyTest.Quantity, currentCurrencyPrice, "SELL")).ReturnsAsync(testOrder);
             _mockBinanceClient.Setup(c => c.GetOpenOrdersAsync(_tradingStrategyTest.Symbol)).ReturnsAsync(new List<Order>());
 
             // Act
@@ -143,7 +192,7 @@ namespace BinanceBot.Tests.Core
             _mockBinanceClient.Verify(c => c.PlaceTestOrderAsync(_tradingStrategyTest.Symbol, _tradingStrategyTest.Quantity, currentCurrencyPrice, "SELL"), Times.Once);
             _mockLogger.Verify(c => c.WriteLog(It.IsAny<string>()), Times.Exactly(4));
             _mockLogger.Verify(c => c.WriteLog(It.Is<string>(s => s.Contains("STOPP LOSS"))), Times.AtLeastOnce);
-            _mockLogger.Verify(c => c.WriteLog(It.Is<string>(s => s.Contains("null"))), Times.AtLeastOnce);
+            _mockLogger.Verify(c => c.WriteLog(It.Is<string>(s => s.Contains(JsonConvert.SerializeObject(testOrder, Formatting.Indented)))), Times.AtLeastOnce);
             _mockLogger.Verify(c => c.WriteLog(It.Is<string>(s => s.Contains("[VENTE]"))), Times.AtLeastOnce);
             _mockLogger.Verify(c => c.WriteLog(It.Is<string>(s => s.Contains("BENEFICE LIMITE"))), Times.AtLeastOnce);
             Assert.IsTrue(!_tradingStrategyTest.OpenPosition);
