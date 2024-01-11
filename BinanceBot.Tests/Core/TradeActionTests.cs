@@ -81,7 +81,7 @@ namespace BinanceBot.Tests.Core
             _mockBinanceClient.Verify(c => c.PlaceOrderAsync(_tradingStrategy.Symbol, _tradingStrategy.Quantity, currentCurrencyPrice, "BUY"), Times.Once);
             _mockLogger.Verify(c => c.WriteLog(It.IsAny<string>()), Times.Exactly(2));
             _mockLogger.Verify(c => c.WriteLog(It.Is<string>(s => s.Contains("[ACHAT]"))), Times.AtLeastOnce);
-            _mockLogger.Verify(c => c.WriteLog(It.Is<string>(s => s.Contains(JsonConvert.SerializeObject(order, Formatting.Indented)))), Times.AtLeastOnce);
+            _mockLogger.Verify(c => c.WriteLog(It.Is<string>(s => s.Contains("real : " + JsonConvert.SerializeObject(order, Formatting.Indented)))), Times.AtLeastOnce);
             Assert.IsTrue(_tradingStrategy.OpenPosition);
         }
 
@@ -109,7 +109,7 @@ namespace BinanceBot.Tests.Core
             _mockBinanceClient.Verify(c => c.PlaceOrderAsync(_tradingStrategy.Symbol, _tradingStrategy.Quantity, currentCurrencyPrice, "SELL"), Times.Once);
             _mockLogger.Verify(c => c.WriteLog(It.IsAny<string>()), Times.Exactly(4));
             _mockLogger.Verify(c => c.WriteLog(It.Is<string>(s => s.Contains("STOPP LOSS"))), Times.AtLeastOnce);
-            _mockLogger.Verify(c => c.WriteLog(It.Is<string>(s => s.Contains(JsonConvert.SerializeObject(order, Formatting.Indented)))), Times.AtLeastOnce);
+            _mockLogger.Verify(c => c.WriteLog(It.Is<string>(s => s.Contains("real : " + JsonConvert.SerializeObject(order, Formatting.Indented)))), Times.AtLeastOnce);
             _mockLogger.Verify(c => c.WriteLog(It.Is<string>(s => s.Contains("[VENTE]"))), Times.AtLeastOnce);
             _mockLogger.Verify(c => c.WriteLog(It.Is<string>(s => s.Contains("BENEFICE LIMITE"))), Times.AtLeastOnce);
             Assert.IsTrue(!_tradingStrategy.OpenPosition);
@@ -150,7 +150,7 @@ namespace BinanceBot.Tests.Core
             _mockBinanceClient.Verify(c => c.PlaceTestOrderAsync(_tradingStrategyTest.Symbol, _tradingStrategyTest.Quantity, currentCurrencyPrice, "BUY"), Times.Once);
             _mockLogger.Verify(c => c.WriteLog(It.IsAny<string>()), Times.Exactly(2));
             _mockLogger.Verify(c => c.WriteLog(It.Is<string>(s => s.Contains("[ACHAT]"))), Times.AtLeastOnce);
-            _mockLogger.Verify(c => c.WriteLog(It.Is<string>(s => s.Contains(JsonConvert.SerializeObject(testOrder, Formatting.Indented)))), Times.AtLeastOnce);
+            _mockLogger.Verify(c => c.WriteLog(It.Is<string>(s => s.Contains("test : " + JsonConvert.SerializeObject(testOrder, Formatting.Indented)))), Times.AtLeastOnce);
             Assert.IsTrue(_tradingStrategyTest.OpenPosition);
         }
 
@@ -191,7 +191,7 @@ namespace BinanceBot.Tests.Core
             _mockBinanceClient.Verify(c => c.PlaceTestOrderAsync(_tradingStrategyTest.Symbol, _tradingStrategyTest.Quantity, currentCurrencyPrice, "SELL"), Times.Once);
             _mockLogger.Verify(c => c.WriteLog(It.IsAny<string>()), Times.Exactly(4));
             _mockLogger.Verify(c => c.WriteLog(It.Is<string>(s => s.Contains("STOPP LOSS"))), Times.AtLeastOnce);
-            _mockLogger.Verify(c => c.WriteLog(It.Is<string>(s => s.Contains(JsonConvert.SerializeObject(testOrder, Formatting.Indented)))), Times.AtLeastOnce);
+            _mockLogger.Verify(c => c.WriteLog(It.Is<string>(s => s.Contains("test : " + JsonConvert.SerializeObject(testOrder, Formatting.Indented)))), Times.AtLeastOnce);
             _mockLogger.Verify(c => c.WriteLog(It.Is<string>(s => s.Contains("[VENTE]"))), Times.AtLeastOnce);
             _mockLogger.Verify(c => c.WriteLog(It.Is<string>(s => s.Contains("BENEFICE LIMITE"))), Times.AtLeastOnce);
             Assert.IsTrue(!_tradingStrategyTest.OpenPosition);

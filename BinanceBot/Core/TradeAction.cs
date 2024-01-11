@@ -39,12 +39,12 @@ namespace BinanceBot.Core
             if (tradingStrategy.TestMode)
             {
                 var orderResponse = await _binanceClient.PlaceTestOrderAsync(symbol, tradingStrategy.Quantity, currentCurrencyPrice, "BUY");
-                _logger.WriteLog($"{JsonConvert.SerializeObject(orderResponse, Formatting.Indented)}");
+                _logger.WriteLog($"test : {JsonConvert.SerializeObject(orderResponse, Formatting.Indented)}");
             }
             else
             {
                 var orderResponse = await _binanceClient.PlaceOrderAsync(symbol, tradingStrategy.Quantity, currentCurrencyPrice, "BUY");
-                _logger.WriteLog($"{JsonConvert.SerializeObject(orderResponse, Formatting.Indented)}");
+                _logger.WriteLog($"real : {JsonConvert.SerializeObject(orderResponse, Formatting.Indented)}");
             }
 
             await WaitBuyAsync(symbol);
@@ -89,12 +89,12 @@ namespace BinanceBot.Core
                 if (tradingStrategy.TestMode)
                 {
                     var orderResponse = await _binanceClient.PlaceTestOrderAsync(symbol, tradingStrategy.Quantity, currentCurrencyPrice, "SELL");
-                    _logger.WriteLog($"{JsonConvert.SerializeObject(orderResponse, Formatting.Indented)}");
+                    _logger.WriteLog($"test : {JsonConvert.SerializeObject(orderResponse, Formatting.Indented)}");
                 }
                 else
                 {
                     var orderResponse = await _binanceClient.PlaceOrderAsync(symbol, tradingStrategy.Quantity, currentCurrencyPrice, "SELL");
-                    _logger.WriteLog($"{JsonConvert.SerializeObject(orderResponse, Formatting.Indented)}");
+                    _logger.WriteLog($"real : {JsonConvert.SerializeObject(orderResponse, Formatting.Indented)}");
                 }
 
 
