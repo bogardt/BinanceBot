@@ -36,8 +36,16 @@ namespace BinanceBot.Core
                 $"cryptoPurchasePrice: {tradingStrategy.CryptoPurchasePrice:F2} | " +
                 $"totalPurchaseCost: {tradingStrategy.TotalPurchaseCost:F2}");
 
-            var response = await _binanceClient.PlaceTestOrderAsync(symbol, tradingStrategy.Quantity, currentCurrencyPrice, "BUY");
-            _logger.WriteLog($"{JsonConvert.SerializeObject(response, Formatting.Indented)}");
+            if (tradingStrategy.TestMode)
+            {
+                var orderResponse = await _binanceClient.PlaceTestOrderAsync(symbol, tradingStrategy.Quantity, currentCurrencyPrice, "BUY");
+                _logger.WriteLog($"{JsonConvert.SerializeObject(orderResponse, Formatting.Indented)}");
+            }
+            else
+            {
+                var orderResponse = await _binanceClient.PlaceOrderAsync(symbol, tradingStrategy.Quantity, currentCurrencyPrice, "BUY");
+                _logger.WriteLog($"{JsonConvert.SerializeObject(orderResponse, Formatting.Indented)}");
+            }
 
             await WaitBuyAsync(symbol);
 

@@ -88,6 +88,7 @@ namespace BinanceBot.Tests.Core
             _mockBinanceClient.Verify(c => c.PlaceTestOrderAsync(It.IsAny<string>(), It.IsAny<decimal>(), It.IsAny<decimal>(), It.IsAny<string>()), Times.Exactly(2));
             _mockBinanceClient.Verify(c => c.GetOpenOrdersAsync(_tradingStrategy.Symbol), Times.Exactly(2));
             _mockLogger.Verify(c => c.WriteLog(It.IsAny<string>()), Times.Exactly(6));
+            //_mockLogger.Verify(c => c.WriteLog(It.Is<string>(str => str.Contains("diffMarge") && str.Contains("forecastTargetPrice"))), Times.AtLeastOnce());
         }
 
         [TestMethod]
