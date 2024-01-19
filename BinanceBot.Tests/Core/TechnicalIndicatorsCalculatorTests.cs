@@ -96,6 +96,36 @@ namespace BinanceBot.Tests.Core
             Assert.ThrowsException<InvalidCastException>(() => technicalIndicatorsCalculator.CalculateRSI(klines, period));
         }
 
+        [TestMethod]
+        public void CalculateRSIWhenPerteMoyenneIsZeroReturnsZero()
+        {
+            // Arrange
+            _mockPriceRetriever.Setup(m => m.GetClosingPrices(It.IsAny<List<List<object>>>()))
+                .Returns(new List<decimal> { 100, 100, 100, 100, 100 });
+            int period = 5;
+
+            // Act
+            var result = _technicalIndicatorsCalculator.CalculateRSI(new List<List<object>>(), period);
+
+            // Assert
+            Assert.AreEqual(0, result);
+        }
+
+        [TestMethod]
+        public void CalculateRSIWhenPerteMoyenneIsNotZeroReturnsCalculatedValue()
+        {
+            // Arrange
+            _mockPriceRetriever.Setup(m => m.GetClosingPrices(It.IsAny<List<List<object>>>()))
+                .Returns(new List<decimal> { 100, 102, 98, 101, 103 });
+            int period = 5;
+
+            // Act
+            var result = _technicalIndicatorsCalculator.CalculateRSI(new List<List<object>>(), period);
+
+            // Assert
+            decimal expectedRsi = 63.64m;
+            Assert.AreEqual(expectedRsi, result, 0.01m);
+        }
 
         private static List<List<object>> CreateLines(int period)
         {
@@ -103,16 +133,10 @@ namespace BinanceBot.Tests.Core
             var kline2 = new List<object> { 50m, 50m, 50m, 50m, 50m, 50m, 50m, 50m, 50m, 50m, 50m, 50m };
             var klines = new List<List<object>>();
 
+
             for (var i = 0; i < period; i++)
             {
-                if (i % 2 == 0)
-                {
-                    klines.Add(kline);
-                }
-                else
-                {
-                    klines.Add(kline2);
-                }
+                klines.Add(i % 2 == 0 ? kline : kline2);
             }
 
             return klines;
