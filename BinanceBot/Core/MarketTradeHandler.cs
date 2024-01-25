@@ -87,7 +87,7 @@ namespace BinanceBot.Core
                         output += $"forecastTargetPrice: {forecastSellingPrice:F2}";
                     }
 
-                    _logger.WriteLog((string.IsNullOrEmpty(output) ? "" : $"{output} | ") +
+                    _logger.WriteLog($"{output} | " +
                         $"{_tradingStrategy.Symbol}: {currentCurrencyPrice:F2} | " +
                         //$"targetPriceFeesIncluded: {targetPriceFeesIncluded:F2} | " +
                         $"mobileAverage: {mobileAverage:F2} | " +
