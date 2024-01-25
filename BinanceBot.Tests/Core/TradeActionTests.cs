@@ -70,7 +70,6 @@ namespace BinanceBot.Tests.Core
                 OrderId = 1,
                 Symbol = "BTCUSDT"
             };
-
             _mockBinanceClient.Setup(c => c.PlaceOrderAsync(_tradingStrategy.Symbol, _tradingStrategy.Quantity, currentCurrencyPrice, "BUY")).ReturnsAsync(order);
             _mockBinanceClient.Setup(c => c.GetOpenOrdersAsync(_tradingStrategy.Symbol)).ReturnsAsync(new List<Order>());
 
@@ -97,7 +96,8 @@ namespace BinanceBot.Tests.Core
                 OrderId = 1,
                 Symbol = "BTCUSDT"
             };
-
+            _tradingStrategy.TotalBenefit = 100;
+            _tradingStrategy.LimitBenefit = 100;
             _mockVolatilityStrategy.Setup(c => c.DetermineLossStrategy(_tradingStrategy.CryptoPurchasePrice, volatility)).Returns(10000);
             _mockBinanceClient.Setup(c => c.PlaceOrderAsync(_tradingStrategy.Symbol, _tradingStrategy.Quantity, currentCurrencyPrice, "SELL")).ReturnsAsync(order);
             _mockBinanceClient.Setup(c => c.GetOpenOrdersAsync(_tradingStrategy.Symbol)).ReturnsAsync(new List<Order>());
@@ -113,6 +113,36 @@ namespace BinanceBot.Tests.Core
             _mockLogger.Verify(c => c.WriteLog(It.Is<string>(s => s.Contains("[VENTE]"))), Times.AtLeastOnce);
             _mockLogger.Verify(c => c.WriteLog(It.Is<string>(s => s.Contains("BENEFICE LIMITE"))), Times.AtLeastOnce);
             Assert.IsTrue(_tradingStrategy.TotalBenefit >= _tradingStrategy.LimitBenefit);
+            Assert.IsTrue(!_tradingStrategy.OpenPosition);
+        }
+
+
+        [TestMethod]
+        public async Task SellValidParametersCallsBinanceClientBenefitHasNotBeenReached()
+        {
+            // Arrange
+            var stopLossStrategy = new StopLossStrategy();
+            decimal currentCurrencyPrice = 10m;
+            decimal volatility = 0.05m;
+            var order = new Order
+            {
+                OrderId = 1,
+                Symbol = "BTCUSDT"
+            };
+            _mockVolatilityStrategy.Setup(c => c.DetermineLossStrategy(_tradingStrategy.CryptoPurchasePrice, volatility)).Returns(10000);
+            _mockBinanceClient.Setup(c => c.PlaceOrderAsync(_tradingStrategy.Symbol, _tradingStrategy.Quantity, currentCurrencyPrice, "SELL")).ReturnsAsync(order);
+            _mockBinanceClient.Setup(c => c.GetOpenOrdersAsync(_tradingStrategy.Symbol)).ReturnsAsync(new List<Order>());
+
+            // Act
+            var (prixVenteCible, maxBenefitDone) = await _tradeAction.Sell(_tradingStrategy, currentCurrencyPrice, volatility, _tradingStrategy.Symbol);
+
+            // Assert
+            _mockBinanceClient.Verify(c => c.PlaceOrderAsync(_tradingStrategy.Symbol, _tradingStrategy.Quantity, currentCurrencyPrice, "SELL"), Times.Once);
+            _mockLogger.Verify(c => c.WriteLog(It.IsAny<string>()), Times.Exactly(3));
+            _mockLogger.Verify(c => c.WriteLog(It.Is<string>(s => s.Contains("STOPP LOSS"))), Times.AtLeastOnce);
+            _mockLogger.Verify(c => c.WriteLog(It.Is<string>(s => s.Contains("real : " + JsonConvert.SerializeObject(order, Formatting.Indented)))), Times.AtLeastOnce);
+            _mockLogger.Verify(c => c.WriteLog(It.Is<string>(s => s.Contains("[VENTE]"))), Times.AtLeastOnce);
+            Assert.IsTrue(_tradingStrategy.TotalBenefit < _tradingStrategy.LimitBenefit);
             Assert.IsTrue(!_tradingStrategy.OpenPosition);
         }
 

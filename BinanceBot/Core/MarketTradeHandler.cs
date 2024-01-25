@@ -82,6 +82,8 @@ namespace BinanceBot.Core
                         output += $"diffMarge: {(targetPrice - _tradingStrategy.CryptoPurchasePrice):F2} | ";
                         //output += $"targetBenefit: {targetBenefit:F2} | ";
                         output += $"targetPrice: {targetPrice:F2}";
+
+                        await _priceRetriever.HandleDiscountAsync(_tradingStrategy);
                     }
                     else
                     {
@@ -103,7 +105,7 @@ namespace BinanceBot.Core
             catch (Exception ex)
             {
                 Console.WriteLine($"Erreur: {ex.Message}", ex);
-                throw ex;
+                throw;
             }
         }
     }

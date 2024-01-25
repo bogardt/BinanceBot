@@ -12,8 +12,8 @@ namespace BinanceBot.Core
         private readonly IVolatilityStrategy _volatilityStrategy;
         private readonly IPriceRetriever _priceRetriever;
         private readonly ILogger _logger;
-        public TradeAction(IBinanceClient binanceClient, 
-            IVolatilityStrategy volatilityStrategy, 
+        public TradeAction(IBinanceClient binanceClient,
+            IVolatilityStrategy volatilityStrategy,
             IPriceRetriever priceRetriever,
             ILogger logger)
         {
@@ -63,8 +63,9 @@ namespace BinanceBot.Core
                 tradingStrategy.FeePercentage,
                 tradingStrategy.Discount,
                 tradingStrategy.TargetProfit);
+
             //decimal prixVenteCible2 = (tradingStrategy.TotalPurchaseCost + tradingStrategy.TargetProfit) / tradingStrategy.Quantity / (1 - tradingStrategy.FeePercentage);
-            
+
             decimal commissionAchatBrute = tradingStrategy.CryptoPurchasePrice * tradingStrategy.Quantity * tradingStrategy.FeePercentage;
             decimal commissionAchat = commissionAchatBrute * (1 - tradingStrategy.Discount);
             decimal commissionVenteBrute = currentCurrencyPrice * tradingStrategy.Quantity * tradingStrategy.FeePercentage;
@@ -74,41 +75,46 @@ namespace BinanceBot.Core
             decimal beneficeNet = (prixVenteTotal - commissionVente) - (prixAchatTotal + commissionAchat);
             decimal stopLossPrice = _volatilityStrategy.DetermineLossStrategy(tradingStrategy.CryptoPurchasePrice, volatility);
 
-            if (currentCurrencyPrice >= prixVenteCible)
+            if (currentCurrencyPrice < prixVenteCible)
+                return (prixVenteCible, false);
+
+            if (currentCurrencyPrice <= stopLossPrice)
             {
-                if (currentCurrencyPrice <= stopLossPrice)
-                {
-                    _logger.WriteLog("STOPP LOSS");
-                }
-
-                tradingStrategy.TotalBenefit += beneficeNet;
-                _logger.WriteLog($"===> [VENTE] {tradingStrategy.Quantity:F2} | " +
-                    $"currentCurrencyPrice: {currentCurrencyPrice:F2} | " +
-                    $"totalBenefit: {tradingStrategy.TotalBenefit:F2}");
-
-                if (tradingStrategy.TestMode)
-                {
-                    var orderResponse = await _binanceClient.PlaceTestOrderAsync(symbol, tradingStrategy.Quantity, currentCurrencyPrice, "SELL");
-                    _logger.WriteLog($"test : {JsonConvert.SerializeObject(orderResponse, Formatting.Indented)}");
-                }
-                else
-                {
-                    var orderResponse = await _binanceClient.PlaceOrderAsync(symbol, tradingStrategy.Quantity, currentCurrencyPrice, "SELL");
-                    _logger.WriteLog($"real : {JsonConvert.SerializeObject(orderResponse, Formatting.Indented)}");
-                }
-
-
-                await WaitSellAsync(symbol);
-
-                tradingStrategy.OpenPosition = false;
-
-                if (tradingStrategy.TotalBenefit >= tradingStrategy.LimitBenefit)
-                {
-                    _logger.WriteLog("BENEFICE LIMITE ->> exit program");
-                    return (prixVenteCible, true);
-                }
+                _logger.WriteLog("STOPP LOSS");
             }
-            return (prixVenteCible, false);
+
+            tradingStrategy.TotalBenefit += beneficeNet;
+            _logger.WriteLog($"===> [VENTE] {tradingStrategy.Quantity:F2} | " +
+                $"currentCurrencyPrice: {currentCurrencyPrice:F2} | " +
+                $"totalBenefit: {tradingStrategy.TotalBenefit:F2}");
+
+            if (tradingStrategy.TestMode)
+            {
+                var orderResponse = await _binanceClient.PlaceTestOrderAsync(symbol, tradingStrategy.Quantity, currentCurrencyPrice, "SELL");
+                _logger.WriteLog($"test : {JsonConvert.SerializeObject(orderResponse, Formatting.Indented)}");
+            }
+            else
+            {
+                var orderResponse = await _binanceClient.PlaceOrderAsync(symbol, tradingStrategy.Quantity, currentCurrencyPrice, "SELL");
+                _logger.WriteLog($"real : {JsonConvert.SerializeObject(orderResponse, Formatting.Indented)}");
+            }
+
+            await WaitSellAsync(symbol);
+
+            tradingStrategy.OpenPosition = false;
+
+            return (prixVenteCible, MaxBenefitHasBeenReached(tradingStrategy));
+        }
+
+        private bool MaxBenefitHasBeenReached(TradingStrategy tradingStrategy)
+        {
+            if (tradingStrategy.TotalBenefit >= tradingStrategy.LimitBenefit)
+            {
+                _logger.WriteLog("BENEFICE LIMITE ->> exit program");
+                return true;
+            }
+
+            return false;
         }
 
         public async Task WaitBuyAsync(string symbol)

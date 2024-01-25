@@ -1,4 +1,5 @@
 ﻿using BinanceBot.Abstraction;
+using BinanceBot.Model;
 using BinanceBot.Strategy;
 using Newtonsoft.Json;
 using System.Globalization;
@@ -41,28 +42,26 @@ namespace BinanceBot.Core
 
         public async Task HandleDiscountAsync(TradingStrategy tradingStrategy)
         {
+            var commission = await _binanceClient.GetCommissionBySymbolAsync(tradingStrategy.Symbol);
             var account = await _binanceClient.GetAccountInfosAsync();
             var bnbPrice = await _binanceClient.GetPriceBySymbolAsync("BNBUSDT");
-            var re = await _binanceClient.GetCommissionBySymbolAsync(tradingStrategy.Symbol);
-
             var bnb = account.Balances.First(b => b.Asset == "BNB");
             var bnbFree = decimal.Parse(bnb.Free);
-            var bnbIsBankable = bnbFree > 0;
             var usdtBnb = bnbFree * bnbPrice.Price;
+            var bnbIsBankable = usdtBnb > 100;
 
             if (bnbIsBankable)
             {
-                tradingStrategy.Discount = 1 - decimal.Parse(re.Discount.DiscountValue);
+                tradingStrategy.Discount = 1 - decimal.Parse(commission.Discount.DiscountValue);
             }
 
             _logger.WriteLog($"SOL: {account.Balances.First(b => b.Asset == "SOL").Free} | " +
                  $"BNB: {account.Balances.First(b => b.Asset == "BNB").Free} | " +
                  $"BNBUSDT: {usdtBnb} | " +
                  $"USDT: {account.Balances.First(b => b.Asset == "USDT").Free} | " +
-                 $"fee: {re.StandardCommission.Maker}" +
-                 $"{(re.Discount.EnabledForSymbol && re.Discount.EnabledForAccount ?
-                 $" | BNB discount: {re.Discount.DiscountValue}" : string.Empty)}");
-
+                 $"fee: {commission.StandardCommission.Maker}" +
+                 $"{(commission.Discount.EnabledForSymbol && commission.Discount.EnabledForAccount ?
+                 $" | BNB discount: {commission.Discount.DiscountValue}" : string.Empty)}");
         }
     }
 }
