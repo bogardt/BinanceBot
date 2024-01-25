@@ -12,20 +12,21 @@ namespace BinanceBot.Tests.Core
         private readonly Mock<ILogger> _mockLogger = new();
         private readonly Mock<IBinanceClient> _mockBinanceClient = new();
         private readonly PriceRetriever _priceRetriever;
-        private static readonly TradingStrategy _tradingStrategy = new()
-        {
-            TargetProfit = 10m,
-            Quantity = 200m,
-            Interval = "1m",
-            Period = 60,
-            Symbol = "SOLUSDT",
-            LimitBenefit = 1000,
-            Discount = 0
-        };
+        private readonly TradingStrategy _tradingStrategy;
 
         public PriceRetrieverTests()
         {
             _priceRetriever = new PriceRetriever(_mockBinanceClient.Object, _mockLogger.Object);
+            _tradingStrategy = new()
+            {
+                TargetProfit = 10m,
+                Quantity = 200m,
+                Interval = "1m",
+                Period = 60,
+                Symbol = "SOLUSDT",
+                LimitBenefit = 1000,
+                Discount = 0
+            };
         }
 
         [TestMethod]
