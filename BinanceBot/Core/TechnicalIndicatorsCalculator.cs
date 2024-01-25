@@ -1,20 +1,14 @@
 ﻿using BinanceBot.Abstraction;
+using BinanceBot.Strategy;
 
 namespace BinanceBot.Core
 {
     public class TechnicalIndicatorsCalculator : ITechnicalIndicatorsCalculator
     {
-        private readonly IPriceRetriever _priceRetriever;
+        private readonly StopLossStrategy _stopLossConfiguration = new();
 
-        public TechnicalIndicatorsCalculator(IPriceRetriever priceRetriever)
+        public decimal CalculateMovingAverage(List<decimal> closingPrices, int periode)
         {
-            _priceRetriever = priceRetriever;
-        }
-
-        public decimal CalculateMovingAverage(List<List<object>> klines, int periode)
-        {
-            var closingPrices = _priceRetriever.GetClosingPrices(klines);
-
             decimal somme = 0;
 
             foreach (var prix in closingPrices)
@@ -23,11 +17,9 @@ namespace BinanceBot.Core
             return somme / periode;
         }
 
-        public decimal CalculateRSI(List<List<object>> klines, int periode)
+        public decimal CalculateRSI(List<decimal> closingPrices, int periode)
         {
             decimal gainMoyen = 0, perteMoyenne = 0;
-
-            var closingPrices = _priceRetriever.GetClosingPrices(klines);
 
             for (int i = 1; i < closingPrices.Count(); i++)
             {
@@ -47,5 +39,24 @@ namespace BinanceBot.Core
             return 100 - (100 / (1 + rs));
         }
 
+        public decimal CalculateVolatility(List<decimal> closingPrices)
+        {
+            decimal moyenne = closingPrices.Average();
+            decimal sumOfSquares = closingPrices.Sum(prix => (prix - moyenne) * (prix - moyenne));
+            decimal ecartType = (decimal)Math.Sqrt((double)(sumOfSquares / (closingPrices.Count - 1)));
+
+            return ecartType;
+        }
+
+        public decimal DetermineLossStrategy(decimal cryptoPurchasePrice, decimal volatility)
+        {
+            decimal pourcentageStopLossCalcule = volatility * _stopLossConfiguration.VolatilityMultiplier;
+            pourcentageStopLossCalcule = Math.Max(_stopLossConfiguration.FloorStopLossPercentage, pourcentageStopLossCalcule);
+            pourcentageStopLossCalcule = Math.Min(_stopLossConfiguration.CeilingStopLossPercentage, pourcentageStopLossCalcule);
+            _stopLossConfiguration.StopLossPercentage = (_stopLossConfiguration.StopLossPercentage + pourcentageStopLossCalcule) / 2;
+            decimal prixStopLoss = cryptoPurchasePrice * (1 - _stopLossConfiguration.StopLossPercentage);
+
+            return prixStopLoss;
+        }
     }
 }

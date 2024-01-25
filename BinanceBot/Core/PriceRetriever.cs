@@ -1,5 +1,4 @@
 ﻿using BinanceBot.Abstraction;
-using BinanceBot.Model;
 using BinanceBot.Strategy;
 using Newtonsoft.Json;
 using System.Globalization;

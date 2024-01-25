@@ -21,7 +21,6 @@ namespace BinanceBot.Tests
                     services.AddSingleton<IBinanceClient, BinanceClient>();
                     services.AddSingleton<ITradeAction, TradeAction>();
                     services.AddSingleton<IFileSystem, FileSystem>();
-                    services.AddSingleton<IVolatilityStrategy, VolatilityStrategy>();
                     services.AddSingleton<ITechnicalIndicatorsCalculator, TechnicalIndicatorsCalculator>();
                     services.AddSingleton<IPriceRetriever, PriceRetriever>();
                     services.AddSingleton<IMarketTradeHandler, MarketTradeHandler>();
@@ -36,7 +35,6 @@ namespace BinanceBot.Tests
             Assert.IsNotNull(provider.GetService<IBinanceClient>());
             Assert.IsNotNull(provider.GetService<ITradeAction>());
             Assert.IsNotNull(provider.GetService<IFileSystem>());
-            Assert.IsNotNull(provider.GetService<IVolatilityStrategy>());
             Assert.IsNotNull(provider.GetService<ITechnicalIndicatorsCalculator>());
             Assert.IsNotNull(provider.GetService<IPriceRetriever>());
             Assert.IsNotNull(provider.GetService<IMarketTradeHandler>());
@@ -58,15 +56,14 @@ namespace BinanceBot.Tests
             };
             var mockBinanceClient = new Mock<IBinanceClient>();
             var mockFileSystem = new Mock<IFileSystem>();
-            var mockVolatilityStrategy = new Mock<IVolatilityStrategy>();
             var mockTechnicalIndicatorsCalculator = new Mock<ITechnicalIndicatorsCalculator>();
             var mockLogger = new Mock<ILogger>();
             var mockHttpClientWrapper = new Mock<IHttpClientWrapper>();
 
             //
             var priceRetriever = new PriceRetriever(mockBinanceClient.Object, mockLogger.Object);
-            var tradeAction = new TradeAction(mockBinanceClient.Object, mockVolatilityStrategy.Object, priceRetriever, mockLogger.Object);
-            var marketTradeHandler = new MarketTradeHandler(mockBinanceClient.Object, mockVolatilityStrategy.Object, mockTechnicalIndicatorsCalculator.Object, priceRetriever, tradeAction, mockLogger.Object, tradingStrategy);
+            var tradeAction = new TradeAction(mockBinanceClient.Object, mockTechnicalIndicatorsCalculator.Object, priceRetriever, mockLogger.Object);
+            var marketTradeHandler = new MarketTradeHandler(mockBinanceClient.Object, mockTechnicalIndicatorsCalculator.Object, priceRetriever, tradeAction, mockLogger.Object, tradingStrategy);
 
             var host = Host.CreateDefaultBuilder()
                 .ConfigureServices((context, services) =>
@@ -74,7 +71,6 @@ namespace BinanceBot.Tests
                     services.AddSingleton<IBinanceClient>(mockBinanceClient.Object);
                     services.AddSingleton<ITradeAction>(tradeAction);
                     services.AddSingleton<IFileSystem>(mockFileSystem.Object);
-                    services.AddSingleton<IVolatilityStrategy>(mockVolatilityStrategy.Object);
                     services.AddSingleton<ITechnicalIndicatorsCalculator>(mockTechnicalIndicatorsCalculator.Object);
                     services.AddSingleton<IPriceRetriever>(priceRetriever);
                     services.AddSingleton<IMarketTradeHandler>(marketTradeHandler);
@@ -91,19 +87,20 @@ namespace BinanceBot.Tests
             var period = tradingStrategy.Period;
             var kline = new List<object> { 100m, 100m, 100m, 100m, 100m, 100m, 100m, 100m, 100m, 100m, 100m, 100m };
             var klines = Enumerable.Repeat(kline, period).ToList();
+            var closingPrices = priceRetriever.GetClosingPrices(klines);
 
             mockBinanceClient.Setup(c => c.GetKLinesBySymbolAsync(tradingStrategy.Symbol, interval, period.ToString()))
                               .ReturnsAsync(klines);
             mockBinanceClient.Setup(c => c.GetKLinesBySymbolAsync(tradingStrategy.Symbol, interval, (period + 1).ToString()))
                               .ReturnsAsync(klines);
 
-            mockTechnicalIndicatorsCalculator.Setup(c => c.CalculateRSI(klines, period))
+            mockTechnicalIndicatorsCalculator.Setup(c => c.CalculateRSI(closingPrices, period))
                 .Returns(30m);
 
-            mockTechnicalIndicatorsCalculator.Setup(c => c.CalculateMovingAverage(klines, period))
+            mockTechnicalIndicatorsCalculator.Setup(c => c.CalculateMovingAverage(closingPrices, period))
                 .Returns(100m);
 
-            mockVolatilityStrategy.Setup(c => c.CalculateVolatility(It.IsAny<List<List<object>>>()))
+            mockTechnicalIndicatorsCalculator.Setup(c => c.CalculateVolatility(It.IsAny<List<decimal>>()))
                 .Returns(0.25m);
 
             var currencyForBuy = new Currency { Symbol = tradingStrategy.Symbol, Price = 90m };
@@ -170,8 +167,8 @@ namespace BinanceBot.Tests
             // run bot
             await binanceBot.TradeOnLimitAsync();
 
-            mockTechnicalIndicatorsCalculator.Verify(c => c.CalculateRSI(klines, period), Times.Exactly(2));
-            mockVolatilityStrategy.Verify(c => c.CalculateVolatility(It.IsAny<List<List<object>>>()), Times.Exactly(2));
+            mockTechnicalIndicatorsCalculator.Verify(c => c.CalculateRSI(closingPrices, period), Times.Exactly(2));
+            mockTechnicalIndicatorsCalculator.Verify(c => c.CalculateVolatility(It.IsAny<List<decimal>>()), Times.Exactly(2));
             mockBinanceClient.Verify(c => c.GetOpenOrdersAsync(tradingStrategy.Symbol), Times.Exactly(2));
             mockBinanceClient.Verify(c => c.GetKLinesBySymbolAsync(tradingStrategy.Symbol, interval, period.ToString()), Times.Exactly(2));
             mockBinanceClient.Verify(c => c.GetPriceBySymbolAsync(tradingStrategy.Symbol), Times.Exactly(2));

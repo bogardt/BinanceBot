@@ -7,14 +7,12 @@ namespace BinanceBot.Core
     {
         private readonly IBinanceClient _binanceClient;
         private readonly IPriceRetriever _priceRetriever;
-        private readonly IVolatilityStrategy _volatilityStrategy;
         private readonly ITechnicalIndicatorsCalculator _technicalIndicatorsCalculator;
         private readonly ITradeAction _tradeAction;
         private readonly ILogger _logger;
         private readonly TradingStrategy _tradingStrategy;
 
         public MarketTradeHandler(IBinanceClient binanceClient,
-            IVolatilityStrategy volatilityStrategy,
             ITechnicalIndicatorsCalculator technicalIndicatorsCalculator,
             IPriceRetriever priceRetriever,
             ITradeAction tradeAction,
@@ -23,13 +21,11 @@ namespace BinanceBot.Core
         {
             _tradingStrategy = tradingStrategy ?? new();
             _binanceClient = binanceClient;
-            _volatilityStrategy = volatilityStrategy;
             _technicalIndicatorsCalculator = technicalIndicatorsCalculator;
             _priceRetriever = priceRetriever;
             _tradeAction = tradeAction;
             _logger = logger;
         }
-
 
         public async Task TradeOnLimitAsync()
         {
@@ -50,9 +46,11 @@ namespace BinanceBot.Core
 
                     decimal currentCurrencyPrice = currency.Price;
 
-                    decimal mobileAverage = _technicalIndicatorsCalculator.CalculateMovingAverage(klines, _tradingStrategy.Period);
-                    decimal rsi = _technicalIndicatorsCalculator.CalculateRSI(klines, _tradingStrategy.Period);
-                    decimal volatility = _volatilityStrategy.CalculateVolatility(klines);
+                    var closingPrices = _priceRetriever.GetClosingPrices(klines);
+
+                    decimal mobileAverage = _technicalIndicatorsCalculator.CalculateMovingAverage(closingPrices, _tradingStrategy.Period);
+                    decimal rsi = _technicalIndicatorsCalculator.CalculateRSI(closingPrices, _tradingStrategy.Period);
+                    decimal volatility = _technicalIndicatorsCalculator.CalculateVolatility(closingPrices);
 
                     decimal targetPriceFeesNotIncluded = ((currentCurrencyPrice * _tradingStrategy.Quantity) + _tradingStrategy.TargetProfit) / _tradingStrategy.Quantity;
                     decimal targetPriceFeesIncluded = targetPriceFeesNotIncluded * (1 + _tradingStrategy.FeePercentage);
@@ -82,8 +80,6 @@ namespace BinanceBot.Core
                         output += $"diffMarge: {(targetPrice - _tradingStrategy.CryptoPurchasePrice):F2} | ";
                         //output += $"targetBenefit: {targetBenefit:F2} | ";
                         output += $"targetPrice: {targetPrice:F2}";
-
-                        await _priceRetriever.HandleDiscountAsync(_tradingStrategy);
                     }
                     else
                     {

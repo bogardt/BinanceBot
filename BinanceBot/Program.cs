@@ -36,7 +36,6 @@ internal class Program
                 services.AddSingleton<IBinanceClient, BinanceClient>();
                 services.AddSingleton<ITradeAction, TradeAction>();
                 services.AddSingleton<IFileSystem, FileSystem>();
-                services.AddSingleton<IVolatilityStrategy, VolatilityStrategy>();
                 services.AddSingleton<ITechnicalIndicatorsCalculator, TechnicalIndicatorsCalculator>();
                 services.AddSingleton<IPriceRetriever, PriceRetriever>();
                 services.AddSingleton<IMarketTradeHandler, MarketTradeHandler>();

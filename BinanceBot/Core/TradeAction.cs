@@ -7,18 +7,17 @@ namespace BinanceBot.Core
 {
     public class TradeAction : ITradeAction
     {
-
         private readonly IBinanceClient _binanceClient;
-        private readonly IVolatilityStrategy _volatilityStrategy;
         private readonly IPriceRetriever _priceRetriever;
+        private readonly ITechnicalIndicatorsCalculator _technicalIndicatorsCalculator;
         private readonly ILogger _logger;
         public TradeAction(IBinanceClient binanceClient,
-            IVolatilityStrategy volatilityStrategy,
+            ITechnicalIndicatorsCalculator technicalIndicatorsCalculator,
             IPriceRetriever priceRetriever,
             ILogger logger)
         {
             _binanceClient = binanceClient;
-            _volatilityStrategy = volatilityStrategy;
+            _technicalIndicatorsCalculator = technicalIndicatorsCalculator;
             _priceRetriever = priceRetriever;
             _logger = logger;
         }
@@ -73,7 +72,7 @@ namespace BinanceBot.Core
             decimal prixVenteTotal = currentCurrencyPrice * tradingStrategy.Quantity;
             decimal prixAchatTotal = tradingStrategy.CryptoPurchasePrice * tradingStrategy.Quantity;
             decimal beneficeNet = (prixVenteTotal - commissionVente) - (prixAchatTotal + commissionAchat);
-            decimal stopLossPrice = _volatilityStrategy.DetermineLossStrategy(tradingStrategy.CryptoPurchasePrice, volatility);
+            decimal stopLossPrice = _technicalIndicatorsCalculator.DetermineLossStrategy(tradingStrategy.CryptoPurchasePrice, volatility);
 
             if (currentCurrencyPrice < prixVenteCible)
                 return (prixVenteCible, false);
@@ -102,6 +101,8 @@ namespace BinanceBot.Core
             await WaitSellAsync(symbol);
 
             tradingStrategy.OpenPosition = false;
+
+            //await _priceRetriever.HandleDiscountAsync(tradingStrategy);
 
             return (prixVenteCible, MaxBenefitHasBeenReached(tradingStrategy));
         }

@@ -12,7 +12,7 @@ namespace BinanceBot.Tests.Core
     {
         private readonly Mock<IBinanceClient> _mockBinanceClient = new();
         private readonly Mock<IPriceRetriever> _mockPriceRetriever = new();
-        private readonly Mock<IVolatilityStrategy> _mockVolatilityStrategy = new();
+        private readonly Mock<ITechnicalIndicatorsCalculator> _mockTechnicalIndicatorsCalculator = new();
         private readonly Mock<ILogger> _mockLogger = new();
         private readonly TradeAction _tradeAction;
         private readonly TradingStrategy _tradingStrategy = new() { TestMode = false };
@@ -20,7 +20,7 @@ namespace BinanceBot.Tests.Core
 
         public TradeActionTests()
         {
-            _tradeAction = new TradeAction(_mockBinanceClient.Object, _mockVolatilityStrategy.Object, _mockPriceRetriever.Object, _mockLogger.Object);
+            _tradeAction = new TradeAction(_mockBinanceClient.Object, _mockTechnicalIndicatorsCalculator.Object, _mockPriceRetriever.Object, _mockLogger.Object);
         }
 
         [TestMethod]
@@ -98,7 +98,7 @@ namespace BinanceBot.Tests.Core
             };
             _tradingStrategy.TotalBenefit = 100;
             _tradingStrategy.LimitBenefit = 100;
-            _mockVolatilityStrategy.Setup(c => c.DetermineLossStrategy(_tradingStrategy.CryptoPurchasePrice, volatility)).Returns(10000);
+            _mockTechnicalIndicatorsCalculator.Setup(c => c.DetermineLossStrategy(_tradingStrategy.CryptoPurchasePrice, volatility)).Returns(10000);
             _mockBinanceClient.Setup(c => c.PlaceOrderAsync(_tradingStrategy.Symbol, _tradingStrategy.Quantity, currentCurrencyPrice, "SELL")).ReturnsAsync(order);
             _mockBinanceClient.Setup(c => c.GetOpenOrdersAsync(_tradingStrategy.Symbol)).ReturnsAsync(new List<Order>());
 
@@ -129,7 +129,7 @@ namespace BinanceBot.Tests.Core
                 OrderId = 1,
                 Symbol = "BTCUSDT"
             };
-            _mockVolatilityStrategy.Setup(c => c.DetermineLossStrategy(_tradingStrategy.CryptoPurchasePrice, volatility)).Returns(10000);
+            _mockTechnicalIndicatorsCalculator.Setup(c => c.DetermineLossStrategy(_tradingStrategy.CryptoPurchasePrice, volatility)).Returns(10000);
             _mockBinanceClient.Setup(c => c.PlaceOrderAsync(_tradingStrategy.Symbol, _tradingStrategy.Quantity, currentCurrencyPrice, "SELL")).ReturnsAsync(order);
             _mockBinanceClient.Setup(c => c.GetOpenOrdersAsync(_tradingStrategy.Symbol)).ReturnsAsync(new List<Order>());
 
@@ -239,7 +239,7 @@ namespace BinanceBot.Tests.Core
                     EnabledForSymbol = false
                 }
             };
-            _mockVolatilityStrategy.Setup(c => c.DetermineLossStrategy(_tradingStrategyTest.CryptoPurchasePrice, volatility)).Returns(10000);
+            _mockTechnicalIndicatorsCalculator.Setup(c => c.DetermineLossStrategy(_tradingStrategyTest.CryptoPurchasePrice, volatility)).Returns(10000);
             _mockBinanceClient.Setup(c => c.PlaceTestOrderAsync(_tradingStrategyTest.Symbol, _tradingStrategyTest.Quantity, currentCurrencyPrice, "SELL")).ReturnsAsync(testOrder);
             _mockBinanceClient.Setup(c => c.GetOpenOrdersAsync(_tradingStrategyTest.Symbol)).ReturnsAsync(new List<Order>());
 

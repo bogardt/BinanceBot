@@ -2,7 +2,9 @@
 {
     public interface ITechnicalIndicatorsCalculator
     {
-        decimal CalculateMovingAverage(List<List<object>> klines, int periode);
-        decimal CalculateRSI(List<List<object>> klines, int periode);
+        decimal CalculateMovingAverage(List<decimal> closingPrices, int periode);
+        decimal CalculateRSI(List<decimal> closingPrices, int periode);
+        decimal CalculateVolatility(List<decimal> closingPrices);
+        decimal DetermineLossStrategy(decimal cryptoPurchasePrice, decimal volatility);
     }
 }

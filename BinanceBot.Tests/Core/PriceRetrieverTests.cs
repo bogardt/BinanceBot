@@ -60,5 +60,21 @@ namespace BinanceBot.Tests.Core
             // Assert
             Assert.AreEqual(0, result.Count);
         }
+
+        [TestMethod]
+        public void ClosingPricesThrowsInvalidCastException()
+        {
+            // Arrange
+            var mockLogger = new Mock<ILogger>();
+            var mockBinanceClient = new Mock<IBinanceClient>();
+            var priceRetriever = new PriceRetriever(mockBinanceClient.Object, mockLogger.Object);
+            var klines = new List<List<object>>
+            {
+                new List<object> { "100.5", "100.5", "100.5", "100.5", "invalid_data", "100.5" },
+            };
+
+            // Act & Assert
+            Assert.ThrowsException<InvalidCastException>(() => priceRetriever.GetClosingPrices(klines));
+        }
     }
 }

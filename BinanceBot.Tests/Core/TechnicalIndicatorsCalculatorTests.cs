@@ -12,50 +12,29 @@ namespace BinanceBot.Tests.Core
 
         public TechnicalIndicatorsCalculatorTests()
         {
-            _technicalIndicatorsCalculator = new(_mockPriceRetriever.Object);
+            _technicalIndicatorsCalculator = new();
         }
 
         [TestMethod]
         public void CalculateMovingAverageValidKlinesCalculatesAverage()
         {
             // Arrange
+            var mockLogger = new Mock<ILogger>();
+            var mockBinanceClient = new Mock<IBinanceClient>();
+            var priceRetriever = new PriceRetriever(mockBinanceClient.Object, mockLogger.Object);
             var period = 2;
             var klines = new List<List<object>>
             {
                 new List<object> { "100.5", "100.5", "100.5", "100.5", "100", "100.5" },
                 new List<object> { "100.5", "100.5", "100.5", "100.5", "200", "100.5" }
             };
-
-            var mockLogger = new Mock<ILogger>();
-            var mockBinanceClient = new Mock<IBinanceClient>();
-            var priceRetriever = new PriceRetriever(mockBinanceClient.Object, mockLogger.Object);
-            var clothingPrices = priceRetriever.GetClosingPrices(klines);
-
-            _mockPriceRetriever.Setup(c => c.GetClosingPrices(klines)).Returns(clothingPrices);
+            var closingPrices = priceRetriever.GetClosingPrices(klines);
 
             // Act
-            var result = _technicalIndicatorsCalculator.CalculateMovingAverage(klines, period);
+            var result = _technicalIndicatorsCalculator.CalculateMovingAverage(closingPrices, period);
 
             // Assert
             Assert.AreEqual(150m, result);
-        }
-
-        [TestMethod]
-        public void CalculateMovingAverageInvalidKlinesThrowsException()
-        {
-            // Arrange
-            var mockLogger = new Mock<ILogger>();
-            var mockBinanceClient = new Mock<IBinanceClient>();
-            var priceRetriever = new PriceRetriever(mockBinanceClient.Object, mockLogger.Object);
-            var technicalIndicatorsCalculator = new TechnicalIndicatorsCalculator(priceRetriever);
-            var period = 2;
-            var klines = new List<List<object>>
-            {
-                new List<object> { "100.5", "100.5", "100.5", "100.5", "invalid_data", "100.5" },
-            };
-
-            // Act & Assert
-            Assert.ThrowsException<InvalidCastException>(() => technicalIndicatorsCalculator.CalculateMovingAverage(klines, period));
         }
 
         [TestMethod]
@@ -65,36 +44,36 @@ namespace BinanceBot.Tests.Core
             var mockLogger = new Mock<ILogger>();
             var mockBinanceClient = new Mock<IBinanceClient>();
             var priceRetriever = new PriceRetriever(mockBinanceClient.Object, mockLogger.Object);
-            var technicalIndicatorsCalculator = new TechnicalIndicatorsCalculator(priceRetriever);
+            var technicalIndicatorsCalculator = new TechnicalIndicatorsCalculator();
             var period = 60;
             var klines = CreateLines(period);
+            var closingPrices = priceRetriever.GetClosingPrices(klines);
 
             // Act
-            var result = technicalIndicatorsCalculator.CalculateRSI(klines, period);
+            var result = technicalIndicatorsCalculator.CalculateRSI(closingPrices, period);
 
             // Assert
             Assert.IsTrue(result < 50);
             Assert.IsTrue(result > 49);
-        }
 
 
-        [TestMethod]
-        public void CalculateRSIApiThrowsExceptionThrowsException()
-        {
-            // Arrange
-            var mockLogger = new Mock<ILogger>();
-            var mockBinanceClient = new Mock<IBinanceClient>();
-            var priceRetriever = new PriceRetriever(mockBinanceClient.Object, mockLogger.Object);
-            var technicalIndicatorsCalculator = new TechnicalIndicatorsCalculator(priceRetriever);
-            var period = 14;
-            var klines = new List<List<object>>
+            static List<List<object>> CreateLines(int period)
             {
-                new List<object> { "100.5", "100.5", "100.5", "100.5", "invalid_data", "100.5" },
-            };
+                var kline = new List<object> { 100m, 100m, 100m, 100m, 100m, 100m, 100m, 100m, 100m, 100m, 100m, 100m };
+                var kline2 = new List<object> { 50m, 50m, 50m, 50m, 50m, 50m, 50m, 50m, 50m, 50m, 50m, 50m };
+                var klines = new List<List<object>>();
 
-            // Act & Assert
-            Assert.ThrowsException<InvalidCastException>(() => technicalIndicatorsCalculator.CalculateRSI(klines, period));
+
+                for (var i = 0; i < period; i++)
+                {
+                    klines.Add(i % 2 == 0 ? kline : kline2);
+                }
+
+                return klines;
+            }
         }
+
+
 
         [TestMethod]
         public void CalculateRSIWhenPerteMoyenneIsZeroReturnsZero()
@@ -105,7 +84,7 @@ namespace BinanceBot.Tests.Core
             int period = 5;
 
             // Act
-            var result = _technicalIndicatorsCalculator.CalculateRSI(new List<List<object>>(), period);
+            var result = _technicalIndicatorsCalculator.CalculateRSI(new List<decimal>(), period);
 
             // Assert
             Assert.AreEqual(0, result);
@@ -115,31 +94,49 @@ namespace BinanceBot.Tests.Core
         public void CalculateRSIWhenPerteMoyenneIsNotZeroReturnsCalculatedValue()
         {
             // Arrange
-            _mockPriceRetriever.Setup(m => m.GetClosingPrices(It.IsAny<List<List<object>>>()))
-                .Returns(new List<decimal> { 100, 102, 98, 101, 103 });
             int period = 5;
 
             // Act
-            var result = _technicalIndicatorsCalculator.CalculateRSI(new List<List<object>>(), period);
+            var result = _technicalIndicatorsCalculator.CalculateRSI(new List<decimal> { 100, 102, 98, 101, 103 }, period);
 
             // Assert
             decimal expectedRsi = 63.64m;
             Assert.AreEqual(expectedRsi, result, 0.01m);
         }
 
-        private static List<List<object>> CreateLines(int period)
+        [TestMethod]
+        public void CalculateVolatilityValidKlinesCalculatesVolatility()
         {
-            var kline = new List<object> { 100m, 100m, 100m, 100m, 100m, 100m, 100m, 100m, 100m, 100m, 100m, 100m };
-            var kline2 = new List<object> { 50m, 50m, 50m, 50m, 50m, 50m, 50m, 50m, 50m, 50m, 50m, 50m };
-            var klines = new List<List<object>>();
-
-
-            for (var i = 0; i < period; i++)
+            // Arrange
+            var mockLogger = new Mock<ILogger>();
+            var mockBinanceClient = new Mock<IBinanceClient>();
+            var priceRetriever = new PriceRetriever(mockBinanceClient.Object, mockLogger.Object);
+            var klines = new List<List<object>>
             {
-                klines.Add(i % 2 == 0 ? kline : kline2);
-            }
+                new List<object> { "100.5", "100.5", "100.5", "100.5", "100.6", "100.5" },
+                new List<object> { "100.5", "100.5", "100.5", "100.5", "101.6", "100.5" }
+            };
+            var closingPrices = priceRetriever.GetClosingPrices(klines);
 
-            return klines;
+            // Act
+            var result = _technicalIndicatorsCalculator.CalculateVolatility(closingPrices);
+
+            // Assert
+            Assert.IsNotNull(result);
+        }
+
+        [TestMethod]
+        public void DetermineLossStrategyGivenVolatilityAndConfigCalculatesStopLossPrice()
+        {
+            // Arrange
+            decimal volatility = 0.05m;
+            decimal cryptoPurchasePrice = 100m;
+
+            // Act
+            var result = _technicalIndicatorsCalculator.DetermineLossStrategy(cryptoPurchasePrice, volatility);
+
+            // Assert
+            Assert.IsTrue(result < cryptoPurchasePrice);
         }
     }
 }
