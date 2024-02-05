@@ -1,26 +1,25 @@
 ﻿using BinanceBot.Abstraction;
 
-namespace BinanceBot.Utils
+namespace BinanceBot.Utils;
+
+public class Helper
 {
-    public class Helper
+    private readonly IFileSystem _fileSystem;
+
+    public Helper(IFileSystem fileSystem)
     {
-        private readonly IFileSystem _fileSystem;
+        _fileSystem = fileSystem;
+    }
 
-        public Helper(IFileSystem fileSystem)
-        {
-            _fileSystem = fileSystem;
-        }
+    public string GetSolutionPath()
+    {
+        var currentDirectory = _fileSystem.GetCurrentDirectory();
 
-        public string GetSolutionPath()
-        {
-            var currentDirectory = _fileSystem.GetCurrentDirectory();
+        var directoryInfo = new DirectoryInfo(currentDirectory);
 
-            var directoryInfo = new DirectoryInfo(currentDirectory);
+        while (directoryInfo != null && !_fileSystem.GetFiles(directoryInfo.FullName, "*.sln").Any())
+            directoryInfo = directoryInfo.Parent;
 
-            while (directoryInfo != null && !_fileSystem.GetFiles(directoryInfo.FullName, "*.sln").Any())
-                directoryInfo = directoryInfo.Parent;
-
-            return directoryInfo?.FullName;
-        }
+        return directoryInfo?.FullName;
     }
 }

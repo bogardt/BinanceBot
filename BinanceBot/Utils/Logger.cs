@@ -1,34 +1,30 @@
 ﻿using BinanceBot.Abstraction;
 
-namespace BinanceBot.Utils
+namespace BinanceBot.Utils;
+
+public class Logger(IFileSystem fileSystem) : ILogger
 {
-    public class Logger : ILogger
+    public string LogFilePath { get; set; } = $"./logfile-bot-{DateTime.Now.ToString("yyyy-MM-dd-hh-mm-ss")}.log";
+    private readonly IFileSystem _fileSystem = fileSystem;
+
+    public void WriteLog(string message)
     {
-        public string LogFilePath { get; set; } = $"./logfile-bot-{DateTime.Now.ToString("yyyy-MM-dd-hh-mm-ss")}.log";
-        private readonly IFileSystem _fileSystem;
-        public Logger(IFileSystem fileSystem)
+        try
         {
-            _fileSystem = fileSystem;
+            var logDirectory = _fileSystem.GetDirectoryName(LogFilePath);
+            if (!_fileSystem.DirectoryExists(logDirectory))
+            {
+                _fileSystem.CreateDirectory(logDirectory);
+            }
+
+            using StreamWriter writer = new(LogFilePath, true);
+
+            writer.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss} - {message}");
+            Console.WriteLine(message);
         }
-        public void WriteLog(string message)
+        catch (Exception ex)
         {
-            try
-            {
-                var logDirectory = _fileSystem.GetDirectoryName(LogFilePath);
-                if (!_fileSystem.DirectoryExists(logDirectory))
-                {
-                    _fileSystem.CreateDirectory(logDirectory);
-                }
-
-                using StreamWriter writer = new(LogFilePath, true);
-
-                writer.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss} - {message}");
-                Console.WriteLine(message);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error writing to log: {ex.Message}");
-            }
+            Console.WriteLine($"Error writing to log: {ex.Message}");
         }
     }
 }

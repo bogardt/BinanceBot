@@ -1,8 +1,7 @@
-﻿namespace BinanceBot.Abstraction
+﻿namespace BinanceBot.Abstraction;
+
+public interface IHttpClientWrapper
 {
-    public interface IHttpClientWrapper
-    {
-        Task<string> GetStringAsync(string uri);
-        Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken = default);
-    }
+    Task<string> GetStringAsync(string uri);
+    Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken = default);
 }

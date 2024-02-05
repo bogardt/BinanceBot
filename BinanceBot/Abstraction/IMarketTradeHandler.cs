@@ -1,7 +1,6 @@
-﻿namespace BinanceBot.Abstraction
+﻿namespace BinanceBot.Abstraction;
+
+public interface IMarketTradeHandler
 {
-    public interface IMarketTradeHandler
-    {
-        Task TradeOnLimitAsync();
-    }
+    Task TradeOnLimitAsync();
 }

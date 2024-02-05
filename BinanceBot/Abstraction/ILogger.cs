@@ -1,7 +1,6 @@
-﻿namespace BinanceBot.Abstraction
+﻿namespace BinanceBot.Abstraction;
+
+public interface ILogger
 {
-    public interface ILogger
-    {
-        void WriteLog(string message);
-    }
+    void WriteLog(string message);
 }
