@@ -20,7 +20,7 @@ public class TradeActionTests
 
     public TradeActionTests()
     {
-        _tradeAction = new TradeAction(_mockBinanceClient.Object, _mockTechnicalIndicatorsCalculator.Object, _mockPriceRetriever.Object, _mockLogger.Object);
+        _tradeAction = new TradeAction(_mockBinanceClient.Object, _mockPriceRetriever.Object, _mockTechnicalIndicatorsCalculator.Object, _mockLogger.Object);
     }
 
     [TestMethod]

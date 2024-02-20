@@ -62,7 +62,7 @@ public class ProgramTests
 
         //
         var priceRetriever = new PriceRetriever(mockBinanceClient.Object, mockLogger.Object);
-        var tradeAction = new TradeAction(mockBinanceClient.Object, mockTechnicalIndicatorsCalculator.Object, priceRetriever, mockLogger.Object);
+        var tradeAction = new TradeAction(mockBinanceClient.Object, priceRetriever, mockTechnicalIndicatorsCalculator.Object, mockLogger.Object);
         var marketTradeHandler = new MarketTradeHandler(mockBinanceClient.Object, mockTechnicalIndicatorsCalculator.Object, priceRetriever, tradeAction, mockLogger.Object, tradingStrategy);
 
         var host = Host.CreateDefaultBuilder()

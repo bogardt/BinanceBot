@@ -46,7 +46,7 @@ public class BinanceClient(
     {
         var endpoint = $"{_baseEndpoint}/api/v3/account/commission";
         var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-        var queryString = $"symbol={symbol}&timestamp={timestamp}";
+        var queryString = $"symbol={symbol}&timestamp={timestamp}"; 
         var signature = Sign(queryString, _apiSecret);
         queryString += $"&signature={signature}";
         var requestUrl = $"{endpoint}?{queryString}";

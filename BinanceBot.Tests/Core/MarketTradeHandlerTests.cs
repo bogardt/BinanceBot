@@ -29,8 +29,8 @@ public class MarketTradeHandlerTests
     public MarketTradeHandlerTests()
     {
         _tradeAction = new TradeAction(_mockBinanceClient.Object,
-            _mockTechnicalIndicatorsCalculator.Object,
             _mockPriceRetriever.Object,
+            _mockTechnicalIndicatorsCalculator.Object,
             _mockLogger.Object);
         _handler = new MarketTradeHandler(_mockBinanceClient.Object,
             _mockTechnicalIndicatorsCalculator.Object,
