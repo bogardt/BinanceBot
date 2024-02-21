@@ -48,13 +48,13 @@ Check out our [code coverage report](https://codecov.io/github/bogardt/BinanceBo
 ```
 
 ### Project
-BinanceBot                      # Project
-├── Abstraction                 # Folder containing interface definitions            
-├── Core                        # Folder containing core functionality like trading logic, price retrieval, and technical indicators
-├── Model                       # Folder containing the models for accounts, balances, orders, etc.        
-├── Strategy                    # Folder containing trading strategies 
-├── Utils                       # Folder containing utility classes such as file system access, HTTP client wrapper, and logger
-└──  Program.cs                 # Main entry point of the application
+BinanceBot                      # Project<br>
+├── Abstraction                 # Folder containing interface definitions<br>      
+├── Core                        # Folder containing core functionality like trading logic, price retrieval, and technical indicators<br>
+├── Model                       # Folder containing the models for accounts, balances, orders, etc.<br>
+├── Strategy                    # Folder containing trading strategies<br>
+├── Utils                       # Folder containing utility classes such as file system access, HTTP client wrapper, and logger<br>
+└──  Program.cs                 # Main entry point of the application<br>
 
 ### Detailed project
 BinanceBot # Project Name<br>
