@@ -57,36 +57,37 @@ BinanceBot                      # Project
 └──  Program.cs                 # Main entry point of the application
 
 ### Detailed project
-BinanceBot                    # Project
-├── Abstraction               # Folder containing interfaces
-│   ├── IBinanceClient.cs         # Interface for interacting with the Binance API
-│   ├── IFileSystem.cs            # Interface for filesystem abstraction
-│   ├── IHttpClientWrapper.cs     # Interface for HTTP call abstraction
-│   ├── ILogger.cs                # Interface for logging abstraction
-│   ├── IMarketTradeHandler.cs    # Interface for market trade handling
-│   ├── IPriceRetriever.cs        # Interface for price retrieval
-│   ├── ITechnicalIndicatorsCalculator.cs # Interface for technical indicators calculation
-│   └── ITradeAction.cs           # Interface for trade action execution
-├── Core                      # Folder containing core logic
-│   ├── BinanceClient.cs          # Implementation for interacting with the Binance API
-│   ├── MarketTradeHandler.cs     # Market trade handler
-│   ├── PriceRetriever.cs         # Component for retrieving prices
-│   ├── TechnicalIndicatorsCalculator.cs # Technical indicators calculator
-│   └── TradeAction.cs            # Trade action executor
-├── Model                     # Folder containing models
-│   ├── Account.cs                # Model for user accounts
-│   ├── Balance.cs                # Model for account balances
-│   ├── Commission.cs             # Model for commissions
-│   ├── CommissionRates.cs        # Model for commission rates
-│   ├── Currency.cs               # Model for currencies
-│   ├── Order.cs                  # Model for trade orders
-│   └── TestOrder.cs              # Model for test orders
-├── Strategy                  # Folder containing trading strategies
-│   ├── StopLossStrategy.cs       # Stop loss strategy
-│   └── TradingStrategy.cs        # Trading strategy
-├── Utils                     # Folder containing utilities
-│   ├── FileSystem.cs             # Utility for file management
-│   ├── Helper.cs                 # Various helper methods
-│   ├── HttpClientWrapper.cs      # Wrapper for HTTP calls
-│   └── Logger.cs                 # Logging system
-└── Program.cs                # File to configure the worker when running the project
+BinanceBot # Project Name
+├── Abstraction # Folder containing interfaces
+│ ├── IBinanceClient.cs # Interface for interacting with the Binance API
+│ ├── IFileSystem.cs # Interface for filesystem abstraction
+│ ├── IHttpClientWrapper.cs # Interface for HTTP call abstraction
+│ ├── ILogger.cs # Interface for logging abstraction
+│ ├── IMarketTradeHandler.cs # Interface for market trade handling
+│ ├── IPriceRetriever.cs # Interface for price retrieval
+│ ├── ITechnicalIndicatorsCalculator.cs # Interface for technical indicators calculation
+│ └── ITradeAction.cs # Interface for trade action execution
+├── Core # Folder containing core logic
+│ ├── BinanceClient.cs # Implementation for interacting with the Binance API
+│ ├── MarketTradeHandler.cs # Market trade handler
+│ ├── PriceRetriever.cs # Component for retrieving prices
+│ ├── TechnicalIndicatorsCalculator.cs # Technical indicators calculator
+│ └── TradeAction.cs # Trade action executor
+├── Model # Folder containing models
+│ ├── Account.cs # Model for user accounts
+│ ├── Balance.cs # Model for account balances
+│ ├── Commission.cs # Model for commissions
+│ ├── CommissionRates.cs # Model for commission rates
+│ ├── Currency.cs # Model for currencies
+│ ├── Order.cs # Model for trade orders
+│ └── TestOrder.cs # Model for test orders
+├── Strategy # Folder containing trading strategies
+│ ├── StopLossStrategy.cs # Stop loss strategy
+│ └── TradingStrategy.cs # Trading strategy
+├── Utils # Folder containing utilities
+│ ├── FileSystem.cs # Utility for file management
+│ ├── Helper.cs # Various helper methods
+│ ├── HttpClientWrapper.cs # Wrapper for HTTP calls
+│ └── Logger.cs # Logging system
+├── Program.cs # File to configure the worker when running the project
+└── Terraform # Configuration folder for infrastructure deployment (hypothetical)
