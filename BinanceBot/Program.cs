@@ -2,8 +2,14 @@
 using Microsoft.Extensions.DependencyInjection;
 using BinanceBot.Core;
 using BinanceBot.Utils;
+using BinanceBot.BinanceApi;
 using Microsoft.Extensions.Configuration;
 using BinanceBot.Abstraction;
+using BinanceBot.BinanceApi.Model.Message;
+using FluentValidation;
+using BinanceBot.BinanceApi.Model;
+using BinanceBot.BinanceApi.Validation.Validator;
+using BinanceBot.BinanceApi.Validation;
 
 internal class Program
 {
@@ -32,15 +38,20 @@ internal class Program
         var builder = Host.CreateDefaultBuilder(args)
             .ConfigureServices((context, services) =>
             {
-                services.AddSingleton<IMarketTradeHandler, MarketTradeHandler>();
+
+                services.AddValidatorsFromAssemblyContaining<AcountValidator>();
+                //services.AddScoped(typeof(IApiValidator), typeof(ApiValidators));
+
+                services.AddSingleton<IApiValidator, ApiValidators>();
+
                 services.AddSingleton<IBinanceClient, BinanceClient>();
-                services.AddSingleton<ITradeAction, TradeAction>();
                 services.AddSingleton<IFileSystem, FileSystem>();
-                services.AddSingleton<ITechnicalIndicatorsCalculator, TechnicalIndicatorsCalculator>();
-                services.AddSingleton<IPriceRetriever, PriceRetriever>();
-                services.AddSingleton<IMarketTradeHandler, MarketTradeHandler>();
-                services.AddSingleton<ILogger, Logger>();
                 services.AddSingleton<IHttpClientWrapper, HttpClientWrapper>();
+                services.AddSingleton<ILogger, Logger>();
+                services.AddSingleton<IMarketTradeHandler, MarketTradeHandler>();
+                services.AddSingleton<IPriceRetriever, PriceRetriever>();
+                services.AddSingleton<ITechnicalIndicatorsCalculator, TechnicalIndicatorsCalculator>();
+                services.AddSingleton<ITradeAction, TradeAction>();
                 services.AddSingleton<IConfiguration>(config);
             });
 

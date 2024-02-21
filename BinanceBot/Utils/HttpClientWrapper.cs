@@ -20,9 +20,9 @@ public class HttpClientWrapper : IHttpClientWrapper, IDisposable
         _httpClient.Dispose();
     }
 
-    public async Task<string> GetStringAsync(string uri)
+    public async Task<HttpResponseMessage> GetAsync(string uri)
     {
-        return await _httpClient.GetStringAsync(uri);
+        return await _httpClient.GetAsync(uri);
     }
 
     public async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken = default)

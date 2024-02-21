@@ -1,8 +1,8 @@
 ﻿using Newtonsoft.Json;
 
-namespace BinanceBot.Model;
+namespace BinanceBot.BinanceApi.Model;
 
-public class CommissionRates
+public class CommissionRate
 {
     [JsonProperty("maker")]
     public string? Maker { get; set; }

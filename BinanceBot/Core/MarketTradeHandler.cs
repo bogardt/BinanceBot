@@ -34,7 +34,7 @@ public class MarketTradeHandler(IBinanceClient binanceClient,
                 var currency = await getPriceTask;
                 var klines = await getKlinesTask;
 
-                decimal currentCurrencyPrice = currency.Price;
+                decimal currentCurrencyPrice = (decimal)currency.Price!;
 
                 var closingPrices = _priceRetriever.GetClosingPrices(klines);
 

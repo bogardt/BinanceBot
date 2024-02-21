@@ -1,6 +1,5 @@
 using BinanceBot.Abstraction;
-using BinanceBot.Core;
-using BinanceBot.Model;
+using BinanceBot.BinanceApi.Model.Message;
 using Microsoft.Extensions.Configuration;
 using Moq;
 using Newtonsoft.Json;
