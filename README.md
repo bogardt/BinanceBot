@@ -57,37 +57,36 @@ BinanceBot                      # Project
 └──  Program.cs                 # Main entry point of the application
 
 ### Detailed project
-BinanceBot # Project Name
-├── Abstraction # Folder containing interfaces
-│ ├── IBinanceClient.cs # Interface for interacting with the Binance API
-│ ├── IFileSystem.cs # Interface for filesystem abstraction
-│ ├── IHttpClientWrapper.cs # Interface for HTTP call abstraction
-│ ├── ILogger.cs # Interface for logging abstraction
-│ ├── IMarketTradeHandler.cs # Interface for market trade handling
-│ ├── IPriceRetriever.cs # Interface for price retrieval
-│ ├── ITechnicalIndicatorsCalculator.cs # Interface for technical indicators calculation
-│ └── ITradeAction.cs # Interface for trade action execution
-├── Core # Folder containing core logic
-│ ├── BinanceClient.cs # Implementation for interacting with the Binance API
-│ ├── MarketTradeHandler.cs # Market trade handler
-│ ├── PriceRetriever.cs # Component for retrieving prices
-│ ├── TechnicalIndicatorsCalculator.cs # Technical indicators calculator
-│ └── TradeAction.cs # Trade action executor
-├── Model # Folder containing models
-│ ├── Account.cs # Model for user accounts
-│ ├── Balance.cs # Model for account balances
-│ ├── Commission.cs # Model for commissions
-│ ├── CommissionRates.cs # Model for commission rates
-│ ├── Currency.cs # Model for currencies
-│ ├── Order.cs # Model for trade orders
-│ └── TestOrder.cs # Model for test orders
-├── Strategy # Folder containing trading strategies
-│ ├── StopLossStrategy.cs # Stop loss strategy
-│ └── TradingStrategy.cs # Trading strategy
-├── Utils # Folder containing utilities
-│ ├── FileSystem.cs # Utility for file management
-│ ├── Helper.cs # Various helper methods
-│ ├── HttpClientWrapper.cs # Wrapper for HTTP calls
-│ └── Logger.cs # Logging system
-├── Program.cs # File to configure the worker when running the project
-└── Terraform # Configuration folder for infrastructure deployment (hypothetical)
+BinanceBot # Project Name<br>
+├── Abstraction # Folder containing interfaces<br>
+│ ├── IBinanceClient.cs # Interface for interacting with the Binance API<br>
+│ ├── IFileSystem.cs # Interface for filesystem abstraction<br>
+│ ├── IHttpClientWrapper.cs # Interface for HTTP call abstraction<br>
+│ ├── ILogger.cs # Interface for logging abstraction<br>
+│ ├── IMarketTradeHandler.cs # Interface for market trade handling<br>
+│ ├── IPriceRetriever.cs # Interface for price retrieval<br>
+│ ├── ITechnicalIndicatorsCalculator.cs # Interface for technical indicators calculation<br>
+│ └── ITradeAction.cs # Interface for trade action execution<br>
+├── Core # Folder containing core logic<br>
+│ ├── BinanceClient.cs # Implementation for interacting with the Binance API<br>
+│ ├── MarketTradeHandler.cs # Market trade handler<br>
+│ ├── PriceRetriever.cs # Component for retrieving prices<br>
+│ ├── TechnicalIndicatorsCalculator.cs # Technical indicators calculator<br>
+│ └── TradeAction.cs # Trade action executor<br>
+├── Model # Folder containing models<br>
+│ ├── Account.cs # Model for user accounts<br>
+│ ├── Balance.cs # Model for account balances<br>
+│ ├── Commission.cs # Model for commissions<br>
+│ ├── CommissionRates.cs # Model for commission rates<br>
+│ ├── Currency.cs # Model for currencies<br>
+│ ├── Order.cs # Model for trade orders<br>
+│ └── TestOrder.cs # Model for test orders<br>
+├── Strategy # Folder containing trading strategies<br>
+│ ├── StopLossStrategy.cs # Stop loss strategy<br>
+│ └── TradingStrategy.cs # Trading strategy<br>
+├── Utils # Folder containing utilities<br>
+│ ├── FileSystem.cs # Utility for file management<br>
+│ ├── Helper.cs # Various helper methods<br>
+│ ├── HttpClientWrapper.cs # Wrapper for HTTP calls<br>
+│ └── Logger.cs # Logging system<br>
+└── Program.cs # File to configure the worker when running the project<br>
