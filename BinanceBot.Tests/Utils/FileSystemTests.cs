@@ -20,6 +20,7 @@ public class FileSystemTests
     [TestMethod]
     public void GetFilesReturnsCorrectFiles()
     {
+        // Arrange
         var currentDirectory = Directory.GetCurrentDirectory();
         var searchPattern = "*.dll";
 
@@ -47,17 +48,27 @@ public class FileSystemTests
     [TestMethod]
     public void GetCurrentDirectoryReturnsCurrentDirectory()
     {
+        // Arrange
         var expected = Directory.GetCurrentDirectory();
+
+        // Act
         var actual = _fileSystem.GetCurrentDirectory();
+
+        // Assert
         Assert.AreEqual(expected, actual);
     }
 
     [TestMethod]
     public void GetDirectoryNameValidPathReturnsDirectoryName()
     {
+        // Arrange
         var path = "C:\\test\\myfile.txt";
         var expected = Path.GetDirectoryName(path);
+
+        // Act
         var actual = _fileSystem.GetDirectoryName(path);
+
+        // Assert
         Assert.AreEqual(expected, actual);
     }
 
@@ -88,39 +99,59 @@ public class FileSystemTests
     [TestMethod]
     public void DirectoryExistsExistingDirectoryReturnsTrue()
     {
+        // Arrange
         var path = Directory.GetCurrentDirectory();
+
+        // Act
         var actual = _fileSystem.DirectoryExists(path);
+
+        // Assert
         Assert.IsTrue(actual);
     }
 
     [TestMethod]
     public void DirectoryExistsNonExistingDirectoryReturnsFalse()
     {
+        // Arrange
         var path = "C:\\NonExisting\\Path";
+
+        // Act
         var actual = _fileSystem.DirectoryExists(path);
+
+        // Assert
         Assert.IsFalse(actual);
     }
 
     [TestMethod]
     public void CreateDirectoryCreateNewDirectoryReturnsDirectoryInfo()
     {
+        // Arrange
         var path = Path.Combine(Directory.GetCurrentDirectory(), "TestDirectory");
         if (Directory.Exists(path))
         {
             Directory.Delete(path);
         }
 
+        // Act
         var dirInfo = _fileSystem.CreateDirectory(path);
+
+        // Assert
         Assert.IsTrue(dirInfo.Exists && dirInfo.FullName == path);
+
         Directory.Delete(path);
     }
 
     [TestMethod]
     public void GetFilesDirectoryWithoutMatchingFilesReturnsNoFiles()
     {
+        // Arrange
         var path = Directory.GetCurrentDirectory();
         var pattern = "*.abcdef";
+
+        // Act
         var files = _fileSystem.GetFiles(path, pattern);
+
+        // Assert
         Assert.IsTrue(files.Length == 0);
     }
 }

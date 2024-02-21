@@ -27,7 +27,7 @@ public class TradeActionTests
     public async Task WaitBuyAsyncCompletesSuccessfullyTestStrategy()
     {
         // Arrange
-        var orders = new List<Order>() { new Order { Symbol = _tradingStrategyTest.Symbol, Side = "BUY" } };
+        var orders = new List<Order>() { new() { Symbol = _tradingStrategyTest.Symbol, Side = "BUY" } };
         var ordersEnd = new List<Order>();
         _mockBinanceClient.SetupSequence(c => c.GetOpenOrdersAsync(_tradingStrategyTest.Symbol))
                           .ReturnsAsync(orders)
@@ -45,7 +45,7 @@ public class TradeActionTests
     public async Task WaitSellAsyncCompletesSuccessfullyTestStrategy()
     {
         // Arrange
-        var orders = new List<Order>() { new Order { Symbol = _tradingStrategyTest.Symbol, Side = "SELL" } };
+        var orders = new List<Order>() { new() { Symbol = _tradingStrategyTest.Symbol, Side = "SELL" } };
         var ordersEnd = new List<Order>();
         _mockBinanceClient.SetupSequence(c => c.GetOpenOrdersAsync(_tradingStrategyTest.Symbol))
                           .ReturnsAsync(orders)

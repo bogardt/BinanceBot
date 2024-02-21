@@ -35,8 +35,8 @@ public class PriceRetrieverTests
         // Arrange
         var klines = new List<List<object>>
         {
-            new List<object> { "100.5", "100.5", "100.5", "100.5", "100.6", "100.5" },
-            new List<object> { "100.5", "100.5", "100.5", "100.5", "101.6", "100.5" }
+            new() { "100.5", "100.5", "100.5", "100.5", "100.6", "100.5" },
+            new() { "100.5", "100.5", "100.5", "100.5", "101.6", "100.5" }
         };
 
         // Act
@@ -54,7 +54,7 @@ public class PriceRetrieverTests
         // Arrange
         var klines = new List<List<object>>
         {
-            new List<object> { "100.5", "100.5", "100.5", "100.5", "not a number", "100.5" },
+            new() { "100.5", "100.5", "100.5", "100.5", "not a number", "100.5" },
         };
 
         // Act & Assert
@@ -83,7 +83,7 @@ public class PriceRetrieverTests
         var priceRetriever = new PriceRetriever(mockBinanceClient.Object, mockLogger.Object);
         var klines = new List<List<object>>
         {
-            new List<object> { "100.5", "100.5", "100.5", "100.5", "invalid_data", "100.5" },
+            new() { "100.5", "100.5", "100.5", "100.5", "invalid_data", "100.5" },
         };
 
         // Act & Assert
@@ -93,6 +93,7 @@ public class PriceRetrieverTests
     [TestMethod]
     public async Task HandleDiscountAsyncTestDiscountUpdated()
     {
+        // Arrange
         _mockBinanceClient.Setup(c => c.GetCommissionBySymbolAsync(_tradingStrategy.Symbol))
             .ReturnsAsync(new Commission
             {
@@ -112,8 +113,8 @@ public class PriceRetrieverTests
         _mockBinanceClient.Setup(c => c.GetAccountInfosAsync())
             .ReturnsAsync(new Account
             {
-                Balances = new Balance[]
-                {
+                Balances =
+                [
                     new Balance
                     {
                         Asset = "SOL",
@@ -129,7 +130,7 @@ public class PriceRetrieverTests
                         Asset = "BNB",
                         Free = "0.99927185"
                     },
-                }
+                ]
             });
         _mockBinanceClient.Setup(c => c.GetPriceBySymbolAsync("BNBUSDT"))
             .ReturnsAsync(new Currency
@@ -150,6 +151,7 @@ public class PriceRetrieverTests
     [TestMethod]
     public async Task HandleDiscountAsyncTestDiscountEqualToZero()
     {
+        // Arrange
         _mockBinanceClient.Setup(c => c.GetCommissionBySymbolAsync(_tradingStrategy.Symbol))
             .ReturnsAsync(new Commission
             {
@@ -169,8 +171,8 @@ public class PriceRetrieverTests
         _mockBinanceClient.Setup(c => c.GetAccountInfosAsync())
             .ReturnsAsync(new Account
             {
-                Balances = new Balance[]
-                {                       
+                Balances =
+                [
                     new Balance
                     {
                         Asset = "SOL",
@@ -186,7 +188,7 @@ public class PriceRetrieverTests
                         Asset = "BNB",
                         Free = "0.99927185"
                     }
-                }
+                ]
             });
         _mockBinanceClient.Setup(c => c.GetPriceBySymbolAsync("BNBUSDT"))
             .ReturnsAsync(new Currency

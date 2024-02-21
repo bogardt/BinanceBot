@@ -119,8 +119,8 @@ public class ProgramTests
         mockBinanceClient.Setup(c => c.GetAccountInfosAsync())
             .ReturnsAsync(new Account
             {
-                Balances = new []
-                {
+                Balances =
+                [
                     new Balance
                     {
                         Asset = "BNB",
@@ -136,7 +136,7 @@ public class ProgramTests
                         Asset = "SOL",
                         Free = "1"
                     },
-                }
+                ]
             });
 
         mockBinanceClient.Setup(c => c.GetPriceBySymbolAsync("BNBUSDT"))

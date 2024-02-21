@@ -30,8 +30,8 @@ public class BinanceClientTests
         // Arrange
         var account = new Account
         {
-            Balances = new[]
-            {
+            Balances =
+            [
                 new Balance
                 {
                     Asset = "BNB",
@@ -47,7 +47,7 @@ public class BinanceClientTests
                     Asset = "SOL",
                     Free = "1"
                 },
-            }
+            ]
         };
         var response = new HttpResponseMessage
         {
@@ -431,13 +431,11 @@ public class BinanceClientTests
         // Arrange
         var order = new List<Order>
         {
-            new Order
-            {
+            new() {
                 OrderId = 1,
                 Symbol = "BTCUSDT"
             },
-            new Order
-            {
+            new() {
                 OrderId = 2,
                 Symbol = "ETHUSDT"
             }

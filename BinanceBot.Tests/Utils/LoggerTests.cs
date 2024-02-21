@@ -21,7 +21,7 @@ public class LoggerTests
         _logger.WriteLog("toto");
         _logger.WriteLog("tata");
         Assert.IsTrue(File.Exists(_logger.LogFilePath));
-        using StreamReader reader = new StreamReader(_logger.LogFilePath);
+        using StreamReader reader = new(_logger.LogFilePath);
         var content = await reader.ReadToEndAsync();
         Assert.IsTrue(content.Contains("test"));
         Assert.IsTrue(content.Contains("toto"));
@@ -33,7 +33,7 @@ public class LoggerTests
     {
         _logger.WriteLog("test");
         Assert.IsTrue(File.Exists(_logger.LogFilePath));
-        using StreamReader reader = new StreamReader(_logger.LogFilePath);
+        using StreamReader reader = new(_logger.LogFilePath);
         var content = await reader.ReadToEndAsync();
         Assert.IsTrue(content.Contains("test"));
     }

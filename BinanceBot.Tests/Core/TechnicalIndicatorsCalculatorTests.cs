@@ -25,8 +25,8 @@ public class TechnicalIndicatorsCalculatorTests
         var period = 2;
         var klines = new List<List<object>>
         {
-            new List<object> { "100.5", "100.5", "100.5", "100.5", "100", "100.5" },
-            new List<object> { "100.5", "100.5", "100.5", "100.5", "200", "100.5" }
+            new() { "100.5", "100.5", "100.5", "100.5", "100", "100.5" },
+            new() { "100.5", "100.5", "100.5", "100.5", "200", "100.5" }
         };
         var closingPrices = priceRetriever.GetClosingPrices(klines);
 
@@ -113,8 +113,8 @@ public class TechnicalIndicatorsCalculatorTests
         var priceRetriever = new PriceRetriever(mockBinanceClient.Object, mockLogger.Object);
         var klines = new List<List<object>>
         {
-            new List<object> { "100.5", "100.5", "100.5", "100.5", "100.6", "100.5" },
-            new List<object> { "100.5", "100.5", "100.5", "100.5", "101.6", "100.5" }
+            new() { "100.5", "100.5", "100.5", "100.5", "100.6", "100.5" },
+            new() { "100.5", "100.5", "100.5", "100.5", "101.6", "100.5" }
         };
         var closingPrices = priceRetriever.GetClosingPrices(klines);
 

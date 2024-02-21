@@ -3,29 +3,19 @@ using BinanceBot.Strategy;
 
 namespace BinanceBot.Core;
 
-public class MarketTradeHandler : IMarketTradeHandler
+public class MarketTradeHandler(IBinanceClient binanceClient,
+    ITechnicalIndicatorsCalculator technicalIndicatorsCalculator,
+    IPriceRetriever priceRetriever,
+    ITradeAction tradeAction,
+    ILogger logger,
+    TradingStrategy? tradingStrategy = null) : IMarketTradeHandler
 {
-    private readonly IBinanceClient _binanceClient;
-    private readonly IPriceRetriever _priceRetriever;
-    private readonly ITechnicalIndicatorsCalculator _technicalIndicatorsCalculator;
-    private readonly ITradeAction _tradeAction;
-    private readonly ILogger _logger;
-    private readonly TradingStrategy _tradingStrategy;
-
-    public MarketTradeHandler(IBinanceClient binanceClient,
-        ITechnicalIndicatorsCalculator technicalIndicatorsCalculator,
-        IPriceRetriever priceRetriever,
-        ITradeAction tradeAction,
-        ILogger logger,
-        TradingStrategy? tradingStrategy = null)
-    {
-        _tradingStrategy = tradingStrategy ?? new();
-        _binanceClient = binanceClient;
-        _technicalIndicatorsCalculator = technicalIndicatorsCalculator;
-        _priceRetriever = priceRetriever;
-        _tradeAction = tradeAction;
-        _logger = logger;
-    }
+    private readonly IBinanceClient _binanceClient = binanceClient;
+    private readonly IPriceRetriever _priceRetriever = priceRetriever;
+    private readonly ITechnicalIndicatorsCalculator _technicalIndicatorsCalculator = technicalIndicatorsCalculator;
+    private readonly ITradeAction _tradeAction = tradeAction;
+    private readonly ILogger _logger = logger;
+    private readonly TradingStrategy _tradingStrategy = tradingStrategy ?? new();
 
     public async Task TradeOnLimitAsync()
     {

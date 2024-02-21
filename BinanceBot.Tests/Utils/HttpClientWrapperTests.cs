@@ -15,8 +15,8 @@ public class HttpClientWrapperTests
     {
         var appSettings = new List<KeyValuePair<string, string?>>
         {
-            new KeyValuePair<string, string?>("AppSettings:Binance:ApiKey", "***"),
-            new KeyValuePair<string, string?>("AppSettings:Binance:ApiSecret", "***")
+            new("AppSettings:Binance:ApiKey", "***"),
+            new("AppSettings:Binance:ApiSecret", "***")
         };
         _config = new ConfigurationBuilder()
             .AddInMemoryCollection(appSettings)
