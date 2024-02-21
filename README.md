@@ -47,8 +47,7 @@ Check out our [code coverage report](https://codecov.io/github/bogardt/BinanceBo
 }
 ```
 
-##Projects
-
+###Project
 BinanceBot                      # Project
 ├── Abstraction                 # Folder containing interface definitions            
 ├── Core                        # Folder containing core functionality like trading logic, price retrieval, and technical indicators
@@ -57,6 +56,7 @@ BinanceBot                      # Project
 ├── Utils                       # Folder containing utility classes such as file system access, HTTP client wrapper, and logger
 └──  Program.cs                 # Main entry point of the application
 
+###Detailed project
 BinanceBot                    # Project
 ├── Abstraction               # Folder containing interfaces
 │   ├── IBinanceClient.cs         # Interface for interacting with the Binance API
@@ -89,5 +89,4 @@ BinanceBot                    # Project
 │   ├── Helper.cs                 # Various helper methods
 │   ├── HttpClientWrapper.cs      # Wrapper for HTTP calls
 │   └── Logger.cs                 # Logging system
-├── Program.cs                # File to configure the worker when running the project
-└── Terraform                 # Configuration folder for infrastructure deployment (hypothetical)
+└── Program.cs                # File to configure the worker when running the project
