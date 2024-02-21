@@ -48,6 +48,7 @@ Check out our [code coverage report](https://codecov.io/github/bogardt/BinanceBo
 ```
 
 ###Project
+
 BinanceBot                      # Project
 ├── Abstraction                 # Folder containing interface definitions            
 ├── Core                        # Folder containing core functionality like trading logic, price retrieval, and technical indicators
@@ -57,6 +58,7 @@ BinanceBot                      # Project
 └──  Program.cs                 # Main entry point of the application
 
 ###Detailed project
+
 BinanceBot                    # Project
 ├── Abstraction               # Folder containing interfaces
 │   ├── IBinanceClient.cs         # Interface for interacting with the Binance API
