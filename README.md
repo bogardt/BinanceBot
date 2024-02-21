@@ -48,8 +48,8 @@ Check out our [code coverage report](https://codecov.io/github/bogardt/BinanceBo
 ```
 
 ### Project
-BinanceBot                      # Project<br>
-├── Abstraction                 # Folder containing interface definitions<br>      
+BinanceBot                      # Project
+├── Abstraction                 # Folder containing interface definitions<br>
 ├── Core                        # Folder containing core functionality like trading logic, price retrieval, and technical indicators<br>
 ├── Model                       # Folder containing the models for accounts, balances, orders, etc.<br>
 ├── Strategy                    # Folder containing trading strategies<br>
