@@ -36,7 +36,7 @@ Check out our [code coverage report](https://codecov.io/github/bogardt/BinanceBo
       "ApiKey": "***",
       "ApiSecret": "***"
     }
-    },
+  },
   "ConnectionStrings": {
   },
   "Logging": {
