@@ -1,4 +1,5 @@
 using BinanceBot.Abstraction;
+using BinanceBot.BinanceApi.Model;
 using BinanceBot.BinanceApi.Model.Message;
 using BinanceBot.Core;
 using BinanceBot.Strategy;

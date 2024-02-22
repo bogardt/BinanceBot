@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace BinanceBot.BinanceApi.Model.Message;
+namespace BinanceBot.BinanceApi.Model;
 
 public class Order : BaseMessage
 {

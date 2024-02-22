@@ -3,14 +3,14 @@ using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Extensions.Configuration;
 using BinanceBot.Abstraction;
-using BinanceBot.BinanceApi.Model.Message;
+using BinanceBot.BinanceApi.Model;
 
 namespace BinanceBot.BinanceApi;
 
 public class BinanceClient(
     IHttpClientWrapper httpClientWrapper,
     IConfiguration config,
-    IApiValidator<BaseMessage> apiValidator,
+    IApiValidatorService apiValidator,
     ILogger logger) : IBinanceClient
 {
     private readonly IHttpClientWrapper _httpClientWrapper = httpClientWrapper;
@@ -23,7 +23,7 @@ public class BinanceClient(
         string requestUrl = GetUrl("account");
         using var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
         var response = await _httpClientWrapper.SendAsync(request);
-        var account = await apiValidator.ValidateResponse<Account>(response);
+        var account = await apiValidator.ValidateAsync<Account>(response);
         return account!;
     }
 
@@ -32,7 +32,7 @@ public class BinanceClient(
         string requestUrl = GetUrl("account/commission", symbol);
         using var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
         var response = await _httpClientWrapper.SendAsync(request);
-        var commission = await apiValidator.ValidateResponse<Commission>(response);
+        var commission = await apiValidator.ValidateAsync<Commission>(response);
         return commission!;
     }
 
@@ -42,7 +42,7 @@ public class BinanceClient(
         using var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
         var response = await _httpClientWrapper.SendAsync(request);
         var orders = await apiValidator.Validate1DResponse<Order>(response);
-        return orders;
+        return (IEnumerable<Order>)orders;
     }
 
     private string GetUrl(string method, string? symbol = null)
@@ -69,7 +69,7 @@ public class BinanceClient(
     {
         var priceEndpoint = $"{_baseEndpoint}/api/v3/ticker/price?symbol={symbol}";
         var response = await _httpClientWrapper.GetAsync(priceEndpoint);
-        var currency = await apiValidator.ValidateResponse<Currency>(response);
+        var currency = await apiValidator.ValidateAsync<Currency>(response);
         return currency;
     }
 
@@ -78,7 +78,7 @@ public class BinanceClient(
         string finalUrl = CreateOrderUrl("order/test", symbol, quantity, price, side);
         using var request = new HttpRequestMessage(HttpMethod.Post, finalUrl);
         var response = await _httpClientWrapper.SendAsync(request);
-        var testOrder = await apiValidator.ValidateResponse<TestOrder>(response);
+        var testOrder = await apiValidator.ValidateAsync<TestOrder>(response);
         return testOrder;
     }
 
@@ -87,7 +87,7 @@ public class BinanceClient(
         string finalUrl = CreateOrderUrl("order", symbol, quantity, price, side);
         using var request = new HttpRequestMessage(HttpMethod.Post, finalUrl);
         var response = await _httpClientWrapper.SendAsync(request);
-        var order = await apiValidator.ValidateResponse<Order>(response);
+        var order = await apiValidator.ValidateAsync<Order>(response);
         return order;
     }
 

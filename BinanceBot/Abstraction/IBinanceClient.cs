@@ -1,4 +1,4 @@
-﻿using BinanceBot.BinanceApi.Model.Message;
+﻿using BinanceBot.BinanceApi.Model;
 
 namespace BinanceBot.Abstraction;
 

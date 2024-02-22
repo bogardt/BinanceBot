@@ -9,8 +9,8 @@ public class BalanceValidator : AbstractValidator<Balance>
     {
         When(x => x is not null, () =>
         {
-            RuleFor(x => x.Asset).Null();
-            RuleFor(x => x.Free).Null();
+            RuleFor(x => x.Asset).NotNull().NotEmpty();
+            RuleFor(x => x.Free).NotNull().NotEmpty();
         }).Otherwise(() =>
         {
             RuleFor(x => x).NotNull();

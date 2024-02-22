@@ -1,5 +1,5 @@
 using BinanceBot.Abstraction;
-using BinanceBot.BinanceApi.Model.Message;
+using BinanceBot.BinanceApi.Model;
 using BinanceBot.Core;
 using BinanceBot.Strategy;
 using Moq;

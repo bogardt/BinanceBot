@@ -9,10 +9,10 @@ public class DiscountValidator : AbstractValidator<Discount>
     {
         When(x => x is not null, () =>
         {
-            RuleFor(x => x.DiscountValue).Null();
-            RuleFor(x => x.DiscountAsset).Null();
-            RuleFor(x => x.EnabledForAccount).Null();
-            RuleFor(x => x.EnabledForSymbol).Null();
+            RuleFor(x => x.DiscountAsset).NotNull().NotEmpty().Equal("BNB");
+            RuleFor(x => x.DiscountValue).NotNull().NotEmpty().Equal("0.75000000");
+            RuleFor(x => x.EnabledForAccount).Equal(true);
+            RuleFor(x => x.EnabledForSymbol).Equal(true);
         }).Otherwise(() =>
         {
             RuleFor(x => x).NotNull();

@@ -1,6 +1,5 @@
 ﻿using BinanceBot.Abstraction;
 using BinanceBot.Strategy;
-using System.Linq;
 
 namespace BinanceBot.Core;
 

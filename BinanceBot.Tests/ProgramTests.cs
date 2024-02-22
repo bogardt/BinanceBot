@@ -1,4 +1,5 @@
 ﻿using BinanceBot.Abstraction;
+using BinanceBot.BinanceApi.Model;
 using BinanceBot.BinanceApi.Model.Message;
 using BinanceBot.Core;
 using BinanceBot.Strategy;
@@ -68,14 +69,14 @@ public class ProgramTests
         var host = Host.CreateDefaultBuilder()
             .ConfigureServices((context, services) =>
             {
-                services.AddSingleton<IBinanceClient>(mockBinanceClient.Object);
+                services.AddSingleton(mockBinanceClient.Object);
                 services.AddSingleton<ITradeAction>(tradeAction);
-                services.AddSingleton<IFileSystem>(mockFileSystem.Object);
-                services.AddSingleton<ITechnicalIndicatorsCalculator>(mockTechnicalIndicatorsCalculator.Object);
+                services.AddSingleton(mockFileSystem.Object);
+                services.AddSingleton(mockTechnicalIndicatorsCalculator.Object);
                 services.AddSingleton<IPriceRetriever>(priceRetriever);
                 services.AddSingleton<IMarketTradeHandler>(marketTradeHandler);
-                services.AddSingleton<ILogger>(mockLogger.Object);
-                services.AddSingleton<IHttpClientWrapper>(mockHttpClientWrapper.Object);
+                services.AddSingleton(mockLogger.Object);
+                services.AddSingleton(mockHttpClientWrapper.Object);
             })
             .Build();
 

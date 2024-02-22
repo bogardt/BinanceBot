@@ -5,11 +5,9 @@ using BinanceBot.Utils;
 using BinanceBot.BinanceApi;
 using Microsoft.Extensions.Configuration;
 using BinanceBot.Abstraction;
-using BinanceBot.BinanceApi.Model.Message;
-using FluentValidation;
-using BinanceBot.BinanceApi.Model;
-using BinanceBot.BinanceApi.Validation.Validator;
 using BinanceBot.BinanceApi.Validation;
+using FluentValidation;
+using BinanceBot.BinanceApi.Validation.Validator;
 
 internal class Program
 {
@@ -39,11 +37,10 @@ internal class Program
             .ConfigureServices((context, services) =>
             {
 
-                services.AddValidatorsFromAssemblyContaining<AcountValidator>();
-                //services.AddScoped(typeof(IApiValidator), typeof(ApiValidators));
+                services.AddValidatorsFromAssemblyContaining<AccountValidator>();
+                services.AddScoped(typeof(IApiValidatorService), typeof(ApiValidatorService));
 
-                services.AddSingleton<IApiValidator, ApiValidators>();
-
+                services.AddSingleton<IApiValidatorService, ApiValidatorService>();
                 services.AddSingleton<IBinanceClient, BinanceClient>();
                 services.AddSingleton<IFileSystem, FileSystem>();
                 services.AddSingleton<IHttpClientWrapper, HttpClientWrapper>();
