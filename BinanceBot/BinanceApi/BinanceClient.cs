@@ -10,7 +10,7 @@ namespace BinanceBot.BinanceApi;
 public class BinanceClient(
     IHttpClientWrapper httpClientWrapper,
     IConfiguration config,
-    IApiValidator apiValidator,
+    IApiValidator<BaseMessage> apiValidator,
     ILogger logger) : IBinanceClient
 {
     private readonly IHttpClientWrapper _httpClientWrapper = httpClientWrapper;

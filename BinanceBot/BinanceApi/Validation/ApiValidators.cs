@@ -5,23 +5,23 @@ using Newtonsoft.Json;
 
 namespace BinanceBot.BinanceApi.Validation;
 
-public class ApiValidators : IApiValidator
+public class ApiValidators<MessageType> : IApiValidator<MessageType> where MessageType : BaseMessage
 {
-    public ApiValidators(IValidator<BaseMessage> validator)
+    public ApiValidators(IValidator<MessageType> validator)
     {
         _validator = validator;
     }
-    private readonly IValidator<BaseMessage> _validator;
+    private readonly IValidator<MessageType> _validator;
 
-    public async Task<MessageType> ValidateResponse<MessageType>(HttpResponseMessage? response) where MessageType : BaseMessage
+    public async Task<MessageType> ValidateResponse(HttpResponseMessage? response)
     {
         var res = await response!.Content.ReadAsStringAsync();
         var message = JsonConvert.DeserializeObject<MessageType>(res) ?? default;
-        _validator.Validate(message);
+        _validator.Validate<MessageType>(message, (option) => { });
         return message!;
     }
 
-    public async Task<IEnumerable<MessageType>> Validate1DResponse<MessageType>(HttpResponseMessage? response) where MessageType : BaseMessage
+    public async Task<IEnumerable<MessageType>> Validate1DResponse(HttpResponseMessage? response)
     {
         var res = await response!.Content.ReadAsStringAsync();
         var messages = (JsonConvert.DeserializeObject<List<MessageType>>(res) ?? null)
