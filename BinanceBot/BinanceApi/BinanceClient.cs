@@ -4,17 +4,15 @@ using System.Text;
 using Microsoft.Extensions.Configuration;
 using BinanceBot.Abstraction;
 using BinanceBot.BinanceApi.Model;
+using Newtonsoft.Json;
 
 namespace BinanceBot.BinanceApi;
 
 public class BinanceClient(
-    IHttpClientWrapper httpClientWrapper,
-    IConfiguration config,
     IApiValidatorService apiValidator,
-    ILogger logger) : IBinanceClient
+    IHttpClientWrapper httpClientWrapper,
+    IConfiguration config) : ICryptoMarketHttpClient
 {
-    private readonly IHttpClientWrapper _httpClientWrapper = httpClientWrapper;
-    private readonly ILogger _logger = logger;
     private readonly string _apiSecret = config["AppSettings:Binance:ApiSecret"] ?? string.Empty;
     private static readonly string _baseEndpoint = "https://api.binance.com";
 
@@ -22,7 +20,7 @@ public class BinanceClient(
     {
         string requestUrl = GetUrl("account");
         using var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
-        var response = await _httpClientWrapper.SendAsync(request);
+        var response = await httpClientWrapper.SendStringAsync(request);
         var account = await apiValidator.ValidateAsync<Account>(response);
         return account!;
     }
@@ -31,7 +29,7 @@ public class BinanceClient(
     {
         string requestUrl = GetUrl("account/commission", symbol);
         using var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
-        var response = await _httpClientWrapper.SendAsync(request);
+        var response = await httpClientWrapper.SendStringAsync(request);
         var commission = await apiValidator.ValidateAsync<Commission>(response);
         return commission!;
     }
@@ -40,9 +38,9 @@ public class BinanceClient(
     {
         string requestUrl = GetUrl("openOrders", symbol);
         using var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
-        var response = await _httpClientWrapper.SendAsync(request);
-        var orders = await apiValidator.Validate1DResponse<Order>(response);
-        return (IEnumerable<Order>)orders;
+        var response = await httpClientWrapper.SendStringAsync(request);
+        var orders = JsonConvert.DeserializeObject<IEnumerable<Order>>(response) ?? null;
+        return orders;
     }
 
     private string GetUrl(string method, string? symbol = null)
@@ -57,18 +55,18 @@ public class BinanceClient(
         return requestUrl;
     }
 
-    public async Task<IEnumerable<IEnumerable<object>>> GetKLinesBySymbolAsync(string symbol, string interval, string limit)
+    public async Task<List<List<object>>> GetKLinesBySymbolAsync(string symbol, string interval, string limit)
     {
         var klinesEndpoint = $"{_baseEndpoint}/api/v3/klines?symbol={symbol}&interval={interval}&limit={limit}";
-        var response = await _httpClientWrapper.GetAsync(klinesEndpoint);
-        var klines = await apiValidator.Validate2DMatriceResponse(response);
+        var response = await httpClientWrapper.GetStringAsync(klinesEndpoint);
+        var klines = JsonConvert.DeserializeObject<List<List<object>>>(response) ?? null;
         return klines!;
     }
 
     public async Task<Currency> GetPriceBySymbolAsync(string symbol)
     {
         var priceEndpoint = $"{_baseEndpoint}/api/v3/ticker/price?symbol={symbol}";
-        var response = await _httpClientWrapper.GetAsync(priceEndpoint);
+        var response = await httpClientWrapper.GetStringAsync(priceEndpoint);
         var currency = await apiValidator.ValidateAsync<Currency>(response);
         return currency;
     }
@@ -77,7 +75,7 @@ public class BinanceClient(
     {
         string finalUrl = CreateOrderUrl("order/test", symbol, quantity, price, side);
         using var request = new HttpRequestMessage(HttpMethod.Post, finalUrl);
-        var response = await _httpClientWrapper.SendAsync(request);
+        var response = await httpClientWrapper.SendStringAsync(request);
         var testOrder = await apiValidator.ValidateAsync<TestOrder>(response);
         return testOrder;
     }
@@ -86,7 +84,7 @@ public class BinanceClient(
     {
         string finalUrl = CreateOrderUrl("order", symbol, quantity, price, side);
         using var request = new HttpRequestMessage(HttpMethod.Post, finalUrl);
-        var response = await _httpClientWrapper.SendAsync(request);
+        var response = await httpClientWrapper.SendStringAsync(request);
         var order = await apiValidator.ValidateAsync<Order>(response);
         return order;
     }

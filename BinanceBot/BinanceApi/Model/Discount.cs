@@ -2,7 +2,7 @@
 
 namespace BinanceBot.BinanceApi.Model;
 
-public class Discount
+public class Discount : IMessage
 {
     [JsonProperty("enabledForAccount")]
     public bool? EnabledForAccount { get; set; }

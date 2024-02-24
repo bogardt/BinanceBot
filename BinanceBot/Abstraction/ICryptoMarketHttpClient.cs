@@ -2,9 +2,9 @@
 
 namespace BinanceBot.Abstraction;
 
-public interface IBinanceClient
+public interface ICryptoMarketHttpClient
 {
-    Task<IEnumerable<IEnumerable<object>>> GetKLinesBySymbolAsync(string symbol, string interval, string limit);
+    Task<List<List<object>>> GetKLinesBySymbolAsync(string symbol, string interval, string limit);
     Task<Currency> GetPriceBySymbolAsync(string symbol);
     Task<TestOrder> PlaceTestOrderAsync(string symbol, decimal quantity, decimal price, string side);
     Task<Order> PlaceOrderAsync(string symbol, decimal quantity, decimal price, string side);

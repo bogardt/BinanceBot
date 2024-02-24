@@ -12,7 +12,7 @@ public class MarketTradeHandlerTests
     private readonly MarketTradeHandler _handler;
     private readonly TradeAction _tradeAction;
     private readonly Mock<ILogger> _mockLogger = new();
-    private readonly Mock<IBinanceClient> _mockBinanceClient = new();
+    private readonly Mock<ICryptoMarketHttpClient> _mockBinanceClient = new();
     private readonly Mock<ITechnicalIndicatorsCalculator> _mockTechnicalIndicatorsCalculator = new();
     private readonly Mock<IPriceRetriever> _mockPriceRetriever = new();
     private static readonly TradingStrategy _tradingStrategy = new()
@@ -162,7 +162,7 @@ public class MarketTradeHandlerTests
         var interval = _tradingStrategy.Interval;
         var period = _tradingStrategy.Period;
 
-        var mockBinanceClient = new Mock<IBinanceClient>();
+        var mockBinanceClient = new Mock<ICryptoMarketHttpClient>();
         mockBinanceClient.Setup(c => c.GetKLinesBySymbolAsync(_tradingStrategy.Symbol, interval, period.ToString()))
                           .ReturnsAsync(new List<List<object>>());
         mockBinanceClient.Setup(c => c.GetPriceBySymbolAsync(_tradingStrategy.Symbol))

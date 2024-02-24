@@ -20,13 +20,21 @@ public class HttpClientWrapper : IHttpClientWrapper, IDisposable
         _httpClient.Dispose();
     }
 
-    public async Task<HttpResponseMessage> GetAsync(string uri)
+    public async Task<HttpResponseMessage> GetAsync(string uri) =>
+        await _httpClient.GetAsync(uri);
+
+    public async Task<string> GetStringAsync(string uri)
     {
-        return await _httpClient.GetAsync(uri);
+        var httpResponseMessage = await GetAsync(uri);
+        return await httpResponseMessage!.Content.ReadAsStringAsync();
     }
 
-    public async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken = default)
+    public async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken = default) =>
+        await _httpClient.SendAsync(request, cancellationToken);
+
+    public async Task<string> SendStringAsync(HttpRequestMessage request, CancellationToken cancellationToken = default)
     {
-        return await _httpClient.SendAsync(request, cancellationToken);
+        var httpResponseMessage = await SendAsync(request, cancellationToken);
+        return await httpResponseMessage!.Content.ReadAsStringAsync(cancellationToken);
     }
 }

@@ -1,6 +1,5 @@
 using BinanceBot.Abstraction;
 using BinanceBot.BinanceApi.Model;
-using BinanceBot.BinanceApi.Model.Message;
 using BinanceBot.Core;
 using BinanceBot.Strategy;
 using Moq;
@@ -11,7 +10,7 @@ namespace BinanceBot.Tests.Core;
 [TestClass]
 public class TradeActionTests
 {
-    private readonly Mock<IBinanceClient> _mockBinanceClient = new();
+    private readonly Mock<ICryptoMarketHttpClient> _mockBinanceClient = new();
     private readonly Mock<IPriceRetriever> _mockPriceRetriever = new();
     private readonly Mock<ITechnicalIndicatorsCalculator> _mockTechnicalIndicatorsCalculator = new();
     private readonly Mock<ILogger> _mockLogger = new();
@@ -183,12 +182,12 @@ public class TradeActionTests
         decimal volatility = 0.05m;
         var testOrder = new TestOrder
         {
-            StandardCommissionForOrder = new CommissionRates
+            StandardCommissionForOrder = new CommissionRate
             {
                 Maker = "0.001",
                 Taker = "0.001"
             },
-            TaxCommissionForOrder = new CommissionRates
+            TaxCommissionForOrder = new CommissionRate
             {
                 Maker = "0.000",
                 Taker = "0.000"
@@ -223,12 +222,12 @@ public class TradeActionTests
         decimal volatility = 0.05m;
         var testOrder = new TestOrder
         {
-            StandardCommissionForOrder = new CommissionRates
+            StandardCommissionForOrder = new CommissionRate
             {
                 Maker = "0.001",
                 Taker = "0.001"
             },
-            TaxCommissionForOrder = new CommissionRates
+            TaxCommissionForOrder = new CommissionRate
             {
                 Maker = "0.000",
                 Taker = "0.000"

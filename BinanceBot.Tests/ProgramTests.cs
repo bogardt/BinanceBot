@@ -1,6 +1,6 @@
 ﻿using BinanceBot.Abstraction;
+using BinanceBot.BinanceApi;
 using BinanceBot.BinanceApi.Model;
-using BinanceBot.BinanceApi.Model.Message;
 using BinanceBot.Core;
 using BinanceBot.Strategy;
 using BinanceBot.Utils;
@@ -19,7 +19,7 @@ public class ProgramTests
         var host = Host.CreateDefaultBuilder()
             .ConfigureServices((context, services) =>
             {
-                services.AddSingleton<IBinanceClient, BinanceClient>();
+                services.AddSingleton<ICryptoMarketHttpClient, BinanceClient>();
                 services.AddSingleton<ITradeAction, TradeAction>();
                 services.AddSingleton<IFileSystem, FileSystem>();
                 services.AddSingleton<ITechnicalIndicatorsCalculator, TechnicalIndicatorsCalculator>();
@@ -33,7 +33,7 @@ public class ProgramTests
         using var serviceScope = host.Services.CreateScope();
         var provider = serviceScope.ServiceProvider;
 
-        Assert.IsNotNull(provider.GetService<IBinanceClient>());
+        Assert.IsNotNull(provider.GetService<ICryptoMarketHttpClient>());
         Assert.IsNotNull(provider.GetService<ITradeAction>());
         Assert.IsNotNull(provider.GetService<IFileSystem>());
         Assert.IsNotNull(provider.GetService<ITechnicalIndicatorsCalculator>());
@@ -55,7 +55,7 @@ public class ProgramTests
             Symbol = "SOLUSDT",
             LimitBenefit = 1000,
         };
-        var mockBinanceClient = new Mock<IBinanceClient>();
+        var mockBinanceClient = new Mock<ICryptoMarketHttpClient>();
         var mockFileSystem = new Mock<IFileSystem>();
         var mockTechnicalIndicatorsCalculator = new Mock<ITechnicalIndicatorsCalculator>();
         var mockLogger = new Mock<ILogger>();
@@ -149,11 +149,11 @@ public class ProgramTests
         mockBinanceClient.Setup(c => c.GetCommissionBySymbolAsync(tradingStrategy.Symbol))
             .ReturnsAsync(new Commission
             {
-                StandardCommission = new CommissionRates
+                StandardCommission = new CommissionRate
                 {
                     Maker = "0.001"
                 },
-                TaxCommission = new CommissionRates
+                TaxCommission = new CommissionRate
                 {
                     Maker = "0.000"
                 },

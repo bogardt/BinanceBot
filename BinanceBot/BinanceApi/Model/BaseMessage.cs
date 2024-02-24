@@ -2,7 +2,7 @@
 
 namespace BinanceBot.BinanceApi.Model;
 
-public abstract class BaseMessage
+public abstract class BaseMessage : IMessage
 {
     [JsonProperty("code")]
     public int? Code { get; set; }

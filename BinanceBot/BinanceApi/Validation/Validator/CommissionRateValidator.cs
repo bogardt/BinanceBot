@@ -9,10 +9,10 @@ public class CommissionRateValidator : AbstractValidator<CommissionRate>
     {
         When(x => x is not null, () =>
         {
-            RuleFor(x => x.Maker).NotNull().NotEmpty();
-            RuleFor(x => x.Taker).NotNull().NotEmpty();
-            RuleFor(x => x.Buyer).NotNull().NotEmpty();
-            RuleFor(x => x.Seller).NotNull().NotEmpty();
+            //RuleFor(x => x.Maker).NotNull().NotEmpty();
+            //RuleFor(x => x.Taker).NotNull().NotEmpty();
+            //RuleFor(x => x.Buyer).NotNull().NotEmpty();
+            //RuleFor(x => x.Seller).NotNull().NotEmpty();
         }).Otherwise(() =>
         {
             RuleFor(x => x).NotNull();

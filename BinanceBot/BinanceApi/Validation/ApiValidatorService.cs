@@ -11,6 +11,24 @@ public class ApiValidatorService : IApiValidatorService
 {
     private readonly Dictionary<Type, IValidator> _validators;
 
+    private IValidator _validator;
+    public  async Task<IMessage> ValidationType(IMessage message, string json) // will do it later
+    {
+        message = message switch
+        {
+            Account account => await ValidateAsync<Account>(json),
+            Balance balance => await ValidateAsync<Balance>(json),
+            Commission commission => await ValidateAsync<Commission>(json),
+            CommissionRate commissionRate => await ValidateAsync<CommissionRate>(json),
+            Discount discount => await ValidateAsync<Discount>(json),
+            Order accountValidator => await ValidateAsync<Order>(json),
+            TestOrder accountValidator => await ValidateAsync<TestOrder>(json),
+            _ => message
+        };
+
+        return message;
+    }
+
     public ApiValidatorService(IServiceProvider serviceProvider)
     {
         _validators = new Dictionary<Type, IValidator>
@@ -27,39 +45,11 @@ public class ApiValidatorService : IApiValidatorService
         };
     }
 
-    public async Task<T> ValidateAsync<T>(HttpResponseMessage? response) where T : BaseMessage
+    public async Task<T> ValidateAsync<T>(string json) where T : IMessage
     {
-        var res = await response!.Content.ReadAsStringAsync();
-        var message = JsonConvert.DeserializeObject<T>(res) ?? default;
+        var message = JsonConvert.DeserializeObject<T>(json) ?? default;
 
         return await Validate(message);
-    }
-
-    public async Task<IEnumerable<T>> Validate1DResponse<T>(HttpResponseMessage? response) where T : BaseMessage
-    {
-        var res = await response!.Content.ReadAsStringAsync();
-        var messages = (JsonConvert.DeserializeObject<List<T>>(res) ?? null)
-            ?? throw new ValidationException("messages is null");
-
-        foreach (var message in messages)
-            await Validate(message);
-
-        return messages!;
-    }
-
-    public async Task<IEnumerable<IEnumerable<object>>> Validate2DMatriceResponse(HttpResponseMessage? response)
-    {
-        var res = await response!.Content.ReadAsStringAsync();
-        var firsts = JsonConvert.DeserializeObject<IEnumerable<IEnumerable<object>>>(res) ?? null;
-
-        if (firsts is not null)
-            foreach (var first in firsts)
-                foreach (var second in first)
-                    await Validate(second);
-        else
-            throw new ValidationException("messages is null");
-
-        return firsts!;
     }
 
     private async Task<T> Validate<T>(T? message)
@@ -68,11 +58,12 @@ public class ApiValidatorService : IApiValidatorService
         {
             var validationResult = await ((IValidator<T>)validator).ValidateAsync(message);
             if (!validationResult.IsValid)
+            {
                 throw new ValidationException(validationResult.Errors);
+            }
             return message!;
         }
         else
             throw new InvalidOperationException($"Missing indicator for type {typeof(T).Name}.");
     }
-
 }

@@ -3,14 +3,14 @@ using BinanceBot.Strategy;
 
 namespace BinanceBot.Core;
 
-public class MarketTradeHandler(IBinanceClient binanceClient,
+public class MarketTradeHandler(ICryptoMarketHttpClient binanceClient,
     ITechnicalIndicatorsCalculator technicalIndicatorsCalculator,
     IPriceRetriever priceRetriever,
     ITradeAction tradeAction,
     ILogger logger,
     TradingStrategy? tradingStrategy = null) : IMarketTradeHandler
 {
-    private readonly IBinanceClient _binanceClient = binanceClient;
+    private readonly ICryptoMarketHttpClient _binanceClient = binanceClient;
     private readonly IPriceRetriever _priceRetriever = priceRetriever;
     private readonly ITechnicalIndicatorsCalculator _technicalIndicatorsCalculator = technicalIndicatorsCalculator;
     private readonly ITradeAction _tradeAction = tradeAction;

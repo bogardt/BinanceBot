@@ -5,12 +5,12 @@ using Newtonsoft.Json;
 namespace BinanceBot.Core;
 
 public class TradeAction(
-    IBinanceClient binanceClient,
+    ICryptoMarketHttpClient binanceClient,
     IPriceRetriever priceRetriever,
     ITechnicalIndicatorsCalculator technicalIndicatorsCalculator,
     ILogger logger) : ITradeAction
 {
-    private readonly IBinanceClient _binanceClient = binanceClient;
+    private readonly ICryptoMarketHttpClient _binanceClient = binanceClient;
     private readonly IPriceRetriever _priceRetriever = priceRetriever;
     private readonly ITechnicalIndicatorsCalculator _technicalIndicatorsCalculator = technicalIndicatorsCalculator;
     private readonly ILogger _logger = logger;

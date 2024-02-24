@@ -2,7 +2,7 @@
 
 namespace BinanceBot.BinanceApi.Model;
 
-public class CommissionRate
+public class CommissionRate : IMessage
 {
     [JsonProperty("maker")]
     public string? Maker { get; set; }

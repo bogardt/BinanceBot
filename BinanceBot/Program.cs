@@ -38,10 +38,10 @@ internal class Program
             {
 
                 services.AddValidatorsFromAssemblyContaining<AccountValidator>();
-                services.AddScoped(typeof(IApiValidatorService), typeof(ApiValidatorService));
+                //services.AddScoped(typeof(IApiValidatorService), typeof(ApiValidatorService));
 
                 services.AddSingleton<IApiValidatorService, ApiValidatorService>();
-                services.AddSingleton<IBinanceClient, BinanceClient>();
+                services.AddSingleton<ICryptoMarketHttpClient, BinanceClient>();
                 services.AddSingleton<IFileSystem, FileSystem>();
                 services.AddSingleton<IHttpClientWrapper, HttpClientWrapper>();
                 services.AddSingleton<ILogger, Logger>();

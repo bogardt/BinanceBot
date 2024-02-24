@@ -2,7 +2,7 @@
 
 namespace BinanceBot.BinanceApi.Model;
 
-public class Balance
+public class Balance : IMessage
 {
     [JsonProperty("asset")]
     public string? Asset { get; set; }

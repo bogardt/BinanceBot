@@ -6,18 +6,32 @@ using System.Globalization;
 namespace BinanceBot.Core;
 
 public class PriceRetriever(
-    IBinanceClient binanceClient,
+    ICryptoMarketHttpClient binanceClient,
     ILogger logger) : IPriceRetriever
 {
-    private readonly IBinanceClient _binanceClient = binanceClient;
+    private readonly ICryptoMarketHttpClient _binanceClient = binanceClient;
     private readonly ILogger _logger = logger;
 
-    public IEnumerable<decimal> GetClosingPrices(IEnumerable<IEnumerable<object>> klines) => klines.Select((it) =>
+    //public IEnumerable<decimal> GetClosingPrices(IEnumerable<IEnumerable<object>> klines) => klines.Select((it) =>
+    //{
+    //    var closingPrice = it.ElementAt(4).ToString();
+    //    if (!decimal.TryParse(closingPrice, NumberStyles.Any, CultureInfo.InvariantCulture, out var ret))
+    //        throw new InvalidCastException($"it cannot be converted to decimal for klines {JsonConvert.SerializeObject(it)}");
+    //    return ret;
+    //});
+    public List<decimal> GetClosingPrices(List<List<object>> klines)
     {
-        if (!decimal.TryParse(it.ElementAt(4).ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out var ret))
-            throw new InvalidCastException($"it cannot be converted to decimal for klines {JsonConvert.SerializeObject(it)}");
+        var ret = new List<decimal>();
+        foreach (var it in klines)
+        {
+            var kline = it.ToList();
+            var closingPrice = kline[4].ToString();
+            if (!decimal.TryParse(closingPrice, NumberStyles.Any, CultureInfo.InvariantCulture, out var dec))
+                throw new InvalidCastException($"it cannot be converted to decimal for klines {JsonConvert.SerializeObject(kline)}");
+            ret.Add(dec);
+        }
         return ret;
-    });
+    }
 
     public decimal CalculateMinimumSellingPrice(decimal cryptoPurchasePrice, decimal quantity, decimal feePercentage, decimal discount, decimal targetProfit)
     {

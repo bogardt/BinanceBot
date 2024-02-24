@@ -1,6 +1,6 @@
 using BinanceBot.Abstraction;
+using BinanceBot.BinanceApi;
 using BinanceBot.BinanceApi.Model;
-using BinanceBot.BinanceApi.Model.Message;
 using Microsoft.Extensions.Configuration;
 using Moq;
 using Newtonsoft.Json;
@@ -13,10 +13,11 @@ public class BinanceClientTests
 {
     private readonly Mock<ILogger> _mockLogger = new();
     private readonly Mock<IHttpClientWrapper> _mockHttpClientWrapper = new();
+    private readonly Mock<IApiValidatorService> _mockApiValidatorService = new();
     private readonly Mock<IConfiguration> _mockConfig = new();
     private readonly BinanceClient _binanceClient;
 
-    public BinanceClientTests() => _binanceClient = new BinanceClient(_mockHttpClientWrapper.Object, _mockConfig.Object, _mockLogger.Object);
+    public BinanceClientTests() => _binanceClient = new BinanceClient(_mockApiValidatorService.Object, _mockHttpClientWrapper.Object, _mockConfig.Object);
 
     //[TestMethod]
     //public void CheckLoggerCallOnConstructorCall()
@@ -152,12 +153,12 @@ public class BinanceClientTests
         // Arrange
         var commission = new Commission
         {
-            StandardCommission = new CommissionRates
+            StandardCommission = new CommissionRate
             {
                 Maker = "0.001",
                 Taker = "0.001"
             },
-            TaxCommission = new CommissionRates
+            TaxCommission = new CommissionRate
             {
                 Maker = "0.000",
                 Taker = "0.000"
@@ -283,8 +284,8 @@ public class BinanceClientTests
 
         // Assert
         Assert.IsNotNull(result);
-        Assert.IsInstanceOfType(result, typeof(List<List<object>>));
-        Assert.AreEqual(10, result.Count);
+        Assert.IsInstanceOfType(result, typeof(IEnumerable<IEnumerable<object>>));
+        Assert.AreEqual(10, result.Count());
         Assert.IsTrue(klines[0].Count == 12);
     }
 
@@ -300,8 +301,8 @@ public class BinanceClientTests
 
         // Assert
         Assert.IsNotNull(result);
-        Assert.IsInstanceOfType(result, typeof(List<List<object>>));
-        Assert.AreEqual(0, result.Count);
+        Assert.IsInstanceOfType(result, typeof(IEnumerable<IEnumerable<object>>));
+        Assert.AreEqual(0, result.Count());
     }
 
     [TestMethod]
@@ -452,11 +453,11 @@ public class BinanceClientTests
 
         // Assert
         Assert.IsNotNull(result);
-        Assert.IsTrue(result.Count == 2);
-        Assert.IsTrue(result[0].OrderId == 1);
-        Assert.IsTrue(result[0].Symbol == "BTCUSDT");
-        Assert.IsTrue(result[1].OrderId == 2);
-        Assert.IsTrue(result[1].Symbol == "ETHUSDT");
+        Assert.IsTrue(result.Count() == 2);
+        Assert.IsTrue(result.ElementAt(0).OrderId == 1);
+        Assert.IsTrue(result.ElementAt(0).Symbol == "BTCUSDT");
+        Assert.IsTrue(result.ElementAt(1).OrderId == 2);
+        Assert.IsTrue(result.ElementAt(1).Symbol == "ETHUSDT");
     }
 
     [TestMethod]
@@ -476,7 +477,7 @@ public class BinanceClientTests
 
         // Assert
         Assert.IsNotNull(result);
-        Assert.AreEqual(0, result.Count);
+        Assert.AreEqual(0, result.Count());
     }
 
     [TestMethod]
@@ -534,12 +535,12 @@ public class BinanceClientTests
         // Arrange
         var testOrder = new TestOrder
         {
-            StandardCommissionForOrder = new CommissionRates
+            StandardCommissionForOrder = new CommissionRate
             {
                 Maker = "0.001",
                 Taker = "0.001"
             },
-            TaxCommissionForOrder = new CommissionRates
+            TaxCommissionForOrder = new CommissionRate
             {
                 Maker = "0.000",
                 Taker = "0.000"
