@@ -25,8 +25,4 @@
     <ProjectReference Include="..\BinanceBot\BinanceBot.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Validation\" />
-  </ItemGroup>
-
 </Project>

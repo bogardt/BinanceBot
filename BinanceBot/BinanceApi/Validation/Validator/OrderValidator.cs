@@ -11,9 +11,9 @@ public class OrderValidator : AbstractValidator<Order>
         {
             RuleFor(x => x.Code).Null();
             RuleFor(x => x.Message).Null();
-            RuleFor(x => x.OrderId).Null();
-            RuleFor(x => x.Symbol).Null();
-            RuleFor(x => x.Side).Null();
+            RuleFor(x => x.OrderId).NotNull().NotEmpty();
+            RuleFor(x => x.Symbol).NotNull().NotEmpty();
+            RuleFor(x => x.Side).NotNull().NotEmpty();
         }).Otherwise(() =>
         {
             RuleFor(x => x).NotNull();

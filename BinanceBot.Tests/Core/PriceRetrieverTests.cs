@@ -10,7 +10,7 @@ namespace BinanceBot.Tests.Core;
 public class PriceRetrieverTests
 {
     private readonly Mock<ILogger> _mockLogger = new();
-    private readonly Mock<ICryptoMarketHttpClient> _mockBinanceClient = new();
+    private readonly Mock<IExchangeHttpClient> _mockBinanceClient = new();
     private readonly PriceRetriever _priceRetriever;
     private readonly TradingStrategy _tradingStrategy;
 

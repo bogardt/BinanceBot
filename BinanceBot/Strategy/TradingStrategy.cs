@@ -2,8 +2,8 @@
 
 public class TradingStrategy
 {
-    public decimal TargetProfit { get; set; } = 20m;
-    public decimal Quantity { get; set; } = 100m;
+    public decimal TargetProfit { get; set; } = 10m;
+    public decimal Quantity { get; set; } = 50m;
     public decimal MaxRSI { get; set; } = 70;
     public decimal FeePercentage { get; set; } = 0.001m;
     public decimal Discount { get; set; } = 0m;
@@ -15,5 +15,5 @@ public class TradingStrategy
     public string Symbol { get; set; } = "SOLUSDT";
     public int LimitBenefit { get; set; } = 1000;
     public bool OpenPosition { get; set; } = false;
-    public bool TestMode { get; set; } = true;
+    public bool TestMode { get; set; } = false;
 }

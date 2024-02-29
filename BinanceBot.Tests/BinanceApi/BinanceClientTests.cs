@@ -6,7 +6,7 @@ using Moq;
 using Newtonsoft.Json;
 using System.Net;
 
-namespace BinanceBot.Tests.Core;
+namespace BinanceBot.Tests.BinanceApi;
 
 [TestClass]
 public class BinanceClientTests

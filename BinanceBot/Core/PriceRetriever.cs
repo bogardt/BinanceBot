@@ -6,10 +6,10 @@ using System.Globalization;
 namespace BinanceBot.Core;
 
 public class PriceRetriever(
-    ICryptoMarketHttpClient binanceClient,
+    IExchangeHttpClient binanceClient,
     ILogger logger) : IPriceRetriever
 {
-    private readonly ICryptoMarketHttpClient _binanceClient = binanceClient;
+    private readonly IExchangeHttpClient _binanceClient = binanceClient;
     private readonly ILogger _logger = logger;
 
     //public IEnumerable<decimal> GetClosingPrices(IEnumerable<IEnumerable<object>> klines) => klines.Select((it) =>

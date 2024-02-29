@@ -20,7 +20,7 @@ public class TechnicalIndicatorsCalculatorTests
     {
         // Arrange
         var mockLogger = new Mock<ILogger>();
-        var mockBinanceClient = new Mock<ICryptoMarketHttpClient>();
+        var mockBinanceClient = new Mock<IExchangeHttpClient>();
         var priceRetriever = new PriceRetriever(mockBinanceClient.Object, mockLogger.Object);
         var period = 2;
         var klines = new List<List<object>>
@@ -42,7 +42,7 @@ public class TechnicalIndicatorsCalculatorTests
     {
         // Arrange
         var mockLogger = new Mock<ILogger>();
-        var mockBinanceClient = new Mock<ICryptoMarketHttpClient>();
+        var mockBinanceClient = new Mock<IExchangeHttpClient>();
         var priceRetriever = new PriceRetriever(mockBinanceClient.Object, mockLogger.Object);
         var technicalIndicatorsCalculator = new TechnicalIndicatorsCalculator();
         var period = 60;
@@ -109,7 +109,7 @@ public class TechnicalIndicatorsCalculatorTests
     {
         // Arrange
         var mockLogger = new Mock<ILogger>();
-        var mockBinanceClient = new Mock<ICryptoMarketHttpClient>();
+        var mockBinanceClient = new Mock<IExchangeHttpClient>();
         var priceRetriever = new PriceRetriever(mockBinanceClient.Object, mockLogger.Object);
         var klines = new List<List<object>>
         {

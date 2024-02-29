@@ -19,7 +19,7 @@ public class ProgramTests
         var host = Host.CreateDefaultBuilder()
             .ConfigureServices((context, services) =>
             {
-                services.AddSingleton<ICryptoMarketHttpClient, BinanceClient>();
+                services.AddSingleton<IExchangeHttpClient, BinanceClient>();
                 services.AddSingleton<ITradeAction, TradeAction>();
                 services.AddSingleton<IFileSystem, FileSystem>();
                 services.AddSingleton<ITechnicalIndicatorsCalculator, TechnicalIndicatorsCalculator>();
@@ -33,7 +33,7 @@ public class ProgramTests
         using var serviceScope = host.Services.CreateScope();
         var provider = serviceScope.ServiceProvider;
 
-        Assert.IsNotNull(provider.GetService<ICryptoMarketHttpClient>());
+        Assert.IsNotNull(provider.GetService<IExchangeHttpClient>());
         Assert.IsNotNull(provider.GetService<ITradeAction>());
         Assert.IsNotNull(provider.GetService<IFileSystem>());
         Assert.IsNotNull(provider.GetService<ITechnicalIndicatorsCalculator>());
@@ -55,7 +55,7 @@ public class ProgramTests
             Symbol = "SOLUSDT",
             LimitBenefit = 1000,
         };
-        var mockBinanceClient = new Mock<ICryptoMarketHttpClient>();
+        var mockBinanceClient = new Mock<IExchangeHttpClient>();
         var mockFileSystem = new Mock<IFileSystem>();
         var mockTechnicalIndicatorsCalculator = new Mock<ITechnicalIndicatorsCalculator>();
         var mockLogger = new Mock<ILogger>();

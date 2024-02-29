@@ -11,7 +11,7 @@ namespace BinanceBot.BinanceApi;
 public class BinanceClient(
     IApiValidatorService apiValidator,
     IHttpClientWrapper httpClientWrapper,
-    IConfiguration config) : ICryptoMarketHttpClient
+    IConfiguration config) : IExchangeHttpClient
 {
     private readonly string _apiSecret = config["AppSettings:Binance:ApiSecret"] ?? string.Empty;
     private static readonly string _baseEndpoint = "https://api.binance.com";

@@ -1,48 +1,20 @@
 ﻿
 using BinanceBot.Abstraction;
 using BinanceBot.BinanceApi.Model;
-using BinanceBot.BinanceApi.Validation.Validator;
 using FluentValidation;
+using FluentValidation.Results;
 using Newtonsoft.Json;
+using ValidationException = FluentValidation.ValidationException;
 
 namespace BinanceBot.BinanceApi.Validation;
 
 public class ApiValidatorService : IApiValidatorService
 {
-    private readonly Dictionary<Type, IValidator> _validators;
-
-    private IValidator _validator;
-    public  async Task<IMessage> ValidationType(IMessage message, string json) // will do it later
-    {
-        message = message switch
-        {
-            Account account => await ValidateAsync<Account>(json),
-            Balance balance => await ValidateAsync<Balance>(json),
-            Commission commission => await ValidateAsync<Commission>(json),
-            CommissionRate commissionRate => await ValidateAsync<CommissionRate>(json),
-            Discount discount => await ValidateAsync<Discount>(json),
-            Order accountValidator => await ValidateAsync<Order>(json),
-            TestOrder accountValidator => await ValidateAsync<TestOrder>(json),
-            _ => message
-        };
-
-        return message;
-    }
+    private readonly IServiceProvider _serviceProvider;
 
     public ApiValidatorService(IServiceProvider serviceProvider)
     {
-        _validators = new Dictionary<Type, IValidator>
-        {
-            { typeof(Account), (IValidator)serviceProvider.GetService(typeof(AccountValidator)) },
-            { typeof(Balance), (IValidator)serviceProvider.GetService(typeof(BalanceValidator)) },
-            { typeof(Commission), (IValidator)serviceProvider.GetService(typeof(CommissionValidator)) },
-            { typeof(CommissionRate), (IValidator)serviceProvider.GetService(typeof(CommissionRateValidator)) },
-            { typeof(Currency), (IValidator)serviceProvider.GetService(typeof(CurrencyValidator)) },
-            { typeof(Discount), (IValidator)serviceProvider.GetService(typeof(DiscountValidator)) },
-            { typeof(Order), (IValidator)serviceProvider.GetService(typeof(OrderValidator)) },
-            { typeof(TestOrder), (IValidator)serviceProvider.GetService(typeof(TestOrderValidator)) },
-            { typeof(object), (IValidator)serviceProvider.GetService(typeof(ObjectValidator)) }
-        };
+        _serviceProvider = serviceProvider;
     }
 
     public async Task<T> ValidateAsync<T>(string json) where T : IMessage
@@ -52,18 +24,53 @@ public class ApiValidatorService : IApiValidatorService
         return await Validate(message);
     }
 
-    private async Task<T> Validate<T>(T? message)
+    private IValidator GetValidatorByType<T>(T message) where T : IMessage
     {
-        if (_validators.TryGetValue(typeof(T), out var validator))
-        {
-            var validationResult = await ((IValidator<T>)validator).ValidateAsync(message);
-            if (!validationResult.IsValid)
-            {
-                throw new ValidationException(validationResult.Errors);
-            }
-            return message!;
-        }
-        else
-            throw new InvalidOperationException($"Missing indicator for type {typeof(T).Name}.");
+        var validatorType = typeof(IValidator<>).MakeGenericType(message!.GetType());
+        var validator = (IValidator)_serviceProvider.GetService(validatorType)!;
+        if (validator == null)
+            throw new InvalidOperationException($"No validator found for type {message.GetType().Name}.");
+        return validator;
+    }
+
+    private async Task<T> Validate<T>(T? message) where T : IMessage
+    {
+        var validator = GetValidatorByType(message!);
+        var context = new ValidationContext<T>(message);
+        var validationResult = await validator.ValidateAsync(context);
+        if (!validationResult.IsValid)
+            throw new ValidationException(validationResult.Errors);
+        return message;
     }
 }
+
+//public class BinanceApiAbstractValidator<T> : AbstractValidator<T> where T : IMessage
+//{
+//    private readonly IServiceProvider _serviceProvider;
+
+//    public BinanceApiAbstractValidator(IServiceProvider serviceProvider)
+//    {
+//        _serviceProvider = serviceProvider;
+//    }
+
+//    private IValidator GetValidatorByType<T>(T message) where T : IMessage
+//    {
+//        var validatorType = typeof(IValidator<>).MakeGenericType(message!.GetType());
+//        var validator = (IValidator)_serviceProvider.GetService(validatorType)!;
+//        if (validator == null)
+//            throw new InvalidOperationException($"No validator found for type {message.GetType().Name}.");
+//        return validator;
+//    }
+//    public override ValidationResult Validate(ValidationContext<T> context)
+//    {
+//        return base.Validate(context);
+//    }
+//    public override ValidationResult Validate(T? message)
+//    {
+//        var validator = GetValidatorByType(message!);
+//        var context = new ValidationContext<T>(message);
+//        var validationResult = await validator.ValidateAsync(context);
+
+//        return base.Validate(context);
+//    }
+//}

@@ -41,7 +41,7 @@ internal class Program
                 //services.AddScoped(typeof(IApiValidatorService), typeof(ApiValidatorService));
 
                 services.AddSingleton<IApiValidatorService, ApiValidatorService>();
-                services.AddSingleton<ICryptoMarketHttpClient, BinanceClient>();
+                services.AddSingleton<IExchangeHttpClient, BinanceClient>();
                 services.AddSingleton<IFileSystem, FileSystem>();
                 services.AddSingleton<IHttpClientWrapper, HttpClientWrapper>();
                 services.AddSingleton<ILogger, Logger>();
