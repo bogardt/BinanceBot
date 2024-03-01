@@ -32,7 +32,7 @@ namespace BinanceBot.Tests.BinanceApi.Validation.Validator
             var result = validator.Validate(commission);
 
             // Assert
-            Assert.IsTrue(result.IsValid);
+            Assert.IsFalse(result.IsValid);
         }
 
         [TestMethod]

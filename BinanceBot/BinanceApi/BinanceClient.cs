@@ -81,7 +81,7 @@ public class BinanceClient(
     }
 
     public async Task<Order> PlaceOrderAsync(string symbol, decimal quantity, decimal price, string side)
-    {
+    { 
         string finalUrl = CreateOrderUrl("order", symbol, quantity, price, side);
         using var request = new HttpRequestMessage(HttpMethod.Post, finalUrl);
         var response = await httpClientWrapper.SendStringAsync(request);
