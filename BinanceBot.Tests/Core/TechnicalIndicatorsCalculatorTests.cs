@@ -1,6 +1,7 @@
 using BinanceBot.Abstraction;
 using BinanceBot.Core;
 using Moq;
+using TradingCalculation;
 
 namespace BinanceBot.Tests.Core;
 
@@ -8,19 +9,14 @@ namespace BinanceBot.Tests.Core;
 public class TechnicalIndicatorsCalculatorTests
 {
     private readonly Mock<IPriceRetriever> _mockPriceRetriever = new();
-    private readonly TechnicalIndicatorsCalculator _technicalIndicatorsCalculator;
-
-    public TechnicalIndicatorsCalculatorTests()
-    {
-        _technicalIndicatorsCalculator = new();
-    }
+    private readonly TechnicalIndicatorsCalculator _technicalIndicatorsCalculator = new();
 
     [TestMethod]
     public void CalculateMovingAverageValidKlinesCalculatesAverage()
     {
         // Arrange
         var mockLogger = new Mock<ILogger>();
-        var mockBinanceClient = new Mock<IBinanceClient>();
+        var mockBinanceClient = new Mock<IExchangeHttpClient>();
         var priceRetriever = new PriceRetriever(mockBinanceClient.Object, mockLogger.Object);
         var period = 2;
         var klines = new List<List<object>>
@@ -42,7 +38,7 @@ public class TechnicalIndicatorsCalculatorTests
     {
         // Arrange
         var mockLogger = new Mock<ILogger>();
-        var mockBinanceClient = new Mock<IBinanceClient>();
+        var mockBinanceClient = new Mock<IExchangeHttpClient>();
         var priceRetriever = new PriceRetriever(mockBinanceClient.Object, mockLogger.Object);
         var technicalIndicatorsCalculator = new TechnicalIndicatorsCalculator();
         var period = 60;
@@ -109,7 +105,7 @@ public class TechnicalIndicatorsCalculatorTests
     {
         // Arrange
         var mockLogger = new Mock<ILogger>();
-        var mockBinanceClient = new Mock<IBinanceClient>();
+        var mockBinanceClient = new Mock<IExchangeHttpClient>();
         var priceRetriever = new PriceRetriever(mockBinanceClient.Object, mockLogger.Object);
         var klines = new List<List<object>>
         {

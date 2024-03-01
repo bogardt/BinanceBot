@@ -1,11 +1,14 @@
 ﻿using BinanceBot.Abstraction;
+using BinanceBot.BinanceApi;
+using BinanceBot.BinanceApi.Model;
+using BinanceBot.BinanceApi.Validation;
 using BinanceBot.Core;
-using BinanceBot.Model;
-using BinanceBot.Strategy;
 using BinanceBot.Utils;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Moq;
+using TradingCalculation;
+using TradingCalculation.Strategy;
 
 namespace BinanceBot.Tests;
 
@@ -18,10 +21,11 @@ public class ProgramTests
         var host = Host.CreateDefaultBuilder()
             .ConfigureServices((context, services) =>
             {
-                services.AddSingleton<IBinanceClient, BinanceClient>();
+                services.AddSingleton<IExchangeHttpClient, BinanceClient>();
                 services.AddSingleton<ITradeAction, TradeAction>();
                 services.AddSingleton<IFileSystem, FileSystem>();
                 services.AddSingleton<ITechnicalIndicatorsCalculator, TechnicalIndicatorsCalculator>();
+                services.AddSingleton<IApiValidatorService, ApiValidatorService>();
                 services.AddSingleton<IPriceRetriever, PriceRetriever>();
                 services.AddSingleton<IMarketTradeHandler, MarketTradeHandler>();
                 services.AddSingleton<ILogger, Logger>();
@@ -32,10 +36,11 @@ public class ProgramTests
         using var serviceScope = host.Services.CreateScope();
         var provider = serviceScope.ServiceProvider;
 
-        Assert.IsNotNull(provider.GetService<IBinanceClient>());
+        Assert.IsNotNull(provider.GetService<IExchangeHttpClient>());
         Assert.IsNotNull(provider.GetService<ITradeAction>());
         Assert.IsNotNull(provider.GetService<IFileSystem>());
         Assert.IsNotNull(provider.GetService<ITechnicalIndicatorsCalculator>());
+        Assert.IsNotNull(provider.GetService<IApiValidatorService>());
         Assert.IsNotNull(provider.GetService<IPriceRetriever>());
         Assert.IsNotNull(provider.GetService<IMarketTradeHandler>());
         Assert.IsNotNull(provider.GetService<ILogger>());
@@ -54,28 +59,30 @@ public class ProgramTests
             Symbol = "SOLUSDT",
             LimitBenefit = 1000,
         };
-        var mockBinanceClient = new Mock<IBinanceClient>();
+        var mockBinanceClient = new Mock<IExchangeHttpClient>();
         var mockFileSystem = new Mock<IFileSystem>();
         var mockTechnicalIndicatorsCalculator = new Mock<ITechnicalIndicatorsCalculator>();
         var mockLogger = new Mock<ILogger>();
         var mockHttpClientWrapper = new Mock<IHttpClientWrapper>();
+        var mockApiValidatorService = new Mock<IApiValidatorService>();
 
         //
         var priceRetriever = new PriceRetriever(mockBinanceClient.Object, mockLogger.Object);
-        var tradeAction = new TradeAction(mockBinanceClient.Object, priceRetriever, mockTechnicalIndicatorsCalculator.Object, mockLogger.Object);
+        var tradeAction = new TradeAction(mockBinanceClient.Object, new TechnicalIndicatorsCalculator(), mockLogger.Object);
         var marketTradeHandler = new MarketTradeHandler(mockBinanceClient.Object, mockTechnicalIndicatorsCalculator.Object, priceRetriever, tradeAction, mockLogger.Object, tradingStrategy);
 
         var host = Host.CreateDefaultBuilder()
             .ConfigureServices((context, services) =>
             {
-                services.AddSingleton<IBinanceClient>(mockBinanceClient.Object);
+                services.AddSingleton(mockBinanceClient.Object);
                 services.AddSingleton<ITradeAction>(tradeAction);
-                services.AddSingleton<IFileSystem>(mockFileSystem.Object);
-                services.AddSingleton<ITechnicalIndicatorsCalculator>(mockTechnicalIndicatorsCalculator.Object);
+                services.AddSingleton(mockFileSystem.Object);
+                services.AddSingleton(mockApiValidatorService.Object);
+                services.AddSingleton(mockTechnicalIndicatorsCalculator.Object);
                 services.AddSingleton<IPriceRetriever>(priceRetriever);
                 services.AddSingleton<IMarketTradeHandler>(marketTradeHandler);
-                services.AddSingleton<ILogger>(mockLogger.Object);
-                services.AddSingleton<IHttpClientWrapper>(mockHttpClientWrapper.Object);
+                services.AddSingleton(mockLogger.Object);
+                services.AddSingleton(mockHttpClientWrapper.Object);
             })
             .Build();
 
@@ -88,6 +95,9 @@ public class ProgramTests
         var kline = new List<object> { 100m, 100m, 100m, 100m, 100m, 100m, 100m, 100m, 100m, 100m, 100m, 100m };
         var klines = Enumerable.Repeat(kline, period).ToList();
         var closingPrices = priceRetriever.GetClosingPrices(klines);
+
+        mockApiValidatorService.Setup(c => c.ValidateAsync<Account>(It.IsAny<string>()))
+            .ReturnsAsync(It.IsAny<Account>());
 
         mockBinanceClient.Setup(c => c.GetKLinesBySymbolAsync(tradingStrategy.Symbol, interval, period.ToString()))
                           .ReturnsAsync(klines);
@@ -148,11 +158,11 @@ public class ProgramTests
         mockBinanceClient.Setup(c => c.GetCommissionBySymbolAsync(tradingStrategy.Symbol))
             .ReturnsAsync(new Commission
             {
-                StandardCommission = new CommissionRates
+                StandardCommission = new CommissionRate
                 {
                     Maker = "0.001"
                 },
-                TaxCommission = new CommissionRates
+                TaxCommission = new CommissionRate
                 {
                     Maker = "0.000"
                 },

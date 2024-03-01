@@ -11,7 +11,7 @@ public class Helper
         _fileSystem = fileSystem;
     }
 
-    public string GetSolutionPath()
+    public string? GetSolutionPath()
     {
         var currentDirectory = _fileSystem.GetCurrentDirectory();
 

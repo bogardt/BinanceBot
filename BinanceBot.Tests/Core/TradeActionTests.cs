@@ -1,17 +1,17 @@
 using BinanceBot.Abstraction;
+using BinanceBot.BinanceApi.Model;
 using BinanceBot.Core;
-using BinanceBot.Model;
-using BinanceBot.Strategy;
 using Moq;
 using Newtonsoft.Json;
+using TradingCalculation;
+using TradingCalculation.Strategy;
 
 namespace BinanceBot.Tests.Core;
 
 [TestClass]
 public class TradeActionTests
 {
-    private readonly Mock<IBinanceClient> _mockBinanceClient = new();
-    private readonly Mock<IPriceRetriever> _mockPriceRetriever = new();
+    private readonly Mock<IExchangeHttpClient> _mockBinanceClient = new();
     private readonly Mock<ITechnicalIndicatorsCalculator> _mockTechnicalIndicatorsCalculator = new();
     private readonly Mock<ILogger> _mockLogger = new();
     private readonly TradeAction _tradeAction;
@@ -20,7 +20,7 @@ public class TradeActionTests
 
     public TradeActionTests()
     {
-        _tradeAction = new TradeAction(_mockBinanceClient.Object, _mockPriceRetriever.Object, _mockTechnicalIndicatorsCalculator.Object, _mockLogger.Object);
+        _tradeAction = new TradeAction(_mockBinanceClient.Object, _mockTechnicalIndicatorsCalculator.Object, _mockLogger.Object);
     }
 
     [TestMethod]
@@ -161,7 +161,7 @@ public class TradeActionTests
         };
         _tradingStrategy.CryptoPurchasePrice = 100m;
         _tradingStrategy.OpenPosition = true;
-        _mockPriceRetriever.Setup(c => c.CalculateMinimumSellingPrice(_tradingStrategy.CryptoPurchasePrice, _tradingStrategy.Quantity, _tradingStrategy.FeePercentage, _tradingStrategy.Discount, _tradingStrategy.TargetProfit)).Returns(minimumSellingPrice);
+        _mockTechnicalIndicatorsCalculator.Setup(c => c.CalculateMinimumSellingPrice(_tradingStrategy.CryptoPurchasePrice, _tradingStrategy.Quantity, _tradingStrategy.FeePercentage, _tradingStrategy.Discount, _tradingStrategy.TargetProfit)).Returns(minimumSellingPrice);
         _mockBinanceClient.Setup(c => c.GetOpenOrdersAsync(_tradingStrategy.Symbol)).ReturnsAsync(new List<Order>());
 
         // Act
@@ -182,12 +182,12 @@ public class TradeActionTests
         decimal volatility = 0.05m;
         var testOrder = new TestOrder
         {
-            StandardCommissionForOrder = new CommissionRates
+            StandardCommissionForOrder = new CommissionRate
             {
                 Maker = "0.001",
                 Taker = "0.001"
             },
-            TaxCommissionForOrder = new CommissionRates
+            TaxCommissionForOrder = new CommissionRate
             {
                 Maker = "0.000",
                 Taker = "0.000"
@@ -222,12 +222,12 @@ public class TradeActionTests
         decimal volatility = 0.05m;
         var testOrder = new TestOrder
         {
-            StandardCommissionForOrder = new CommissionRates
+            StandardCommissionForOrder = new CommissionRate
             {
                 Maker = "0.001",
                 Taker = "0.001"
             },
-            TaxCommissionForOrder = new CommissionRates
+            TaxCommissionForOrder = new CommissionRate
             {
                 Maker = "0.000",
                 Taker = "0.000"

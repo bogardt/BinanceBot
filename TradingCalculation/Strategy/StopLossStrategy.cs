@@ -1,4 +1,4 @@
-﻿namespace BinanceBot.Strategy;
+﻿namespace TradingCalculation.Strategy;
 
 public class StopLossStrategy
 {

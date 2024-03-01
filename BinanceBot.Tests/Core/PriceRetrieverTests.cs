@@ -1,8 +1,8 @@
 using BinanceBot.Abstraction;
+using BinanceBot.BinanceApi.Model;
 using BinanceBot.Core;
-using BinanceBot.Model;
-using BinanceBot.Strategy;
 using Moq;
+using TradingCalculation.Strategy;
 
 namespace BinanceBot.Tests.Core;
 
@@ -10,7 +10,7 @@ namespace BinanceBot.Tests.Core;
 public class PriceRetrieverTests
 {
     private readonly Mock<ILogger> _mockLogger = new();
-    private readonly Mock<IBinanceClient> _mockBinanceClient = new();
+    private readonly Mock<IExchangeHttpClient> _mockBinanceClient = new();
     private readonly PriceRetriever _priceRetriever;
     private readonly TradingStrategy _tradingStrategy;
 
@@ -43,9 +43,9 @@ public class PriceRetrieverTests
         var result = _priceRetriever.GetClosingPrices(klines);
 
         // Assert
-        Assert.AreEqual(2, result.Count);
-        Assert.AreEqual(100.6m, result[0]);
-        Assert.AreEqual(101.6m, result[1]);
+        Assert.AreEqual(2, result.Count());
+        Assert.AreEqual(100.6m, result.ElementAt(0));
+        Assert.AreEqual(101.6m, result.ElementAt(1));
     }
 
     [TestMethod]
@@ -54,7 +54,7 @@ public class PriceRetrieverTests
         // Arrange
         var klines = new List<List<object>>
         {
-            new() { "100.5", "100.5", "100.5", "100.5", "not a number", "100.5" },
+            new List<object> { "100.5", "100.5", "100.5", -1231, "not a number", "100.5" },
         };
 
         // Act & Assert
@@ -71,23 +71,7 @@ public class PriceRetrieverTests
         var result = _priceRetriever.GetClosingPrices(klines);
 
         // Assert
-        Assert.AreEqual(0, result.Count);
-    }
-
-    [TestMethod]
-    public void ClosingPricesThrowsInvalidCastException()
-    {
-        // Arrange
-        var mockLogger = new Mock<ILogger>();
-        var mockBinanceClient = new Mock<IBinanceClient>();
-        var priceRetriever = new PriceRetriever(mockBinanceClient.Object, mockLogger.Object);
-        var klines = new List<List<object>>
-        {
-            new() { "100.5", "100.5", "100.5", "100.5", "invalid_data", "100.5" },
-        };
-
-        // Act & Assert
-        Assert.ThrowsException<InvalidCastException>(() => priceRetriever.GetClosingPrices(klines));
+        Assert.AreEqual(0, result.Count());
     }
 
     [TestMethod]
@@ -102,7 +86,7 @@ public class PriceRetrieverTests
                     DiscountAsset = "BNB",
                     DiscountValue = "0.75"
                 },
-                StandardCommission = new CommissionRates
+                StandardCommission = new CommissionRate
                 {
                     Maker = "0.00100000",
                     Taker = "0.00100000",
@@ -160,7 +144,7 @@ public class PriceRetrieverTests
                     DiscountAsset = "BNB",
                     DiscountValue = "0.75"
                 },
-                StandardCommission = new CommissionRates
+                StandardCommission = new CommissionRate
                 {
                     Maker = "0.00100000",
                     Taker = "0.00100000",
