@@ -23,11 +23,16 @@ internal class Program
             IServiceProvider provider = serviceScope.ServiceProvider;
 
             var binanceBotSimulator = provider.GetRequiredService<IMarketTradeHandlerSimulation>();
-
-            for (decimal i = 135m; i >= 133m; i -= 0.1m)
-            {
-                await binanceBotSimulator.CalculateProfit(134.85m, i);
-            }
+            await binanceBotSimulator.CalculateMinimumMargeToProfit(133.6m);
+            await binanceBotSimulator.CalculateProfit(133.6m, 133.9m);
+            //for (decimal i = 135m; i >= 133m; i -= 0.1m)
+            //{
+            //    await binanceBotSimulator.CalculateProfit(133.6m, 133.9m);
+            //}
+            //for (decimal i = 134m; i <= 140m; i += 0.1m)
+            //{
+            //    await binanceBotSimulator.CalculateProfit(134.85m, i);
+            //}
         }
 
         var helper = new Helper(new FileSystem());

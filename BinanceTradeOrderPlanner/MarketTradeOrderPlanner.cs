@@ -1,4 +1,5 @@
 ﻿using BinanceBot.Abstraction;
+using Newtonsoft.Json;
 using TradingCalculation.Strategy;
 
 namespace BinanceTradeOrderPlanner;
@@ -21,12 +22,12 @@ public class MarketTradeOrderPlanner(IExchangeHttpClient binanceClient,
     {
         try
         {
-            //var orderBuyResponse = await binanceClient.PlaceOrderAsync(_tradingStrategy.Symbol, _tradingStrategy.Quantity, 134.85m, "BUY");
-            //_logger.WriteLog($"real : {JsonConvert.SerializeObject(orderBuyResponse, Formatting.Indented)}");
+            //var orderBuyResponse = await binanceClient.PlaceOrderAsync(_tradingStrategy.Symbol, _tradingStrategy.Quantity, 132m, "BUY");
+            //_logger.WriteLog($"buy : {JsonConvert.SerializeObject(orderBuyResponse, Formatting.Indented)}");
             //await tradeAction.WaitBuyAsync(_tradingStrategy.Symbol);
 
-            //var orderSellResponse = await binanceClient.PlaceOrderAsync(_tradingStrategy.Symbol, _tradingStrategy.Quantity, 135.5m, "SELL");
-            //_logger.WriteLog($"real : {JsonConvert.SerializeObject(orderSellResponse, Formatting.Indented)}");
+            //var orderSellResponse = await binanceClient.PlaceOrderAsync(_tradingStrategy.Symbol, _tradingStrategy.Quantity, 133m, "SELL");
+            //_logger.WriteLog($"sell : {JsonConvert.SerializeObject(orderSellResponse, Formatting.Indented)}");
             //await tradeAction.WaitSellAsync(_tradingStrategy.Symbol);
 
         }

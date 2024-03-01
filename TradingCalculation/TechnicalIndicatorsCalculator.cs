@@ -5,7 +5,26 @@ namespace TradingCalculation;
 public class TechnicalIndicatorsCalculator : ITechnicalIndicatorsCalculator
 {
     private readonly StopLossStrategy _stopLossConfiguration = new();
+    public bool IsTargetPriceAchievable(decimal targetPrice, List<decimal> closingPrices)
+    {
+        // Calculer la moyenne et l'écart type des prix de clôture
+        decimal averagePrice = closingPrices.Average();
+        decimal stdDeviation = CalculateStandardDeviation(closingPrices, averagePrice);
 
+        // Estimer la probabilité d'atteindre le prix cible
+        // Ici, on utilise une approche simple en considérant le prix cible par rapport à la moyenne ajustée par l'écart type
+        // Cette méthode est rudimentaire et doit être ajustée en fonction de vos besoins spécifiques
+        decimal upperBound = averagePrice + (2 * stdDeviation); // Utilise 2 écarts types comme marge
+
+        return targetPrice <= upperBound;
+    }
+
+    public decimal CalculateStandardDeviation(List<decimal> values, decimal mean)
+    {
+        decimal sumOfSquaresOfDifferences = values.Sum(val => (val - mean) * (val - mean));
+        decimal stdDev = (decimal)Math.Sqrt((double)(sumOfSquaresOfDifferences / values.Count));
+        return stdDev;
+    }
     public decimal CalculateProfit(decimal cryptoPurchasePrice, decimal cryptoSellingPrice, decimal quantity, decimal feePercentage, decimal discount)
     {
         decimal purchaseCommission = cryptoPurchasePrice * quantity * feePercentage;

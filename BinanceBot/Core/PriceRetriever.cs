@@ -43,14 +43,15 @@ public class PriceRetriever(
         if (bnbIsBankable)
         {
             tradingStrategy.Discount = 1 - decimal.Parse(commission?.Discount?.DiscountValue!);
+            logger.WriteLog($"SOL: {account?.Balances?.First(b => b.Asset == "SOL").Free} | " +
+                 $"BNB: {account?.Balances?.First(b => b.Asset == "BNB").Free} | " +
+                 $"BNBUSDT: {usdtBnb} | " +
+                 $"USDT: {account?.Balances?.First(b => b.Asset == "USDT").Free} | " +
+                 $"fee: {commission?.StandardCommission?.Maker}" +
+                 $"{(commission?.Discount?.EnabledForSymbol == true && commission.Discount.EnabledForAccount == true ?
+                 $" | BNB discount: {commission.Discount.DiscountValue}" : string.Empty)}");
         }
 
-        logger.WriteLog($"SOL: {account?.Balances?.First(b => b.Asset == "SOL").Free} | " +
-             $"BNB: {account?.Balances?.First(b => b.Asset == "BNB").Free} | " +
-             $"BNBUSDT: {usdtBnb} | " +
-             $"USDT: {account?.Balances?.First(b => b.Asset == "USDT").Free} | " +
-             $"fee: {commission?.StandardCommission?.Maker}" +
-             $"{(commission?.Discount?.EnabledForSymbol == true && commission.Discount.EnabledForAccount == true ?
-             $" | BNB discount: {commission.Discount.DiscountValue}" : string.Empty)}");
+
     }
 }

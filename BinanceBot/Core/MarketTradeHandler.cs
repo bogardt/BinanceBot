@@ -42,7 +42,9 @@ public class MarketTradeHandler(IExchangeHttpClient binanceClient,
                 decimal targetPriceFeesIncluded = targetPriceFeesNotIncluded * (1 + _tradingStrategy.FeePercentage);
                 decimal forecastSellingPrice = technicalIndicatorsCalculator.CalculateMinimumSellingPrice(currentCurrencyPrice, _tradingStrategy.Quantity, _tradingStrategy.FeePercentage, _tradingStrategy.Discount, _tradingStrategy.TargetProfit);
 
-                if (!_tradingStrategy.OpenPosition && rsi <= _tradingStrategy.MaxRSI && currentCurrencyPrice < mobileAverage)
+                var isAchievable = technicalIndicatorsCalculator.IsTargetPriceAchievable(forecastSellingPrice, closingPrices);
+
+                if (!_tradingStrategy.OpenPosition && rsi <= _tradingStrategy.MaxRSI && currentCurrencyPrice < mobileAverage && isAchievable)
                 {
                     await tradeAction.Buy(_tradingStrategy, currentCurrencyPrice, volatility, _tradingStrategy.Symbol);
                 }

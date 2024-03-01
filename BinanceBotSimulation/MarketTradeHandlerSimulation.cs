@@ -16,7 +16,7 @@ public class MarketTradeHandlerSimulation(IPriceRetriever priceRetriever,
 {
     private readonly TradingStrategy _tradingStrategy = new()
     {
-        TargetProfit = 300m,
+        TargetProfit = 10m,
         Quantity = 200m,
         Period = 600,
         Interval = "1s",
