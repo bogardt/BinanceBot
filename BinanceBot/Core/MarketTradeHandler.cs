@@ -40,12 +40,8 @@ public class MarketTradeHandler(IExchangeHttpClient binanceClient,
 
                 decimal targetPriceFeesNotIncluded = ((currentCurrencyPrice * _tradingStrategy.Quantity) + _tradingStrategy.TargetProfit) / _tradingStrategy.Quantity;
                 decimal targetPriceFeesIncluded = targetPriceFeesNotIncluded * (1 + _tradingStrategy.FeePercentage);
-                decimal forecastSellingPrice = technicalIndicatorsCalculator.CalculateMinimumSellingPrice(
-                    currentCurrencyPrice,
-                    _tradingStrategy.Quantity,
-                    _tradingStrategy.FeePercentage,
-                    _tradingStrategy.Discount,
-                    _tradingStrategy.TargetProfit);
+                decimal forecastSellingPrice = technicalIndicatorsCalculator.CalculateMinimumSellingPrice(currentCurrencyPrice, _tradingStrategy.Quantity, _tradingStrategy.FeePercentage, _tradingStrategy.Discount, _tradingStrategy.TargetProfit);
+
                 if (!_tradingStrategy.OpenPosition && rsi <= _tradingStrategy.MaxRSI && currentCurrencyPrice < mobileAverage)
                 {
                     await tradeAction.Buy(_tradingStrategy, currentCurrencyPrice, volatility, _tradingStrategy.Symbol);

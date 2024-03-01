@@ -40,34 +40,3 @@ public class ApiValidatorService : IApiValidatorService
         return message;
     }
 }
-
-//public class BinanceApiAbstractValidator<T> : AbstractValidator<T> where T : IMessage
-//{
-//    private readonly IServiceProvider _serviceProvider;
-
-//    public BinanceApiAbstractValidator(IServiceProvider serviceProvider)
-//    {
-//        _serviceProvider = serviceProvider;
-//    }
-
-//    private IValidator GetValidatorByType<T>(T message) where T : IMessage
-//    {
-//        var validatorType = typeof(IValidator<>).MakeGenericType(message!.GetType());
-//        var validator = (IValidator)_serviceProvider.GetService(validatorType)!;
-//        if (validator == null)
-//            throw new InvalidOperationException($"No validator found for type {message.GetType().Name}.");
-//        return validator;
-//    }
-//    public override ValidationResult Validate(ValidationContext<T> context)
-//    {
-//        return base.Validate(context);
-//    }
-//    public override ValidationResult Validate(T? message)
-//    {
-//        var validator = GetValidatorByType(message!);
-//        var context = new ValidationContext<T>(message);
-//        var validationResult = await validator.ValidateAsync(context);
-
-//        return base.Validate(context);
-//    }
-//}

@@ -9,9 +9,6 @@ public class PriceRetriever(
     IExchangeHttpClient binanceClient,
     ILogger logger) : IPriceRetriever
 {
-    private readonly IExchangeHttpClient _binanceClient = binanceClient;
-    private readonly ILogger _logger = logger;
-
     //public IEnumerable<decimal> GetClosingPrices(IEnumerable<IEnumerable<object>> klines) => klines.Select((it) =>
     //{
     //    var closingPrice = it.ElementAt(4).ToString();
@@ -35,9 +32,9 @@ public class PriceRetriever(
 
     public async Task HandleDiscountAsync(TradingStrategy tradingStrategy)
     {
-        var commission = await _binanceClient.GetCommissionBySymbolAsync(tradingStrategy.Symbol);
-        var account = await _binanceClient.GetAccountInfosAsync();
-        var bnbPrice = await _binanceClient.GetPriceBySymbolAsync("BNBUSDT");
+        var commission = await binanceClient.GetCommissionBySymbolAsync(tradingStrategy.Symbol);
+        var account = await binanceClient.GetAccountInfosAsync();
+        var bnbPrice = await binanceClient.GetPriceBySymbolAsync("BNBUSDT");
         var bnb = account.Balances?.First(b => b.Asset == "BNB");
         var bnbFree = decimal.Parse(bnb?.Free!);
         var usdtBnb = bnbFree * bnbPrice.Price;
@@ -48,12 +45,12 @@ public class PriceRetriever(
             tradingStrategy.Discount = 1 - decimal.Parse(commission?.Discount?.DiscountValue!);
         }
 
-        //_logger.WriteLog($"SOL: {account?.Balances?.First(b => b.Asset == "SOL").Free} | " +
-        //     $"BNB: {account?.Balances?.First(b => b.Asset == "BNB").Free} | " +
-        //     $"BNBUSDT: {usdtBnb} | " +
-        //     $"USDT: {account?.Balances?.First(b => b.Asset == "USDT").Free} | " +
-        //     $"fee: {commission?.StandardCommission?.Maker}" +
-        //     $"{(commission?.Discount?.EnabledForSymbol == true && commission.Discount.EnabledForAccount == true?
-        //     $" | BNB discount: {commission.Discount.DiscountValue}" : string.Empty)}");
+        logger.WriteLog($"SOL: {account?.Balances?.First(b => b.Asset == "SOL").Free} | " +
+             $"BNB: {account?.Balances?.First(b => b.Asset == "BNB").Free} | " +
+             $"BNBUSDT: {usdtBnb} | " +
+             $"USDT: {account?.Balances?.First(b => b.Asset == "USDT").Free} | " +
+             $"fee: {commission?.StandardCommission?.Maker}" +
+             $"{(commission?.Discount?.EnabledForSymbol == true && commission.Discount.EnabledForAccount == true ?
+             $" | BNB discount: {commission.Discount.DiscountValue}" : string.Empty)}");
     }
 }

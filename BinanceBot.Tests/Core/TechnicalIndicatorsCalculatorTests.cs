@@ -9,12 +9,7 @@ namespace BinanceBot.Tests.Core;
 public class TechnicalIndicatorsCalculatorTests
 {
     private readonly Mock<IPriceRetriever> _mockPriceRetriever = new();
-    private readonly TechnicalIndicatorsCalculator _technicalIndicatorsCalculator;
-
-    public TechnicalIndicatorsCalculatorTests()
-    {
-        _technicalIndicatorsCalculator = new();
-    }
+    private readonly TechnicalIndicatorsCalculator _technicalIndicatorsCalculator = new();
 
     [TestMethod]
     public void CalculateMovingAverageValidKlinesCalculatesAverage()

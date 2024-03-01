@@ -1,6 +1,5 @@
 ﻿using BinanceBot.BinanceApi.Model;
 using FluentValidation;
-using FluentValidation.Results;
 
 namespace BinanceBot.BinanceApi.Validation.Validator;
 

@@ -5,7 +5,6 @@ using Microsoft.Extensions.Configuration;
 using Moq;
 using Newtonsoft.Json;
 using System.Net;
-using System.Security.Principal;
 
 namespace BinanceBot.Tests.BinanceApi;
 

@@ -1,17 +1,12 @@
 ﻿using BinanceBot.BinanceApi.Model;
-using BinanceBot.BinanceApi.Validation;
 using BinanceBot.BinanceApi.Validation.Validator;
 using BinanceBot.Tests.BinanceApi.Validation.Context;
-using FluentValidation;
 
 namespace BinanceBot.Tests.BinanceApi.Validation.Validator
 {
     [TestClass]
     public class AccountValidatorTests
     {
-        public AccountValidatorTests()
-        {
-        }
         [TestMethod]
         public void AccountValidatorShouldSuccess()
         {
