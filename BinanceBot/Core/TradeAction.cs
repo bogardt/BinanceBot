@@ -1,20 +1,15 @@
 ﻿using BinanceBot.Abstraction;
-using BinanceBot.Strategy;
 using Newtonsoft.Json;
+using TradingCalculation;
+using TradingCalculation.Strategy;
 
 namespace BinanceBot.Core;
 
 public class TradeAction(
     IExchangeHttpClient binanceClient,
-    IPriceRetriever priceRetriever,
     ITechnicalIndicatorsCalculator technicalIndicatorsCalculator,
     ILogger logger) : ITradeAction
 {
-    private readonly IExchangeHttpClient _binanceClient = binanceClient;
-    private readonly IPriceRetriever _priceRetriever = priceRetriever;
-    private readonly ITechnicalIndicatorsCalculator _technicalIndicatorsCalculator = technicalIndicatorsCalculator;
-    private readonly ILogger _logger = logger;
-
     public async Task Buy(TradingStrategy tradingStrategy, decimal currentCurrencyPrice, decimal volatility, string symbol)
     {
         tradingStrategy.CryptoPurchasePrice = currentCurrencyPrice;
@@ -23,20 +18,20 @@ public class TradeAction(
         decimal feesAmount = tradingStrategy.TotalPurchaseCost * tradingStrategy.FeePercentage;
         tradingStrategy.TotalPurchaseCost *= (1 + tradingStrategy.FeePercentage);
 
-        _logger.WriteLog($"===> [ACHAT] {tradingStrategy.Quantity} | " +
+        logger.WriteLog($"===> [ACHAT] {tradingStrategy.Quantity} | " +
             $"feesAmount: {feesAmount} | " +
             $"cryptoPurchasePrice: {tradingStrategy.CryptoPurchasePrice:F2} | " +
             $"totalPurchaseCost: {tradingStrategy.TotalPurchaseCost:F2}");
 
         if (tradingStrategy.TestMode)
         {
-            var orderResponse = await _binanceClient.PlaceTestOrderAsync(symbol, tradingStrategy.Quantity, currentCurrencyPrice, "BUY");
-            _logger.WriteLog($"test : {JsonConvert.SerializeObject(orderResponse, Formatting.Indented)}");
+            var orderResponse = await binanceClient.PlaceTestOrderAsync(symbol, tradingStrategy.Quantity, currentCurrencyPrice, "BUY");
+            logger.WriteLog($"test : {JsonConvert.SerializeObject(orderResponse, Formatting.Indented)}");
         }
         else
         {
-            var orderResponse = await _binanceClient.PlaceOrderAsync(symbol, tradingStrategy.Quantity, currentCurrencyPrice, "BUY");
-            _logger.WriteLog($"real : {JsonConvert.SerializeObject(orderResponse, Formatting.Indented)}");
+            var orderResponse = await binanceClient.PlaceOrderAsync(symbol, tradingStrategy.Quantity, currentCurrencyPrice, "BUY");
+            logger.WriteLog($"real : {JsonConvert.SerializeObject(orderResponse, Formatting.Indented)}");
         }
 
         await WaitBuyAsync(symbol);
@@ -49,7 +44,7 @@ public class TradeAction(
         decimal volatility,
         string symbol)
     {
-        decimal prixVenteCible = _priceRetriever.CalculateMinimumSellingPrice(
+        decimal prixVenteCible = technicalIndicatorsCalculator.CalculateMinimumSellingPrice(
             tradingStrategy.CryptoPurchasePrice,
             tradingStrategy.Quantity,
             tradingStrategy.FeePercentage,
@@ -65,30 +60,30 @@ public class TradeAction(
         decimal prixVenteTotal = currentCurrencyPrice * tradingStrategy.Quantity;
         decimal prixAchatTotal = tradingStrategy.CryptoPurchasePrice * tradingStrategy.Quantity;
         decimal beneficeNet = (prixVenteTotal - commissionVente) - (prixAchatTotal + commissionAchat);
-        decimal stopLossPrice = _technicalIndicatorsCalculator.DetermineLossStrategy(tradingStrategy.CryptoPurchasePrice, volatility);
+        decimal stopLossPrice = technicalIndicatorsCalculator.DetermineLossStrategy(tradingStrategy.CryptoPurchasePrice, volatility);
 
         if (currentCurrencyPrice < prixVenteCible)
             return (prixVenteCible, false);
 
         if (currentCurrencyPrice <= stopLossPrice)
         {
-            _logger.WriteLog("STOPP LOSS");
+            logger.WriteLog("STOPP LOSS");
         }
 
         tradingStrategy.TotalBenefit += beneficeNet;
-        _logger.WriteLog($"===> [VENTE] {tradingStrategy.Quantity:F2} | " +
+        logger.WriteLog($"===> [VENTE] {tradingStrategy.Quantity:F2} | " +
             $"currentCurrencyPrice: {currentCurrencyPrice:F2} | " +
             $"totalBenefit: {tradingStrategy.TotalBenefit:F2}");
 
         if (tradingStrategy.TestMode)
         {
-            var orderResponse = await _binanceClient.PlaceTestOrderAsync(symbol, tradingStrategy.Quantity, currentCurrencyPrice, "SELL");
-            _logger.WriteLog($"test : {JsonConvert.SerializeObject(orderResponse, Formatting.Indented)}");
+            var orderResponse = await binanceClient.PlaceTestOrderAsync(symbol, tradingStrategy.Quantity, currentCurrencyPrice, "SELL");
+            logger.WriteLog($"test : {JsonConvert.SerializeObject(orderResponse, Formatting.Indented)}");
         }
         else
         {
-            var orderResponse = await _binanceClient.PlaceOrderAsync(symbol, tradingStrategy.Quantity, currentCurrencyPrice, "SELL");
-            _logger.WriteLog($"real : {JsonConvert.SerializeObject(orderResponse, Formatting.Indented)}");
+            var orderResponse = await binanceClient.PlaceOrderAsync(symbol, tradingStrategy.Quantity, currentCurrencyPrice, "SELL");
+            logger.WriteLog($"real : {JsonConvert.SerializeObject(orderResponse, Formatting.Indented)}");
         }
 
         await WaitSellAsync(symbol);
@@ -104,7 +99,7 @@ public class TradeAction(
     {
         if (tradingStrategy.TotalBenefit >= tradingStrategy.LimitBenefit)
         {
-            _logger.WriteLog("BENEFICE LIMITE ->> exit program");
+            logger.WriteLog("BENEFICE LIMITE ->> exit program");
             return true;
         }
 
@@ -113,14 +108,14 @@ public class TradeAction(
 
     public async Task WaitBuyAsync(string symbol)
     {
-        var orders = await _binanceClient.GetOpenOrdersAsync(symbol);
+        var orders = await binanceClient.GetOpenOrdersAsync(symbol);
 
         while (true)
         {
             if (orders.Any((it) => it.Symbol == symbol && it.Side == "BUY"))
             {
                 Console.WriteLine("En attente de la fin de l'achat");
-                orders = await _binanceClient.GetOpenOrdersAsync(symbol);
+                orders = await binanceClient.GetOpenOrdersAsync(symbol);
             }
             else
             {
@@ -133,14 +128,14 @@ public class TradeAction(
 
     public async Task WaitSellAsync(string symbol)
     {
-        var orders = await _binanceClient.GetOpenOrdersAsync(symbol);
+        var orders = await binanceClient.GetOpenOrdersAsync(symbol);
 
         while (true)
         {
             if (orders.Any((it) => it.Symbol == symbol && it.Side == "SELL"))
             {
                 Console.WriteLine("En attente de la fin de la vente");
-                orders = await _binanceClient.GetOpenOrdersAsync(symbol);
+                orders = await binanceClient.GetOpenOrdersAsync(symbol);
             }
             else
             {

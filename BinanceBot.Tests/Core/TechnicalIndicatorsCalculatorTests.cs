@@ -1,6 +1,7 @@
 using BinanceBot.Abstraction;
 using BinanceBot.Core;
 using Moq;
+using TradingCalculation;
 
 namespace BinanceBot.Tests.Core;
 

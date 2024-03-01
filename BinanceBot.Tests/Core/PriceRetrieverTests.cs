@@ -1,8 +1,8 @@
 using BinanceBot.Abstraction;
 using BinanceBot.BinanceApi.Model;
 using BinanceBot.Core;
-using BinanceBot.Strategy;
 using Moq;
+using TradingCalculation.Strategy;
 
 namespace BinanceBot.Tests.Core;
 

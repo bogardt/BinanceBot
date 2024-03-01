@@ -8,6 +8,7 @@ using BinanceBot.Abstraction;
 using BinanceBot.BinanceApi.Validation;
 using FluentValidation;
 using BinanceBot.BinanceApi.Validation.Validator;
+using BinanceTradeOrderPlanner;
 using TradingCalculation;
 
 internal class Program
@@ -21,9 +22,9 @@ internal class Program
             using IServiceScope serviceScope = services.CreateScope();
             IServiceProvider provider = serviceScope.ServiceProvider;
 
-            var binanceBot = provider.GetRequiredService<IMarketTradeHandler>();
+            var marketTradeOrderPlanner = provider.GetRequiredService<IMarketTradeHandler>();
 
-            await binanceBot.TradeOnLimitAsync();
+            await marketTradeOrderPlanner.TradeOnLimitAsync();
         }
 
         var helper = new Helper(new FileSystem());
@@ -46,7 +47,7 @@ internal class Program
                 services.AddSingleton<IFileSystem, FileSystem>();
                 services.AddSingleton<IHttpClientWrapper, HttpClientWrapper>();
                 services.AddSingleton<ILogger, Logger>();
-                services.AddSingleton<IMarketTradeHandler, MarketTradeHandler>();
+                services.AddSingleton<IMarketTradeHandler, MarketTradeOrderPlanner>();
                 services.AddSingleton<IPriceRetriever, PriceRetriever>();
                 services.AddSingleton<ITechnicalIndicatorsCalculator, TechnicalIndicatorsCalculator>();
                 services.AddSingleton<ITradeAction, TradeAction>();

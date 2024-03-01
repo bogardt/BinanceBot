@@ -96,7 +96,7 @@ public class BinanceClient(
         var quantitystr = quantity.ToString("0.######", CultureInfo.InvariantCulture);
         var pricestr = price.ToString("0.######", CultureInfo.InvariantCulture);
         var queryString = $"symbol={symbol}&side={side}&type=LIMIT&timeInForce=GTC&quantity={quantitystr}" +
-            $"&price={pricestr}&timestamp={timestamp}&computeCommissionRates=true";
+            $"&price={pricestr}&timestamp={timestamp}" + (method.Contains("test") ? "&computeCommissionRates=true" : "");
         var signature = Sign(queryString, _apiSecret);
         var finalUrl = $"{endpoint}?{queryString}&signature={signature}";
         return finalUrl;

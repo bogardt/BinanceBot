@@ -1,11 +1,44 @@
-﻿using BinanceBot.Abstraction;
-using BinanceBot.Strategy;
+﻿using TradingCalculation.Strategy;
 
-namespace BinanceBot.Core;
+namespace TradingCalculation;
 
 public class TechnicalIndicatorsCalculator : ITechnicalIndicatorsCalculator
 {
     private readonly StopLossStrategy _stopLossConfiguration = new();
+
+    public decimal CalculateProfit(decimal cryptoPurchasePrice, decimal cryptoSellingPrice, decimal quantity, decimal feePercentage, decimal discount)
+    {
+        decimal purchaseCommission = cryptoPurchasePrice * quantity * feePercentage;
+        decimal discountOnPurchase = purchaseCommission * discount;
+        decimal purchaseCommissionWithDiscount = purchaseCommission - discountOnPurchase;
+        
+        decimal effectivePurchaseCost = cryptoPurchasePrice * quantity + purchaseCommissionWithDiscount;
+
+        decimal sellingCommission = cryptoSellingPrice * quantity * feePercentage;
+        decimal discountOnSelling = sellingCommission * discount;
+        decimal sellingCommissionWithDiscount = sellingCommission - discountOnSelling;
+
+        decimal effectiveSellingRevenue = cryptoSellingPrice * quantity - sellingCommissionWithDiscount;
+
+        decimal profit = effectiveSellingRevenue - effectivePurchaseCost;
+
+        return profit;
+    }
+
+    public decimal CalculateMinimumSellingPrice(decimal cryptoPurchasePrice, decimal quantity, decimal feePercentage, decimal discount, decimal targetProfit)
+    {
+        decimal purchaseCommission = cryptoPurchasePrice * quantity * feePercentage;
+
+        decimal discountOnPurchase = purchaseCommission * discount;
+        decimal purchaseCommissionWithDiscount = purchaseCommission - discountOnPurchase;
+
+        decimal effectiveCommissionRate = feePercentage * (1 - discount);
+
+        decimal minimumSellingPrice = (cryptoPurchasePrice * quantity + purchaseCommissionWithDiscount + targetProfit) / (1 - effectiveCommissionRate);
+        decimal minimumSellingPricePerItem = minimumSellingPrice / quantity;
+
+        return minimumSellingPricePerItem;
+    }
 
     public decimal CalculateMovingAverage(IEnumerable<decimal> closingPrices, int periode)
     {

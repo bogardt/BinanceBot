@@ -1,8 +1,9 @@
 using BinanceBot.Abstraction;
 using BinanceBot.BinanceApi.Model;
 using BinanceBot.Core;
-using BinanceBot.Strategy;
 using Moq;
+using TradingCalculation;
+using TradingCalculation.Strategy;
 
 namespace BinanceBot.Tests.Core;
 
@@ -29,7 +30,6 @@ public class MarketTradeHandlerTests
     public MarketTradeHandlerTests()
     {
         _tradeAction = new TradeAction(_mockBinanceClient.Object,
-            _mockPriceRetriever.Object,
             _mockTechnicalIndicatorsCalculator.Object,
             _mockLogger.Object);
         _handler = new MarketTradeHandler(_mockBinanceClient.Object,
@@ -56,17 +56,17 @@ public class MarketTradeHandlerTests
 
         _mockPriceRetriever.Setup(c => c.HandleDiscountAsync(_tradingStrategy))
                            .Returns(Task.CompletedTask);
-        _mockPriceRetriever.Setup(c => c.CalculateMinimumSellingPrice(It.IsAny<decimal>(), It.IsAny<decimal>(), It.IsAny<decimal>(), It.IsAny<decimal>(), It.IsAny<decimal>()))
-                           .Returns(95);
 
+        _mockTechnicalIndicatorsCalculator.Setup(c => c.CalculateMinimumSellingPrice(It.IsAny<decimal>(), It.IsAny<decimal>(), It.IsAny<decimal>(), It.IsAny<decimal>(), It.IsAny<decimal>()))
+                           .Returns(95);
         _mockTechnicalIndicatorsCalculator.Setup(c => c.CalculateRSI(It.IsAny<List<decimal>>(), period))
-            .Returns(30m);
+                           .Returns(30m);
 
         _mockTechnicalIndicatorsCalculator.Setup(c => c.CalculateMovingAverage(It.IsAny<List<decimal>>(), period))
-            .Returns(100m);
+                           .Returns(100m);
 
         _mockTechnicalIndicatorsCalculator.Setup(c => c.CalculateVolatility(It.IsAny<List<decimal>>()))
-            .Returns(0.25m);
+                                    .Returns(0.25m);
 
         var currencyForBuy = new Currency { Symbol = _tradingStrategy.Symbol, Price = 90m };
         var currencyForSell = new Currency { Symbol = _tradingStrategy.Symbol, Price = 100m };
@@ -113,7 +113,7 @@ public class MarketTradeHandlerTests
 
         _mockPriceRetriever.Setup(c => c.HandleDiscountAsync(_tradingStrategy))
                            .Returns(Task.CompletedTask);
-        _mockPriceRetriever.Setup(c => c.CalculateMinimumSellingPrice(It.IsAny<decimal>(), It.IsAny<decimal>(), It.IsAny<decimal>(), It.IsAny<decimal>(), It.IsAny<decimal>()))
+        _mockTechnicalIndicatorsCalculator.Setup(c => c.CalculateMinimumSellingPrice(It.IsAny<decimal>(), It.IsAny<decimal>(), It.IsAny<decimal>(), It.IsAny<decimal>(), It.IsAny<decimal>()))
                .Returns(99);
 
         _mockTechnicalIndicatorsCalculator.Setup(c => c.CalculateRSI(It.IsAny<List<decimal>>(), period))

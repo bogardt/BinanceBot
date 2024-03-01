@@ -1,10 +1,7 @@
-﻿
-using BinanceBot.Abstraction;
+﻿using BinanceBot.Abstraction;
 using BinanceBot.BinanceApi.Model;
 using FluentValidation;
-using FluentValidation.Results;
 using Newtonsoft.Json;
-using ValidationException = FluentValidation.ValidationException;
 
 namespace BinanceBot.BinanceApi.Validation;
 

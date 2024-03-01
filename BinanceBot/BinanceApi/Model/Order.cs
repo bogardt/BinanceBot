@@ -7,7 +7,7 @@ public class Order : BaseMessage
     [JsonProperty("symbol")]
     public string? Symbol { get; set; }
     [JsonProperty("orderId")]
-    public int? OrderId { get; set; }
+    public long? OrderId { get; set; }
     [JsonProperty("side")]
     public string? Side { get; set; }
 }

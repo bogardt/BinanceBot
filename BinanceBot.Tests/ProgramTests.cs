@@ -2,11 +2,12 @@
 using BinanceBot.BinanceApi;
 using BinanceBot.BinanceApi.Model;
 using BinanceBot.Core;
-using BinanceBot.Strategy;
 using BinanceBot.Utils;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Moq;
+using TradingCalculation;
+using TradingCalculation.Strategy;
 
 namespace BinanceBot.Tests;
 
@@ -63,7 +64,7 @@ public class ProgramTests
 
         //
         var priceRetriever = new PriceRetriever(mockBinanceClient.Object, mockLogger.Object);
-        var tradeAction = new TradeAction(mockBinanceClient.Object, priceRetriever, mockTechnicalIndicatorsCalculator.Object, mockLogger.Object);
+        var tradeAction = new TradeAction(mockBinanceClient.Object, mockTechnicalIndicatorsCalculator.Object, mockLogger.Object);
         var marketTradeHandler = new MarketTradeHandler(mockBinanceClient.Object, mockTechnicalIndicatorsCalculator.Object, priceRetriever, tradeAction, mockLogger.Object, tradingStrategy);
 
         var host = Host.CreateDefaultBuilder()

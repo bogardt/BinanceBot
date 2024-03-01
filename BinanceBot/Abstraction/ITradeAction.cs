@@ -1,4 +1,4 @@
-﻿using BinanceBot.Strategy;
+﻿using TradingCalculation.Strategy;
 
 namespace BinanceBot.Abstraction;
 
