@@ -9,8 +9,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BinanceBot.Tests", "Binance
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BinanceBotSimulation", "BinanceBotSimulation\BinanceBotSimulation.csproj", "{5B51677E-2B46-4D67-835F-3963C31D356C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BinanceTradeOrderPlanner", "BinanceTradeOrderPlanner\BinanceTradeOrderPlanner.csproj", "{F724DFFB-2209-4C05-8832-8526DFC3071A}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TradingCalculation", "TradingCalculation\TradingCalculation.csproj", "{14D008B1-D44C-4A01-A5FB-F34D7B0F3B06}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BinanceBotML", "BinanceBotML\BinanceBotML.csproj", "{142B79E8-2DDC-48F7-9885-0A2AFBEC5D50}"
@@ -35,10 +33,6 @@ Global
 		{5B51677E-2B46-4D67-835F-3963C31D356C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5B51677E-2B46-4D67-835F-3963C31D356C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5B51677E-2B46-4D67-835F-3963C31D356C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F724DFFB-2209-4C05-8832-8526DFC3071A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F724DFFB-2209-4C05-8832-8526DFC3071A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F724DFFB-2209-4C05-8832-8526DFC3071A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F724DFFB-2209-4C05-8832-8526DFC3071A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{14D008B1-D44C-4A01-A5FB-F34D7B0F3B06}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{14D008B1-D44C-4A01-A5FB-F34D7B0F3B06}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{14D008B1-D44C-4A01-A5FB-F34D7B0F3B06}.Release|Any CPU.ActiveCfg = Release|Any CPU
