@@ -63,6 +63,24 @@ public class BinanceClient(
         return klines!;
     }
 
+    public async Task<List<List<object>>> GetKLinesBySymbolAsync(DateTime from, DateTime to, string symbol, string interval, string limit)
+    {
+        var fromUtc = new DateTimeOffset(from).ToUnixTimeMilliseconds();
+        var toUtc = new DateTimeOffset(to).ToUnixTimeMilliseconds();
+        var klinesEndpoint = $"{_baseEndpoint}/api/v3/klines?startTime={fromUtc}&endTime={toUtc}&symbol={symbol}&interval={interval}&limit={limit}";
+        var response = await httpClientWrapper.GetStringAsync(klinesEndpoint);
+        var klines = JsonConvert.DeserializeObject<List<List<object>>>(response) ?? null;
+        return klines!;
+    }
+    public async Task<string> GetKLinesBySymbolAsyncStr(DateTime from, DateTime to, string symbol, string interval, string limit)
+    {
+        var fromUtc = new DateTimeOffset(from).ToUnixTimeMilliseconds();
+        var toUtc = new DateTimeOffset(to).ToUnixTimeMilliseconds();
+        var klinesEndpoint = $"{_baseEndpoint}/api/v3/klines?startTime={fromUtc}&endTime={toUtc}&symbol={symbol}&interval={interval}&limit={limit}";
+        var response = await httpClientWrapper.GetStringAsync(klinesEndpoint);
+        return response!;
+    }
+
     public async Task<Currency> GetPriceBySymbolAsync(string symbol)
     {
         var priceEndpoint = $"{_baseEndpoint}/api/v3/ticker/price?symbol={symbol}";

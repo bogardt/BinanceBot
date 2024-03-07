@@ -21,21 +21,31 @@ public class MarketTradeHandler(IExchangeHttpClient binanceClient,
 
             while (true)
             {
+                var offSetPeriodFrom = 400;
+                var offSetPeriodTo = 40;
+                var offSetPeriod = offSetPeriodFrom - offSetPeriodTo;
+                var period = _tradingStrategy.Period;// + offSetPeriod;
+
                 var now = DateTime.UtcNow;
                 var getPriceTask = binanceClient.GetPriceBySymbolAsync(_tradingStrategy.Symbol);
                 var getKlinesTask = binanceClient.GetKLinesBySymbolAsync(_tradingStrategy.Symbol, _tradingStrategy.Interval, _tradingStrategy.Period.ToString());
+                //var getKlinesTaskBefore = binanceClient.GetKLinesBySymbolAsync(DateTime.Now.AddMinutes((-1) * offSetPeriodFrom), DateTime.Now.AddMinutes((-1) * offSetPeriodTo), _tradingStrategy.Symbol, _tradingStrategy.Interval, period.ToString());
 
                 await Task.WhenAll(getPriceTask, getKlinesTask);
 
+                //await Task.WhenAll(getPriceTask, getKlinesTask, getKlinesTaskBefore);
                 var currency = await getPriceTask;
                 var klines = await getKlinesTask;
+                //var klines = await getKlinesTaskBefore;
+                //var actualKlines = await getKlinesTask;
+                //klines.AddRange(actualKlines);
 
                 decimal currentCurrencyPrice = (decimal)currency.Price!;
 
                 var closingPrices = priceRetriever.GetClosingPrices(klines);
 
-                decimal mobileAverage = technicalIndicatorsCalculator.CalculateMovingAverage(closingPrices, _tradingStrategy.Period);
-                decimal rsi = technicalIndicatorsCalculator.CalculateRSI(closingPrices, _tradingStrategy.Period);
+                decimal mobileAverage = technicalIndicatorsCalculator.CalculateMovingAverage(closingPrices, period);
+                decimal rsi = technicalIndicatorsCalculator.CalculateRSI(closingPrices, period);
                 decimal volatility = technicalIndicatorsCalculator.CalculateVolatility(closingPrices);
 
                 decimal targetPriceFeesNotIncluded = ((currentCurrencyPrice * _tradingStrategy.Quantity) + _tradingStrategy.TargetProfit) / _tradingStrategy.Quantity;
@@ -50,8 +60,6 @@ public class MarketTradeHandler(IExchangeHttpClient binanceClient,
                 }
 
                 var output = string.Empty;
-
-
 
                 if (_tradingStrategy.OpenPosition)
                 {

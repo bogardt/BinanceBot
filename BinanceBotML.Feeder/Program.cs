@@ -8,27 +8,31 @@ using BinanceBot.Abstraction;
 using BinanceBot.BinanceApi.Validation;
 using FluentValidation;
 using BinanceBot.BinanceApi.Validation.Validator;
-using BinanceTradeOrderPlanner;
 using TradingCalculation;
+using BinanceBotML.Feeder;
 
 internal class Program
 {
     private static async Task Main(string[] args)
     {
-        static async Task RunBot(IServiceProvider services, string scope)
+        var helper = new Helper(new FileSystem());
+        var solutionPath = helper.GetSolutionPath();
+
+        static async Task RunScriptCsvFeeder(IServiceProvider services, string scope)
         {
             Console.WriteLine($"{scope}...");
 
             using IServiceScope serviceScope = services.CreateScope();
             IServiceProvider provider = serviceScope.ServiceProvider;
 
-            var marketTradeOrderPlanner = provider.GetRequiredService<IMarketTradeHandler>();
+            var feeder = provider.GetRequiredService<IFeeder>();
 
-            await marketTradeOrderPlanner.TradeOnLimitAsync();
+            var helper = new Helper(new FileSystem());
+            var solutionPath = helper.GetSolutionPath();
+
+            await feeder.Run(solutionPath + "\\test.csv");
         }
 
-        var helper = new Helper(new FileSystem());
-        var solutionPath = helper.GetSolutionPath();
 
         var config = new ConfigurationBuilder()
             .SetBasePath(solutionPath)
@@ -42,12 +46,13 @@ internal class Program
                 services.AddValidatorsFromAssemblyContaining<AccountValidator>();
                 //services.AddScoped(typeof(IApiValidatorService), typeof(ApiValidatorService));
 
+                services.AddSingleton<IFeeder, FeedCsv>();
                 services.AddSingleton<IApiValidatorService, ApiValidatorService>();
                 services.AddSingleton<IExchangeHttpClient, BinanceClient>();
                 services.AddSingleton<IFileSystem, FileSystem>();
                 services.AddSingleton<IHttpClientWrapper, HttpClientWrapper>();
                 services.AddSingleton<ILogger, Logger>();
-                services.AddSingleton<IMarketTradeHandler, MarketTradeOrderPlanner>();
+                services.AddSingleton<IMarketTradeHandler, MarketTradeHandler>();
                 services.AddSingleton<IPriceRetriever, PriceRetriever>();
                 services.AddSingleton<ITechnicalIndicatorsCalculator, TechnicalIndicatorsCalculator>();
                 services.AddSingleton<ITradeAction, TradeAction>();
@@ -56,7 +61,7 @@ internal class Program
 
         using IHost host = builder.Build();
 
-        await RunBot(host.Services, "My singleton for BinanceBot is running...");
+        await RunScriptCsvFeeder(host.Services, "Running script csv feeder...");
 
         Console.WriteLine();
 
