@@ -59,17 +59,17 @@ public class TechnicalIndicatorsCalculator : ITechnicalIndicatorsCalculator
         return minimumSellingPricePerItem;
     }
 
-    public decimal CalculateMovingAverage(IEnumerable<decimal> closingPrices, int periode)
+    public decimal CalculateMovingAverage(IEnumerable<decimal> closingPrices, int period)
     {
         decimal somme = 0;
 
         foreach (var prix in closingPrices)
             somme += prix;
 
-        return somme / periode;
+        return somme / period;
     }
 
-    public decimal CalculateRSI(IEnumerable<decimal> closingPrices, int periode)
+    public decimal CalculateRSI(IEnumerable<decimal> closingPrices, int period)
     {
         decimal gainMoyen = 0, perteMoyenne = 0;
 
@@ -83,8 +83,8 @@ public class TechnicalIndicatorsCalculator : ITechnicalIndicatorsCalculator
                 perteMoyenne -= delta;
         }
 
-        gainMoyen /= periode;
-        perteMoyenne /= periode;
+        gainMoyen /= period;
+        perteMoyenne /= period;
 
         decimal rs = perteMoyenne == 0 ? 0 : (gainMoyen / perteMoyenne);
 

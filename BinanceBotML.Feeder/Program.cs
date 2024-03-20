@@ -30,9 +30,8 @@ internal class Program
             var helper = new Helper(new FileSystem());
             var solutionPath = helper.GetSolutionPath();
 
-            await feeder.Run(solutionPath + "\\test.csv");
+            await feeder.Run10Min(solutionPath + "\\test.csv");
         }
-
 
         var config = new ConfigurationBuilder()
             .SetBasePath(solutionPath)
@@ -42,10 +41,7 @@ internal class Program
         var builder = Host.CreateDefaultBuilder(args)
             .ConfigureServices((context, services) =>
             {
-
                 services.AddValidatorsFromAssemblyContaining<AccountValidator>();
-                //services.AddScoped(typeof(IApiValidatorService), typeof(ApiValidatorService));
-
                 services.AddSingleton<IFeeder, FeedCsv>();
                 services.AddSingleton<IApiValidatorService, ApiValidatorService>();
                 services.AddSingleton<IExchangeHttpClient, BinanceClient>();

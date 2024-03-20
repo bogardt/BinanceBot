@@ -24,5 +24,9 @@ namespace BinanceBotML
 
         [LoadColumn(6)]
         public float Volume { get; set; }
+
+        [LoadColumn(7)]
+        public float SMA { get; set; } // Ajout de la nouvelle propriété pour la moyenne mobile simple
+        [LoadColumn(8)] public bool Label; // Assume this is a boolean indicating if the price goes up (true) or down (false)
     }
 }

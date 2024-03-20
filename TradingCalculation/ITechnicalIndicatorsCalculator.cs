@@ -2,8 +2,8 @@
 
 public interface ITechnicalIndicatorsCalculator
 {
-    decimal CalculateMovingAverage(IEnumerable<decimal> closingPrices, int periode);
-    decimal CalculateRSI(IEnumerable<decimal> closingPrices, int periode);
+    decimal CalculateMovingAverage(IEnumerable<decimal> closingPrices, int period);
+    decimal CalculateRSI(IEnumerable<decimal> closingPrices, int period);
     decimal CalculateVolatility(IEnumerable<decimal> closingPrices);
     decimal DetermineLossStrategy(decimal cryptoPurchasePrice, decimal volatility);
     decimal CalculateProfit(decimal cryptoPurchasePrice, decimal cryptoSellingPrice, decimal quantity, decimal feePercentage, decimal discount);

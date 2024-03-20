@@ -1,4 +1,5 @@
 ﻿using Microsoft.ML;
+using Microsoft.ML.Calibrators;
 using Microsoft.ML.Data;
 using Microsoft.ML.Trainers;
 using Microsoft.ML.Trainers.FastTree;
@@ -8,49 +9,73 @@ namespace BinanceBotML
 {
     public class AnalyzerML
     {
-        public (MLContext, TransformerChain<RegressionPredictionTransformer<FastTreeRegressionModelParameters>>) Train(string csvPath)
+        public MLContext MLContext { get; set; }
+        public TransformerChain<RegressionPredictionTransformer<FastTreeRegressionModelParameters>> Model { get; set; }
+
+        public AnalyzerML()
         {
-            var mlContext = new MLContext(seed: 0);
-            var dataView = mlContext.Data.LoadFromTextFile<MarketData>("test.csv", separatorChar: ',', hasHeader: true);
+            MLContext = new MLContext(seed: 0); // Initialisation avec une graine pour la reproductibilité
+        }
 
-            var pipeline = mlContext.Transforms.CopyColumns(outputColumnName: "Label", inputColumnName: nameof(MarketData.Close))
-                .Append(mlContext.Transforms.Concatenate("Features",
-                //nameof(MarketData.OpenDate),
-                //nameof(MarketData.CloseDate), 
-                nameof(MarketData.Open),
-                nameof(MarketData.High),
-                nameof(MarketData.Low),
-                nameof(MarketData.Close),
-                nameof(MarketData.Volume)
-                ))
-                .Append(mlContext.Regression.Trainers.FastTree());
+        public void Train(string csvPath)
+        {
+            // Chargement des données
+            var dataView = MLContext.Data.LoadFromTextFile<MarketData>(csvPath, separatorChar: ',', hasHeader: true);
 
-            var split = mlContext.Data.TrainTestSplit(dataView, testFraction: 0.2);
-            var model = pipeline.Fit(split.TrainSet);
+            // Définition de la pipeline de transformation des données et du modèle d'apprentissage
+            var pipeline = MLContext.Transforms.CopyColumns(outputColumnName: "Label", inputColumnName: nameof(MarketData.Close))
+                .Append(MLContext.Transforms.Concatenate("Features",
+                    nameof(MarketData.Open),
+                    nameof(MarketData.High),
+                    nameof(MarketData.Low),
+                    nameof(MarketData.Close),
+                    nameof(MarketData.Volume)))
+                .Append(MLContext.Transforms.NormalizeMinMax("Features"))
+                .Append(MLContext.Regression.Trainers.FastTree());
 
-            var predictions = model.Transform(split.TestSet);
-            var metrics = mlContext.Regression.Evaluate(predictions);
+            // Division des données en ensemble d'entraînement et de test
+            var splitData = MLContext.Data.TrainTestSplit(dataView, testFraction: 0.2);
+
+            // Entraînement du modèle
+            Model = pipeline.Fit(splitData.TrainSet);
+
+            // Évaluation du modèle sur l'ensemble de test
+            var predictions = Model.Transform(splitData.TestSet);
+            var metrics = MLContext.Regression.Evaluate(predictions);
             Console.WriteLine($"R^2: {metrics.RSquared:0.##}");
             Console.WriteLine($"Mean Absolute Error: {metrics.MeanAbsoluteError:#.##}");
             Console.WriteLine($"Root Mean Squared Error: {metrics.RootMeanSquaredError:#.##}");
 
-            return (mlContext, model);
         }
-
-        public void Predict(MLContext mlContext, TransformerChain<RegressionPredictionTransformer<FastTreeRegressionModelParameters>> model)
+        public void Train2(string csvPath)
         {
-            var predictionFunction = mlContext.Model.CreatePredictionEngine<MarketData, MarketPrediction>(model);
-            var sampleData = new MarketData
-            {
-                //Open = 95.45f,
-                Close = 138.45f,
-                //High = 95.50f,
-                //Low = 95.37f,
-                //Volume = 371.32f
-            };
+            // Chargement des données
+            var dataView = MLContext.Data.LoadFromTextFile<MarketData>(csvPath, separatorChar: ',', hasHeader: true);
 
-            var prediction = predictionFunction.Predict(sampleData);
-            Console.WriteLine($"Predicted Close: {prediction.Close}");
+            // Définition de la pipeline de transformation des données et du modèle d'apprentissage
+            var pipeline = MLContext.Transforms.CopyColumns(outputColumnName: "Label", inputColumnName: nameof(MarketData.Close))
+                .Append(MLContext.Transforms.Concatenate("Features",
+                        nameof(MarketData.Open),
+                        nameof(MarketData.High),
+                        nameof(MarketData.Low),
+                        nameof(MarketData.Close),
+                        nameof(MarketData.Volume),
+                        nameof(MarketData.SMA))) // Incluez SMA ici
+                .Append(MLContext.Regression.Trainers.FastTree());
+
+            // Division des données en ensemble d'entraînement et de test
+            var splitData = MLContext.Data.TrainTestSplit(dataView, testFraction: 0.2);
+
+            // Entraînement du modèle
+            Model = pipeline.Fit(splitData.TrainSet);
+
+            // Évaluation du modèle sur l'ensemble de test
+            var predictions = Model.Transform(splitData.TestSet);
+            var metrics = MLContext.Regression.Evaluate(predictions);
+            Console.WriteLine($"R^2: {metrics.RSquared:0.##}");
+            Console.WriteLine($"Mean Absolute Error: {metrics.MeanAbsoluteError:#.##}");
+            Console.WriteLine($"Root Mean Squared Error: {metrics.RootMeanSquaredError:#.##}");
+
         }
     }
 }

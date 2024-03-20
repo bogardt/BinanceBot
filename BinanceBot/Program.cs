@@ -9,6 +9,9 @@ using BinanceBot.BinanceApi.Validation;
 using FluentValidation;
 using BinanceBot.BinanceApi.Validation.Validator;
 using TradingCalculation;
+using BinanceBot.BinanceApi.Serializer;
+using Newtonsoft.Json;
+using System.Runtime;
 
 internal class Program
 {
@@ -38,9 +41,15 @@ internal class Program
             .ConfigureServices((context, services) =>
             {
 
+                var binanceKlineConverter = new JsonSerializerSettings
+                {
+                    Converters = new List<JsonConverter> { new BinanceKlineConverter() }
+                };
+
                 services.AddValidatorsFromAssemblyContaining<AccountValidator>();
                 //services.AddScoped(typeof(IApiValidatorService), typeof(ApiValidatorService));
 
+                services.AddSingleton(binanceKlineConverter);
                 services.AddSingleton<IApiValidatorService, ApiValidatorService>();
                 services.AddSingleton<IExchangeHttpClient, BinanceClient>();
                 services.AddSingleton<IFileSystem, FileSystem>();
