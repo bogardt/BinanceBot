@@ -2,72 +2,75 @@ name: .NET Coverage and GitHub Pages
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   build-and-deploy:
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: '8.0.x'
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
 
-    - name: Restore dependencies
-      run: dotnet restore
+      - name: Restore dependencies
+        run: dotnet restore
 
-    - name: Sync branch
-      run: |
-        git fetch origin coverage-report
-        git checkout coverage-report
-        git pull origin coverage-report
-        git checkout main
-      shell: powershell
+      - name: Sync branch
+        run: |
+          git fetch --all
+          if (git branch -r | Select-String "origin/coverage-report") {
+            git checkout coverage-report 2>$null || git checkout -b coverage-report
+            git pull origin coverage-report 2>$null || Write-Host "Branch coverage-report created"
+          } else {
+            git checkout -b coverage-report
+          }
+          git checkout main
+        shell: powershell
 
-    - name: Run tests with coverage
-      run: dotnet test --collect:"XPlat Code Coverage"
+      - name: Run tests with coverage
+        run: dotnet test --collect:"XPlat Code Coverage"
 
-    - name: Install ReportGenerator
-      run: dotnet tool install -g dotnet-reportgenerator-globaltool
+      - name: Install ReportGenerator
+        run: dotnet tool install -g dotnet-reportgenerator-globaltool
 
-    - name: Generate coverage report
-      run: reportgenerator -reports:**/TestResults/**/*.cobertura.xml -targetdir:coverage -reporttypes:Cobertura
+      - name: Generate coverage report
+        run: reportgenerator -reports:**/TestResults/**/*.cobertura.xml -targetdir:coverage -reporttypes:Cobertura
 
-    - name: Upload coverage report to Codecov
-      uses: codecov/codecov-action@v2
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
-        files: coverage/**/*.xml
-        fail_ci_if_error: true
+      - name: Upload coverage report to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage/**/*.xml
+          fail_ci_if_error: true
 
-    - name: Check if branch exists and set up branch variable
-      run: |
-        $branchExists = git ls-remote --heads origin coverage-report
-        if ($null -ne $branchExists) {
-          echo "branch_exists=true" | Out-File -Append -FilePath $Env:GITHUB_ENV
-        } else {
-          echo "branch_exists=false" | Out-File -Append -FilePath $Env:GITHUB_ENV
-        }
-      shell: powershell
+      - name: Check if branch exists and set up branch variable
+        run: |
+          $branchExists = git ls-remote --heads origin coverage-report
+          if ($null -ne $branchExists) {
+            echo "branch_exists=true" | Out-File -Append -FilePath $Env:GITHUB_ENV
+          } else {
+            echo "branch_exists=false" | Out-File -Append -FilePath $Env:GITHUB_ENV
+          }
+        shell: powershell
 
-    - name: Commit and push coverage report to GitHub Pages
-      uses: EndBug/add-and-commit@v9
-      with:
-        author_name: github-actions
-        author_email: actions@github.com
-        message: 'Deploy Coverage Report to GitHub Pages'
-        add: 'coverage/*'
-        push: origin ${{ env.branch_exists == 'true' && 'coverage-report' || 'new:coverage-report' }}
-        github_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Commit and push coverage report to GitHub Pages
+        uses: EndBug/add-and-commit@v9
+        with:
+          author_name: github-actions
+          author_email: actions@github.com
+          message: "Deploy Coverage Report to GitHub Pages"
+          add: "coverage/*"
+          push: origin ${{ env.branch_exists == 'true' && 'coverage-report' || 'new:coverage-report' }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Upload coverage to GitHub Artifacts
-      uses: actions/upload-artifact@v2
-      with:
-        name: coverage-report
-        path: coverage/
-            
+      - name: Upload coverage to GitHub Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/

@@ -4,6 +4,10 @@
 
 [![.NET Coverage and GitHub Pages](https://github.com/bogardt/BinanceBot/actions/workflows/dotnet.yml/badge.svg?branch=main)](https://github.com/bogardt/BinanceBot/actions/workflows/dotnet.yml)
 [![codecov](https://codecov.io/github/bogardt/BinanceBot/graph/badge.svg?token=V2F65ESN7M)](https://codecov.io/github/bogardt/BinanceBot)
+[![.NET 8](https://img.shields.io/badge/.NET-8-purple.svg)](https://dotnet.microsoft.com/)
+[![AI/ML](https://img.shields.io/badge/AI-ML.NET-orange.svg)](https://dotnet.microsoft.com/apps/machinelearning-ai/ml-dotnet)
+[![Trading](https://img.shields.io/badge/Trading-Binance-yellow.svg)](https://binance.com/)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 ### Code Coverage Report
 
