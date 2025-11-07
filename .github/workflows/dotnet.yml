@@ -21,25 +21,6 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore
 
-      - name: Sync branch
-        run: |
-          git fetch --all
-          $branchExists = git ls-remote --heads origin coverage-report
-          if ($branchExists) {
-            git checkout coverage-report
-            if ($LASTEXITCODE -ne 0) {
-              git checkout -b coverage-report
-            }
-            git pull origin coverage-report
-            if ($LASTEXITCODE -ne 0) {
-              Write-Host "New branch coverage-report created"
-            }
-          } else {
-            git checkout -b coverage-report
-          }
-          git checkout main
-        shell: powershell
-
       - name: Run tests with coverage
         run: dotnet test --collect:"XPlat Code Coverage"
 
