@@ -113,6 +113,9 @@ public class ProgramTests
         mockTechnicalIndicatorsCalculator.Setup(c => c.CalculateVolatility(It.IsAny<List<decimal>>()))
             .Returns(0.25m);
 
+        mockTechnicalIndicatorsCalculator.Setup(c => c.IsTargetPriceAchievable(It.IsAny<decimal>(), It.IsAny<List<decimal>>()))
+            .Returns(true);
+
         var currencyForBuy = new Currency { Symbol = tradingStrategy.Symbol, Price = 90m };
         var currencyForSell = new Currency { Symbol = tradingStrategy.Symbol, Price = 100m };
         mockBinanceClient.SetupSequence(c => c.GetPriceBySymbolAsync(tradingStrategy.Symbol))
@@ -120,7 +123,7 @@ public class ProgramTests
                           .ReturnsAsync(currencyForSell);
 
         mockBinanceClient.Setup(c => c.PlaceTestOrderAsync(It.IsAny<string>(), It.IsAny<decimal>(), It.IsAny<decimal>(), It.IsAny<string>()))
-                          .ReturnsAsync(It.IsAny<TestOrder>());
+                          .ReturnsAsync(new TestOrder());
 
         var orders = new List<Order>();
         mockBinanceClient.Setup(c => c.GetOpenOrdersAsync(tradingStrategy.Symbol))

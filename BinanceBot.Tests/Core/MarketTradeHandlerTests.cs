@@ -68,6 +68,9 @@ public class MarketTradeHandlerTests
         _mockTechnicalIndicatorsCalculator.Setup(c => c.CalculateVolatility(It.IsAny<List<decimal>>()))
                                     .Returns(0.25m);
 
+        _mockTechnicalIndicatorsCalculator.Setup(c => c.IsTargetPriceAchievable(It.IsAny<decimal>(), It.IsAny<List<decimal>>()))
+                                    .Returns(true);
+
         var currencyForBuy = new Currency { Symbol = _tradingStrategy.Symbol, Price = 90m };
         var currencyForSell = new Currency { Symbol = _tradingStrategy.Symbol, Price = 100m };
         _mockBinanceClient.SetupSequence(c => c.GetPriceBySymbolAsync(_tradingStrategy.Symbol))
@@ -75,7 +78,7 @@ public class MarketTradeHandlerTests
                           .ReturnsAsync(currencyForSell);
 
         _mockBinanceClient.Setup(c => c.PlaceTestOrderAsync(It.IsAny<string>(), It.IsAny<decimal>(), It.IsAny<decimal>(), It.IsAny<string>()))
-                          .ReturnsAsync(It.IsAny<TestOrder>());
+                          .ReturnsAsync(new TestOrder());
 
         var orders = new List<Order>();
         _mockBinanceClient.Setup(c => c.GetOpenOrdersAsync(_tradingStrategy.Symbol))
@@ -125,6 +128,9 @@ public class MarketTradeHandlerTests
         _mockTechnicalIndicatorsCalculator.Setup(c => c.CalculateVolatility(It.IsAny<List<decimal>>()))
             .Returns(0.25m);
 
+        _mockTechnicalIndicatorsCalculator.Setup(c => c.IsTargetPriceAchievable(It.IsAny<decimal>(), It.IsAny<List<decimal>>()))
+            .Returns(true);
+
         var currencyForBuy1 = new Currency { Symbol = _tradingStrategy.Symbol, Price = 110m };
         var currencyForBuy2 = new Currency { Symbol = _tradingStrategy.Symbol, Price = 90m };
         var currencyForSell2 = new Currency { Symbol = _tradingStrategy.Symbol, Price = 100m };
@@ -134,7 +140,7 @@ public class MarketTradeHandlerTests
                           .ReturnsAsync(currencyForSell2);
 
         _mockBinanceClient.Setup(c => c.PlaceTestOrderAsync(It.IsAny<string>(), It.IsAny<decimal>(), It.IsAny<decimal>(), It.IsAny<string>()))
-                          .ReturnsAsync(It.IsAny<TestOrder>());
+                          .ReturnsAsync(new TestOrder());
 
         var orders = new List<Order>();
         _mockBinanceClient.Setup(c => c.GetOpenOrdersAsync(_tradingStrategy.Symbol))

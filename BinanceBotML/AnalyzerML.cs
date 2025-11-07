@@ -10,7 +10,7 @@ namespace BinanceBotML
     public class AnalyzerML
     {
         public MLContext MLContext { get; set; }
-        public TransformerChain<RegressionPredictionTransformer<FastTreeRegressionModelParameters>> Model { get; set; }
+        public TransformerChain<RegressionPredictionTransformer<FastTreeRegressionModelParameters>>? Model { get; set; }
 
         public AnalyzerML()
         {

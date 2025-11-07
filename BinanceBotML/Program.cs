@@ -33,14 +33,16 @@ internal class Program
             var klines = await binance.GetKLinesBySymbolAsync("SOLUSDT", "1s", 600.ToString());
             var technicalIndicatorsCalculator = provider.GetRequiredService<ITechnicalIndicatorsCalculator>();
             var tradingBot = new TradingBot(solutionPath + "\\test.csv");
-            var closingPrices = klines.Select(x => x);
-            var sma = technicalIndicatorsCalculator.CalculateMovingAverage(, klines.Count);
+
+            // Extract closing prices from klines (index 4 contains the closing price)
+            var closingPrices = klines.Select(kline => decimal.Parse(kline[4]?.ToString() ?? "0")).ToList();
+            var sma = technicalIndicatorsCalculator.CalculateMovingAverage(closingPrices, klines.Count);
 
             for (var i = 0; i < 200; i++)
             {
                 var price = await binance.GetPriceBySymbolAsync("SOLUSDT");
-                Console.WriteLine(price.Price.ToString());
-                tradingBot.MakeTradingDecision((float)price.Price);
+                Console.WriteLine(price.Price?.ToString() ?? "0");
+                tradingBot.MakeTradingDecision((float)(price.Price ?? 0));
                 Task.Delay(1000).Wait();
 
             }
@@ -49,7 +51,7 @@ internal class Program
         var solutionPath = helper.GetSolutionPath();
 
         var config = new ConfigurationBuilder()
-            .SetBasePath(solutionPath)
+            .SetBasePath(solutionPath ?? Directory.GetCurrentDirectory())
             .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
             .Build();
 
@@ -67,9 +69,9 @@ internal class Program
                 services.AddSingleton<IHttpClientWrapper, HttpClientWrapper>();
                 services.AddSingleton<ILogger, Logger>();
                 services.AddSingleton<IMarketTradeHandler, MarketTradeHandler>();
-                //services.AddSingleton<IPriceRetriever, PriceRetriever>();
-                //services.AddSingleton<ITechnicalIndicatorsCalculator, TechnicalIndicatorsCalculator>();
-                //services.AddSingleton<ITradeAction, TradeAction>();
+                services.AddSingleton<IPriceRetriever, PriceRetriever>();
+                services.AddSingleton<ITechnicalIndicatorsCalculator, TechnicalIndicatorsCalculator>();
+                services.AddSingleton<ITradeAction, TradeAction>();
                 services.AddSingleton<IConfiguration>(config);
             });
 

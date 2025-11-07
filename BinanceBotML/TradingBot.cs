@@ -12,6 +12,11 @@
 
         public float MakeTradingDecision(float currentClosePrice)
         {
+            if (_analyzer.Model == null)
+            {
+                Console.WriteLine("Model is not trained yet.");
+                return currentClosePrice;
+            }
 
             // Simulez les données de marché pour la prédiction actuelle
             var marketData = new MarketData
