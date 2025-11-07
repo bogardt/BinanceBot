@@ -24,9 +24,16 @@ jobs:
       - name: Sync branch
         run: |
           git fetch --all
-          if (git branch -r | Select-String "origin/coverage-report") {
-            git checkout coverage-report 2>$null || git checkout -b coverage-report
-            git pull origin coverage-report 2>$null || Write-Host "Branch coverage-report created"
+          $branchExists = git ls-remote --heads origin coverage-report
+          if ($branchExists) {
+            git checkout coverage-report
+            if ($LASTEXITCODE -ne 0) {
+              git checkout -b coverage-report
+            }
+            git pull origin coverage-report
+            if ($LASTEXITCODE -ne 0) {
+              Write-Host "New branch coverage-report created"
+            }
           } else {
             git checkout -b coverage-report
           }
@@ -49,24 +56,14 @@ jobs:
           files: coverage/**/*.xml
           fail_ci_if_error: true
 
-      - name: Check if branch exists and set up branch variable
-        run: |
-          $branchExists = git ls-remote --heads origin coverage-report
-          if ($null -ne $branchExists) {
-            echo "branch_exists=true" | Out-File -Append -FilePath $Env:GITHUB_ENV
-          } else {
-            echo "branch_exists=false" | Out-File -Append -FilePath $Env:GITHUB_ENV
-          }
-        shell: powershell
-
       - name: Commit and push coverage report to GitHub Pages
         uses: EndBug/add-and-commit@v9
         with:
           author_name: github-actions
           author_email: actions@github.com
-          message: "Deploy Coverage Report to GitHub Pages"
-          add: "coverage/*"
-          push: origin ${{ env.branch_exists == 'true' && 'coverage-report' || 'new:coverage-report' }}
+          message: 'Deploy Coverage Report to GitHub Pages'
+          add: 'coverage/*'
+          new_branch: coverage-report
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload coverage to GitHub Artifacts
