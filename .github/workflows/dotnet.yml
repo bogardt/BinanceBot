@@ -30,6 +30,18 @@ jobs:
       - name: Generate coverage report
         run: reportgenerator -reports:**/TestResults/**/*.cobertura.xml -targetdir:coverage -reporttypes:Cobertura
 
+      - name: Fetch and setup coverage-report branch
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "actions@github.com"
+          git fetch origin
+          if (git branch -r | Select-String "origin/coverage-report") {
+            git checkout -B coverage-report origin/coverage-report
+          } else {
+            git checkout -b coverage-report
+          }
+        shell: powershell
+
       - name: Upload coverage report to Codecov
         uses: codecov/codecov-action@v4
         with:
@@ -44,8 +56,12 @@ jobs:
           author_email: actions@github.com
           message: "Deploy Coverage Report to GitHub Pages"
           add: "coverage/*"
-          new_branch: coverage-report
+          push: true
           github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Return to main branch
+        run: git checkout main
+        shell: powershell
 
       - name: Upload coverage to GitHub Artifacts
         uses: actions/upload-artifact@v4
