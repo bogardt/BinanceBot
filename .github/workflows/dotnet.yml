@@ -37,10 +37,21 @@ jobs:
           git config --global user.name "github-actions"
           git config --global user.email "actions@github.com"
           git fetch origin
+          # Temporarily move coverage files
+          if (Test-Path "coverage") {
+            Move-Item "coverage" "coverage-temp"
+          }
           if (git branch -r | Select-String "origin/coverage-report") {
             git checkout -B coverage-report origin/coverage-report
           } else {
             git checkout -b coverage-report
+          }
+          # Restore coverage files
+          if (Test-Path "coverage-temp") {
+            if (Test-Path "coverage") {
+              Remove-Item "coverage" -Recurse -Force
+            }
+            Move-Item "coverage-temp" "coverage"
           }
         shell: powershell
 
