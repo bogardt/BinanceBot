@@ -61,8 +61,8 @@ jobs:
         with:
           author_name: github-actions
           author_email: actions@github.com
-          message: 'Deploy Coverage Report to GitHub Pages'
-          add: 'coverage/*'
+          message: "Deploy Coverage Report to GitHub Pages"
+          add: "coverage/*"
           new_branch: coverage-report
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
